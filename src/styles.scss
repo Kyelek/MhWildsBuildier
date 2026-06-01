@@ -1,0 +1,144 @@
+// Configuración de fuentes globales
+$font-titles: 'Cinzel', serif;
+$font-body: 'Montserrat', sans-serif;
+
+// Colores base
+$color-gold: #c5a059;
+$color-text: #f5f5e9;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: $font-body;
+  color: $color-text;
+  background-color: #14120f; // Color de respaldo por si tarda en cargar la imagen
+}
+
+body {
+  // 💡 Aplicamos la imagen fija de fondo ocupando toda la pantalla sin repetirse
+  background-image: url('./assets/images/bg-wilds.png');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+// Estilos por defecto para títulos con la fuente de MH
+h1, h2, h3, h4 {
+  font-family: $font-titles;
+  color: $color-gold;
+  letter-spacing: 1px;
+}
+
+// Ajustes globales para que las tarjetas de Angular Material sean transparentes/estilo cristal
+.mat-mdc-card {
+  background-color: rgba(25, 23, 20, 0.8) !important; // Fondo oscuro traslúcido
+  backdrop-filter: blur(8px);                         // Efecto desenfoque premium
+  border: 1px solid rgba(197, 160, 89, 0.2) !important; // Borde sutil dorado
+  color: $color-text !important;
+}
+
+// Ajustes para los inputs y desplegables de Angular Material en fondo oscuro
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-label-text-color: #9e9e93;
+  --mdc-outlined-text-field-focused-label-text-color: #c5a059;
+  --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.2);
+  --mdc-outlined-text-field-focused-outline-color: #c5a059;
+  
+  .mdc-text-field--outlined {
+    color: $color-text !important;
+  }
+  // ==========================================
+// 💡 RESTRICCIONES DE CONTRASTE PARA ANGULAR MATERIAL (DARK THEME MANUAL)
+// ==========================================
+
+// 1. Color del texto dentro de los inputs del selector cuando están cerrados
+.mat-mdc-select-value {
+  color: #f5f5e9 !important;
+}
+
+// 2. Flecha del desplegable
+.mat-mdc-select-arrow {
+  color: rgba(197, 160, 89, 0.7) !important;
+}
+
+// 3. El panel flotante que se despliega con las opciones
+.mat-mdc-select-panel {
+  background-color: rgba(25, 23, 20, 0.95) !important; // Fondo casi opaco para leer bien
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(197, 160, 89, 0.4) !important;
+}
+
+// 4. Las opciones individuales de la lista (.mat-mdc-option)
+.mat-mdc-option {
+  color: #f5f5e9 !important;
+  font-family: 'Montserrat', sans-serif;
+
+  // El estado cuando pasas el ratón por encima (Hover) o navegas con teclado (Focus)
+  &:hover:not(.mdc-list-item--disabled),
+  &:focus:not(.mdc-list-item--disabled),
+  &.mat-mdc-option-active,
+  &.mdc-list-item--hn-programmatic-focus {
+    background-color: rgba(197, 160, 89, 0.25) !important; // Fondo dorado sutil traslúcido
+    color: #ffffff !important; // Texto blanco puro para romper el fondo anterior
+  }
+
+  // La opción que está actualmente seleccionada
+  &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+    background-color: rgba(197, 160, 89, 0.4) !important; // Dorado más intenso
+    
+    .mdc-list-item__primary-text {
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+  }
+}
+
+// 5. Arreglar el hover del propio cuadro del select antes de hacer click
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):hover {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #c5a059 !important; // El borde se ilumina en dorado al pasar el ratón
+}
+}
+// ==========================================
+// 💡 CORRECCIÓN DE CONTRASTE EN HOVER (SELECTORS)
+// ==========================================
+
+// Evitamos que el texto se "borre" al pasar el ratón por el selector
+.mat-mdc-form-field:hover {
+  .mat-mdc-select-value-text, 
+  .mat-mdc-select-placeholder {
+    color: #f5f5e9 !important; // Mantenemos el color marfil
+    opacity: 0.9;               // Solo una transparencia muy leve
+  }
+}
+
+// Eliminamos la capa grisácea/azulada que pone Material por defecto sobre el input
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-text-field__ripple {
+  display: none !important; 
+}
+
+// Controlamos el hover de las OPCIONES de la lista (el desplegable)
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background-color: rgba(197, 160, 89, 0.15) !important; // Dorado muy suave y transparente
+  
+  .mdc-list-item__primary-text {
+    color: #ffffff !important; // Texto siempre blanco puro en hover
+    opacity: 1 !important;
+  }
+}
+
+// Si la opción está seleccionada, le damos un toque más sólido pero legible
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background-color: rgba(197, 160, 89, 0.3) !important;
+  
+  .mdc-list-item__primary-text {
+    color: #c5a059 !important; // Texto dorado para la pieza equipada
+    font-weight: 600;
+  }
+}
+}

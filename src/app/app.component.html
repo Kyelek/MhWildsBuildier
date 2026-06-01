@@ -1,0 +1,63 @@
+<nav class="main-navbar">
+  <div class="nav-logo" (click)="navigateTo('home')">
+    <span class="logo-icon">⚔️</span> MH <span class="text-gold">Wilds</span> Forge
+  </div>
+  
+  <ul class="nav-links">
+    <li>
+      <button 
+        [class.active]="currentScreen() === 'home'" 
+        (click)="navigateTo('home')">
+        Inicio
+      </button>
+    </li>
+    <li>
+      <button 
+        [class.active]="currentScreen() === 'builder'" 
+        (click)="navigateTo('builder')">
+        Constructor
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<main class="main-content">
+  @switch (currentScreen()) {
+    
+    @case ('home') {
+      <div class="home-container animate-fade-in">
+        <header class="hero-section">
+          <h1>Forja tu Destino en <br><span class="text-gold font-wilds">Monster Hunter Wilds</span></h1>
+          <p class="hero-subtitle">
+            Planifica tu equipamiento, calcula tus defensas y optimiza tu afinidad antes de salir a la caza en las Tierras Prohibidas.
+          </p>
+          <button class="btn-cta" (click)="navigateTo('builder')">
+            Abrir la Forja ⚔️
+          </button>
+        </header>
+
+        <section class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Calculadora de Defensa</h3>
+            <p>Suma la defensa máxima de tus piezas de armadura y comprueba tus resistencias elementales en tiempo real.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚔️</div>
+            <h3>Arsenal Completo</h3>
+            <p>Filtra y selecciona cualquier tipo de arma para comprobar su ataque base y afinidad de manera instantánea.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Buscador Avanzado</h3>
+            <p>Encuentra piezas rápidamente gracias a los nuevos selectores inteligentes con filtrado en castellano.</p>
+          </div>
+        </section>
+      </div>
+    }
+
+    @case ('builder') {
+      <app-builder class="animate-fade-in"></app-builder>
+    }
+  }
+</main>
