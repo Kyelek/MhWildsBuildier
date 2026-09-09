@@ -46,12 +46,22 @@ h1, h2, h3, h4 {
   --mdc-outlined-text-field-focused-label-text-color: #c5a059;
   --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.2);
   --mdc-outlined-text-field-focused-outline-color: #c5a059;
-  
+
   .mdc-text-field--outlined {
     color: $color-text !important;
   }
-  // ==========================================
+}
+
+// ==========================================
 // 💡 RESTRICCIONES DE CONTRASTE PARA ANGULAR MATERIAL (DARK THEME MANUAL)
+//
+// 🐛 FIX: estas reglas estaban antes anidadas por error dentro de `.mat-mdc-form-field {}`
+// (a `.mat-mdc-form-field .mat-mdc-select-panel`, `.mat-mdc-form-field .mat-mdc-option`...).
+// El panel desplegable y sus opciones los inserta el CDK en un overlay fuera del DOM del
+// form-field, así que esas reglas NUNCA llegaban a coincidir con nada: van aquí, como
+// reglas globales de nivel superior, para que apliquen de verdad a cualquier mat-select
+// de la aplicación (Constructor y Forja de Habilidades) sin depender de qué componente
+// se haya montado primero.
 // ==========================================
 
 // 1. Color del texto dentro de los inputs del selector cuando están cerrados
@@ -65,10 +75,58 @@ h1, h2, h3, h4 {
 }
 
 // 3. El panel flotante que se despliega con las opciones
+//
+// 🐛 FIX (bug de transparencia al hacer scroll): un fondo semitransparente (alpha 0.95)
+// combinado con `backdrop-filter: blur(...)` hace que el navegador cree una capa de
+// composición aparte; al usar `position: sticky` en la cabecera del buscador interno
+// (.select-search-box), esa capa provoca que las opciones que pasan por debajo se
+// "transparenten" a través de la cabecera durante el scroll. La solución es un fondo
+// 100% opaco (sin canal alfa) y sin desenfoque.
 .mat-mdc-select-panel {
-  background-color: rgba(25, 23, 20, 0.95) !important; // Fondo casi opaco para leer bien
-  backdrop-filter: blur(10px);
+  background-color: #14120f !important; // Opaco al 100% (antes rgba(25, 23, 20, 0.95))
+  backdrop-filter: none !important; // Antes blur(10px): causaba el bug de transparencia
   border: 1px solid rgba(197, 160, 89, 0.4) !important;
+  position: relative; // Contenedor de referencia estable para el "sticky" del buscador interno
+  overflow-y: auto; // Es la lista con scroll sobre la que debe quedar por encima el buscador
+
+  // 🐛 FIX (residuo del bug de transparencia): el CDK de Angular Material aplica
+  // "padding: 8px 0" a este panel por defecto. Como .select-search-box usa
+  // "position: sticky; top: 0", ese "top: 0" se mide desde el borde del padding, NO desde
+  // el borde exterior del contenedor con scroll: quedaban 8px por ENCIMA de la cabecera fija
+  // que el sticky nunca llegaba a cubrir, y por ahí se seguían viendo las opciones al hacer
+  // scroll. El buscador ya trae su propio padding interno, así que quitar el del panel no
+  // afecta al espaciado visual.
+  padding-top: 0 !important;
+}
+
+// Cabecera fija (buscador) dentro del panel del mat-select, usada tanto por el Constructor
+// como por la Forja de Habilidades. Se define aquí, en global, y no con "::ng-deep" en cada
+// componente, para que el z-index/opacidad se apliquen siempre, sin depender del orden en
+// el que Angular inyecta los estilos de cada componente.
+.select-search-box {
+  position: sticky;
+  top: 0;
+  isolation: isolate; // Contexto de apilamiento propio para que su z-index sea fiable
+  z-index: 20; // Por encima de la lista de opciones con scroll
+  background-color: #14120f !important; // Opaco al 100%, igual que el panel
+}
+
+// Categorías de un select agrupado con mat-optgroup (p. ej. los tipos de arma del Constructor)
+.mat-mdc-select-panel .mat-mdc-optgroup-label {
+  color: #c5a059 !important;
+  font-weight: bold !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+// Scrollbar a juego con el tema dorado dentro del panel desplegable
+.mat-mdc-select-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.mat-mdc-select-panel::-webkit-scrollbar-thumb {
+  background: #c5a059;
+  border-radius: 10px;
 }
 
 // 4. Las opciones individuales de la lista (.mat-mdc-option)
@@ -88,10 +146,14 @@ h1, h2, h3, h4 {
   // La opción que está actualmente seleccionada
   &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
     background-color: rgba(197, 160, 89, 0.4) !important; // Dorado más intenso
-    
+
     .mdc-list-item__primary-text {
       color: #ffffff !important;
       font-weight: 600;
+    }
+
+    .mat-mdc-option-pseudo-checkbox {
+      color: #c5a059 !important;
     }
   }
 }
@@ -102,30 +164,61 @@ h1, h2, h3, h4 {
   .mdc-notched-outline__notch,
   .mdc-notched-outline__trailing {
     border-color: #c5a059 !important; // El borde se ilumina en dorado al pasar el ratón
+  }
 }
+
+// 6. Borde y etiqueta dorados cuando el select está abierto/enfocado (evita el azul por defecto)
+.mat-mdc-form-field.mat-focused {
+  .mat-mdc-form-field-label-wrapper .mdc-floating-label {
+    color: #c5a059 !important;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #c5a059 !important;
+    border-width: 2px !important;
+  }
 }
+
+.mdc-floating-label {
+  color: rgba(197, 160, 89, 0.7) !important;
+}
+
+:root {
+  --mdc-outlined-text-field-focus-outline-color: #c5a059 !important;
+  --mdc-select-focused-arrow-color: #c5a059 !important;
+}
+
 // ==========================================
 // 💡 CORRECCIÓN DE CONTRASTE EN HOVER (SELECTORS)
 // ==========================================
 
 // Evitamos que el texto se "borre" al pasar el ratón por el selector
 .mat-mdc-form-field:hover {
-  .mat-mdc-select-value-text, 
+  .mat-mdc-select-value-text,
   .mat-mdc-select-placeholder {
     color: #f5f5e9 !important; // Mantenemos el color marfil
     opacity: 0.9;               // Solo una transparencia muy leve
+  }
+
+  .mdc-outlined-border-primary,
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(197, 160, 89, 0.6) !important;
   }
 }
 
 // Eliminamos la capa grisácea/azulada que pone Material por defecto sobre el input
 .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-text-field__ripple {
-  display: none !important; 
+  display: none !important;
 }
 
 // Controlamos el hover de las OPCIONES de la lista (el desplegable)
 .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
   background-color: rgba(197, 160, 89, 0.15) !important; // Dorado muy suave y transparente
-  
+
   .mdc-list-item__primary-text {
     color: #ffffff !important; // Texto siempre blanco puro en hover
     opacity: 1 !important;
@@ -135,10 +228,9 @@ h1, h2, h3, h4 {
 // Si la opción está seleccionada, le damos un toque más sólido pero legible
 .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
   background-color: rgba(197, 160, 89, 0.3) !important;
-  
+
   .mdc-list-item__primary-text {
     color: #c5a059 !important; // Texto dorado para la pieza equipada
     font-weight: 600;
   }
-}
 }

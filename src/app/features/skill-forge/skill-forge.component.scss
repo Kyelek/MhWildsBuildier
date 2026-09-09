@@ -1,0 +1,213 @@
+// ==========================================
+// 🎨 HOMOGENEIDAD VISUAL: esta hoja de estilos replica deliberadamente la estructura,
+// las clases y los valores (colores, paddings, márgenes) de builder.component.scss,
+// para que la Forja de Habilidades sea 100% coherente con el Constructor.
+// ==========================================
+.skill-forge-layout {
+  display: flex;
+  gap: 32px; // Misma separación entre columnas que el Constructor
+  padding: 40px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+
+  // 💡 Misma proporción 7/3 que el Constructor entre selectores y panel de resumen.
+  // Ahora apila 2 tarjetas (selectores + bonificaciones/descripciones), por eso necesita
+  // su propio flex-column con el mismo gap "32px" que separa las columnas principales.
+  .equipment-selectors {
+    flex: 7;
+    min-width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .stats-panel {
+    flex: 3;
+    min-width: 320px;
+  }
+
+  .section-card {
+    padding: 32px !important; // Mismo "aire" interno que las tarjetas del Constructor
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 32px;
+      border-bottom: 1px solid rgba(197, 160, 89, 0.3);
+      padding-bottom: 12px;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 20px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .loading-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0 24px 0;
+    color: #9e9e93; // Mismo gris apagado que "res-label" en el Constructor
+    font-size: 0.9rem;
+  }
+
+  // ==========================================
+  // 📊 PANEL DE RESUMEN (idéntico al panel "Estadísticas Totales" del Constructor)
+  // ==========================================
+  .status-card {
+    h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.15rem;
+      color: #c5a059;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 1px;
+    }
+
+    .stat-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      font-size: 1.15rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .stat-value {
+        font-weight: bold;
+      }
+    }
+
+    // Grid de 2 columnas reutilizado tal cual del bloque de resistencias del Constructor,
+    // ahora aplicado a las bonificaciones de conjunto (pueden ser varias a la vez)
+    .resistances-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding-top: 4px;
+
+      .res-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 10px 14px;
+        border-radius: 6px;
+        border: 1px solid rgba(197, 160, 89, 0.1);
+        backdrop-filter: blur(4px);
+
+        .res-label {
+          font-size: 0.9rem;
+          color: #9e9e93;
+          font-weight: 500;
+        }
+
+        .res-value {
+          font-weight: bold;
+          font-size: 1rem;
+        }
+      }
+    }
+
+    // Descripciones detalladas: mismo lenguaje visual (bordes y tonos sutiles del tema dorado)
+    .description-item {
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &.is-set-bonus {
+        background: rgba(197, 160, 89, 0.05);
+        padding: 10px 14px;
+        border-radius: 6px;
+        border: 1px solid rgba(197, 160, 89, 0.1);
+        border-bottom: 1px solid rgba(197, 160, 89, 0.1);
+        margin-bottom: 8px;
+      }
+
+      .description-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 6px;
+      }
+
+      .description-text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.6);
+      }
+    }
+  }
+
+  .empty-state {
+    color: #9e9e93;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin: 0;
+    padding: 14px 0;
+  }
+
+  .text-gold {
+    color: #c5a059;
+  }
+}
+
+// ==========================================
+// 🔍 Buscador dentro del panel flotante del mat-select (idéntico al del Constructor)
+//
+// 💡 La posición "sticky", el z-index y el fondo opaco de la cabecera (.select-search-box)
+// están definidos en el CSS global (src/styles.scss), junto con el resto de overrides del
+// panel del mat-select. No se duplican aquí con "::ng-deep" porque ese panel lo renderiza
+// el CDK en un overlay fuera del árbol de este componente: solo un estilo verdaderamente
+// global llega ahí de forma fiable, sin depender de qué componente se haya montado antes.
+// Aquí solo quedan los detalles puramente cosméticos del input de búsqueda.
+// ==========================================
+.select-search-box {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+  margin-bottom: 4px;
+
+  input {
+    width: 100%;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s ease;
+
+    &:focus {
+      border-color: #c5a059;
+      background-color: rgba(197, 160, 89, 0.05);
+      box-shadow: 0 0 4px rgba(197, 160, 89, 0.2);
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+  }
+}

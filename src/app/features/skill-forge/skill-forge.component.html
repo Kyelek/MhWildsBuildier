@@ -1,0 +1,176 @@
+<div class="skill-forge-layout">
+
+  <div class="equipment-selectors">
+    <mat-card class="section-card">
+      <h2>Piezas del Conjunto</h2>
+
+      @if (cargando()) {
+        <div class="loading-box">
+          <mat-spinner diameter="32"></mat-spinner>
+          <span>Cargando catálogo de armaduras y habilidades...</span>
+        </div>
+      }
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Cabeza (Casco)</mat-label>
+        <mat-select (selectionChange)="selectedHead.set($event.value)">
+
+          <div class="select-search-box">
+            <input
+              type="text"
+              placeholder="Buscar casco..."
+              (input)="headSearch.set($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+          </div>
+
+          <mat-option [value]="null">— Sin equipar —</mat-option>
+          @for (piece of helmets(); track piece.id) {
+            <mat-option [value]="piece">{{ piece.name }}</mat-option>
+          } @empty {
+            <mat-option disabled>No se encontraron cascos</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Pecho (Coraza)</mat-label>
+        <mat-select (selectionChange)="selectedChest.set($event.value)">
+
+          <div class="select-search-box">
+            <input
+              type="text"
+              placeholder="Buscar pecho..."
+              (input)="chestSearch.set($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+          </div>
+
+          <mat-option [value]="null">— Sin equipar —</mat-option>
+          @for (piece of chests(); track piece.id) {
+            <mat-option [value]="piece">{{ piece.name }}</mat-option>
+          } @empty {
+            <mat-option disabled>No se encontraron piezas</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Brazos (Guantes)</mat-label>
+        <mat-select (selectionChange)="selectedArms.set($event.value)">
+
+          <div class="select-search-box">
+            <input
+              type="text"
+              placeholder="Buscar guantes..."
+              (input)="armsSearch.set($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+          </div>
+
+          <mat-option [value]="null">— Sin equipar —</mat-option>
+          @for (piece of arms(); track piece.id) {
+            <mat-option [value]="piece">{{ piece.name }}</mat-option>
+          } @empty {
+            <mat-option disabled>No se encontraron piezas</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Cintura (Faja)</mat-label>
+        <mat-select (selectionChange)="selectedWaist.set($event.value)">
+
+          <div class="select-search-box">
+            <input
+              type="text"
+              placeholder="Buscar faja..."
+              (input)="waistSearch.set($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+          </div>
+
+          <mat-option [value]="null">— Sin equipar —</mat-option>
+          @for (piece of waists(); track piece.id) {
+            <mat-option [value]="piece">{{ piece.name }}</mat-option>
+          } @empty {
+            <mat-option disabled>No se encontraron piezas</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Piernas (Grebas)</mat-label>
+        <mat-select (selectionChange)="selectedLegs.set($event.value)">
+
+          <div class="select-search-box">
+            <input
+              type="text"
+              placeholder="Buscar grebas..."
+              (input)="legsSearch.set($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+          </div>
+
+          <mat-option [value]="null">— Sin equipar —</mat-option>
+          @for (piece of legs(); track piece.id) {
+            <mat-option [value]="piece">{{ piece.name }}</mat-option>
+          } @empty {
+            <mat-option disabled>No se encontraron piezas</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </mat-card>
+
+    <!-- 🎖️📖 REESTRUCTURACIÓN: las bonificaciones de conjunto y las descripciones detalladas
+         se muestran ahora justo debajo de los selectores de piezas de armadura, en vez de en el
+         panel lateral. Siguen siendo 100% dinámicas: se recalculan solas al cambiar cualquier pieza. -->
+    <mat-card class="section-card status-card">
+      <h3>Bonificaciones de Conjunto</h3>
+      @if (bonificacionesSet().length === 0) {
+        <p class="empty-state">Ninguna bonificación de conjunto activa. Equipa 2 o más piezas del mismo conjunto.</p>
+      } @else {
+        <div class="stat-group resistances-grid">
+          @for (bono of bonificacionesSet(); track bono.setId) {
+            <div class="res-item">
+              <span class="res-label">🎖️ {{ bono.nombreSet }} ({{ bono.piezasEquipadas }}/{{ bono.piezasRequeridas }})</span>
+              <span class="res-value text-gold">{{ bono.nombreHabilidad }} Nv.{{ bono.nivel }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <mat-divider style="margin: 24px 0; border-color: rgba(197, 160, 89, 0.15);"></mat-divider>
+
+      <h3>Descripciones Detalladas</h3>
+      @for (item of descripcionesDetalladas(); track item.clave) {
+        <div class="description-item" [class.is-set-bonus]="item.esBonificacionSet">
+          <div class="description-header">
+            <span class="description-name">{{ item.nombre }}</span>
+            <span class="text-gold">Nv. {{ item.nivel }}</span>
+          </div>
+          <p class="description-text">{{ item.descripcion }}</p>
+        </div>
+      } @empty {
+        <p class="empty-state">Aún no hay habilidades que describir.</p>
+      }
+    </mat-card>
+  </div>
+
+  <!-- 📊 La tarjeta principal "Habilidades del Conjunto" permanece en su ubicación de siempre
+       (panel lateral derecho), solo con la lista de habilidades activas y sus niveles. -->
+  <div class="stats-panel">
+    <mat-card class="section-card status-card">
+      <h2>Habilidades del Conjunto</h2>
+
+      <div class="stat-group">
+        @if (habilidadesActivas().length === 0) {
+          <p class="empty-state">Equipa piezas de armadura para ver las habilidades acumuladas.</p>
+        } @else {
+          @for (habilidad of habilidadesActivas(); track habilidad.skillId) {
+            <div class="stat-row">
+              <span>{{ habilidad.nombre }}</span>
+              <span class="stat-value text-gold">Nv. {{ habilidad.nivel }}</span>
+            </div>
+          }
+        }
+      </div>
+    </mat-card>
+  </div>
+
+</div>

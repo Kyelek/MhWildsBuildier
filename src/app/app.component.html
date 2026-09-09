@@ -12,10 +12,17 @@
       </button>
     </li>
     <li>
-      <button 
-        [class.active]="currentScreen() === 'builder'" 
+      <button
+        [class.active]="currentScreen() === 'builder'"
         (click)="navigateTo('builder')">
         Constructor
+      </button>
+    </li>
+    <li>
+      <button
+        [class.active]="currentScreen() === 'skill-forge'"
+        (click)="navigateTo('skill-forge')">
+        Forja de Habilidades
       </button>
     </li>
   </ul>
@@ -52,12 +59,21 @@
             <h3>Buscador Avanzado</h3>
             <p>Encuentra piezas rápidamente gracias a los nuevos selectores inteligentes con filtrado en castellano.</p>
           </div>
+          <div class="feature-card">
+            <div class="feature-icon">📜</div>
+            <h3>Forja de Habilidades</h3>
+            <p>Combina piezas de armadura, acumula sus habilidades y descubre qué bonificación de conjunto activas.</p>
+          </div>
         </section>
       </div>
     }
 
     @case ('builder') {
       <app-builder class="animate-fade-in"></app-builder>
+    }
+
+    @case ('skill-forge') {
+      <app-skill-forge class="animate-fade-in"></app-skill-forge>
     }
   }
 </main>

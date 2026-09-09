@@ -119,12 +119,14 @@
   color: #f44336 !important; // Rojo para alertar de debilidades elementales
 }
 // Estilos para el cuadro de búsqueda dentro del panel flotante del mat-select
+//
+// 💡 La posición "sticky", el z-index y el fondo opaco de la cabecera (.select-search-box),
+// así como el resto de overrides del panel del mat-select, están centralizados en el CSS
+// global (src/styles.scss). No se duplican aquí con "::ng-deep" porque ese panel lo renderiza
+// el CDK en un overlay fuera del árbol de este componente: solo un estilo verdaderamente
+// global llega ahí de forma fiable. Aquí solo quedan los detalles cosméticos del input.
 .select-search-box {
-  position: sticky;
-  top: 0;
-  background: #14120f;
   padding: 8px 12px;
-  z-index: 10;
   border-bottom: 1px solid rgba(197, 160, 89, 0.2);
   margin-bottom: 4px;
 
@@ -150,110 +152,5 @@
     &::placeholder {
       color: rgba(255, 255, 255, 0.4);
     }
-  }
-}
-// 🎨 Forzamos el estilo oscuro en el panel desplegable
-::ng-deep {
-  .mat-mdc-select-panel {
-    background-color: #14120f !important; // Fondo oscuro
-    border: 1px solid rgba(197, 160, 89, 0.3);
-    
-    // Estilo de los textos de las categorías (BOW, GREAT SWORD...)
-    .mat-mdc-optgroup-label {
-      color: #c5a059 !important; 
-      font-weight: bold !important;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-    }
-
-    // Estilo de las opciones individuales
-    .mat-mdc-option {
-      color: rgba(255, 255, 255, 0.8) !important;
-      
-      &:hover:not(.mdc-list-item--disabled) {
-        background-color: rgba(197, 160, 89, 0.1) !important;
-      }
-
-      &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
-        background-color: rgba(197, 160, 89, 0.2) !important;
-        .mdc-list-item__primary-text {
-          color: #c5a059 !important;
-        }
-      }
-    }
-  }
-
-  // Scrollbar personalizada para que no desentone
-  .mat-mdc-select-panel::-webkit-scrollbar {
-    width: 6px;
-  }
-  .mat-mdc-select-panel::-webkit-scrollbar-thumb {
-    background: #c5a059;
-    border-radius: 10px;
-  }
-}
-
-// 🔍 Tu buscador interno (ajuste para que encaje mejor con el fondo oscuro)
-.select-search-box {
-  background: #1a1814 !important;
-  input {
-    border: 1px solid #c5a059 !important;
-    background: transparent !important;
-  }
-}
-::ng-deep {
-  // 1. ELIMINAR EL AZUL Y CAMBIAR A DORADO (Borde y Label cuando está enfocado)
-  .mat-mdc-form-field.mat-focused {
-    // Color de la etiqueta (Label) superior
-    .mat-mdc-form-field-label-wrapper .mdc-floating-label {
-      color: #c5a059 !important;
-    }
-    
-    // Color del borde cuando el select está abierto o enfocado
-    .mdc-outlined-border-primary {
-      border-color: #c5a059 !important;
-      border-width: 2px !important; // Un poco más grueso para que destaque
-    }
-  }
-
-  // 2. ESTILO CUANDO PASAS EL RATÓN (Hover)
-  .mat-mdc-form-field:hover .mdc-outlined-border-primary {
-    border-color: rgba(197, 160, 89, 0.6) !important;
-  }
-
-  // 3. COLOR DEL TEXTO SELECCIONADO Y FLECHA
-  .mat-mdc-select-value, 
-  .mat-mdc-select-arrow {
-    color: rgba(255, 255, 255, 0.9) !important;
-  }
-
-  // 4. FIX PARA EL LABEL EN REPOSO (Evitar el azul que se ve en la imagen)
-  .mdc-floating-label {
-    color: rgba(197, 160, 89, 0.7) !important;
-  }
-
-  // 5. SOBREESCRITURA DEL CHECKMARK (El tic que sale en el item seleccionado)
-  .mat-mdc-option.mdc-list-item--selected .mat-mdc-option-pseudo-checkbox {
-    color: #c5a059 !important;
-  }
-}
-::ng-deep {
-  // 🔥 El búnker definitivo contra el azul cuando el select está abierto/enfocado
-  .mat-mdc-form-field {
-    &.mat-focused {
-      // Atacamos directamente al notar la estructura de Material con outline
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__trailing {
-        border-color: #c5a059 !important;
-        border-width: 2px !important;
-      }
-    }
-  }
-
-  // Por si el tema global de Angular Material intenta meter la variable del sistema (--mdc-outlined-text-field-focus-outline-color)
-  :root {
-    --mdc-outlined-text-field-focus-outline-color: #c5a059 !important;
-    --mdc-select-focused-arrow-color: #c5a059 !important;
   }
 }
