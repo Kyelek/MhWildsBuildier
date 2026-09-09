@@ -2,27 +2,48 @@
   <div class="nav-logo" (click)="navigateTo('home')">
     <span class="logo-icon">⚔️</span> MH <span class="text-gold">Wilds</span> Forge
   </div>
-  
+
   <ul class="nav-links">
     <li>
-      <button 
-        [class.active]="currentScreen() === 'home'" 
+      <button
+        [class.active]="currentScreen() === 'home'"
         (click)="navigateTo('home')">
-        Inicio
+        {{ "nav.home" | translate }}
       </button>
     </li>
     <li>
       <button
         [class.active]="currentScreen() === 'builder'"
         (click)="navigateTo('builder')">
-        Constructor
+        {{ "nav.constructor" | translate }}
       </button>
     </li>
     <li>
       <button
         [class.active]="currentScreen() === 'skill-forge'"
         (click)="navigateTo('skill-forge')">
-        Forja de Habilidades
+        {{ "nav.skills-forge" | translate }}
+      </button>
+    </li>
+
+    <li>
+      <button
+        (click)="useLanguage('en')">
+        EN
+      </button>
+    </li>
+
+    <li>
+      <button
+        (click)="useLanguage('es')">
+        ES
+      </button>
+    </li>
+
+    <li>
+      <button
+        (click)="useLanguage('jp')">
+        JP
       </button>
     </li>
   </ul>
@@ -30,39 +51,40 @@
 
 <main class="main-content">
   @switch (currentScreen()) {
-    
+
     @case ('home') {
       <div class="home-container animate-fade-in">
         <header class="hero-section">
-          <h1>Forja tu Destino en <br><span class="text-gold font-wilds">Monster Hunter Wilds</span></h1>
+<!--          <h1>Forja tu Destino en </h1>-->
+          <h1>{{ 'home.header.title' | translate}} <br><span class="text-gold font-wilds">Monster Hunter Wilds</span> </h1>
           <p class="hero-subtitle">
-            Planifica tu equipamiento, calcula tus defensas y optimiza tu afinidad antes de salir a la caza en las Tierras Prohibidas.
+            {{ 'home.header.sub-title' | translate }}
           </p>
           <button class="btn-cta" (click)="navigateTo('builder')">
-            Abrir la Forja ⚔️
+            {{ 'buttons.open-forge' | translate }} ⚔️
           </button>
         </header>
 
         <section class="features-grid">
           <div class="feature-card">
             <div class="feature-icon">🛡️</div>
-            <h3>Calculadora de Defensa</h3>
-            <p>Suma la defensa máxima de tus piezas de armadura y comprueba tus resistencias elementales en tiempo real.</p>
+            <h3>{{ 'home.features.defense.title' | translate }}</h3>
+            <p>{{ 'home.features.defense.lbl' | translate }}</p>
           </div>
           <div class="feature-card">
             <div class="feature-icon">⚔️</div>
-            <h3>Arsenal Completo</h3>
-            <p>Filtra y selecciona cualquier tipo de arma para comprobar su ataque base y afinidad de manera instantánea.</p>
+            <h3>{{ 'home.features.arsenal.title' | translate }}</h3>
+            <p>{{ 'home.features.arsenal.lbl' | translate }}</p>
           </div>
           <div class="feature-card">
             <div class="feature-icon">🔍</div>
-            <h3>Buscador Avanzado</h3>
-            <p>Encuentra piezas rápidamente gracias a los nuevos selectores inteligentes con filtrado en castellano.</p>
+            <h3>{{ 'home.features.search.title' | translate }}</h3>
+            <p>{{ 'home.features.search.lbl' | translate }}</p>
           </div>
           <div class="feature-card">
             <div class="feature-icon">📜</div>
-            <h3>Forja de Habilidades</h3>
-            <p>Combina piezas de armadura, acumula sus habilidades y descubre qué bonificación de conjunto activas.</p>
+            <h3>{{ 'home.features.skill-forge.title' | translate }}</h3>
+            <p>{{ 'home.features.skill-forge.lbl' | translate }}</p>
           </div>
         </section>
       </div>
@@ -73,7 +95,7 @@
     }
 
     @case ('skill-forge') {
-      <app-skill-forge class="animate-fade-in"></app-skill-forge>
+      <app-skill-forge class="animate-fade-in"/>
     }
   }
 </main>

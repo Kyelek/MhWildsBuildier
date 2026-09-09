@@ -110,7 +110,7 @@ $font-main: 'Montserrat', sans-serif;
       line-height: 1.2;
       margin-bottom: 24px;
       color: #ffffff;
-      
+
       .text-gold { color: $color-gold; }
     }
 
@@ -157,11 +157,18 @@ $font-main: 'Montserrat', sans-serif;
       border-radius: 4px;
       text-align: center;
       transition: all 0.3s ease;
+      user-select: none;
+      cursor: pointer;
 
       &:hover {
         border-color: rgba(197, 160, 89, 0.3);
         background: rgba(197, 160, 89, 0.02);
         transform: translateY(-4px);
+      }
+
+      &:active {
+        transition: all 0.1s ease;
+        background: rgba(197, 160, 89, 0.1);
       }
 
       .feature-icon {

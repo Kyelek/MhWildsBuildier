@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "home": "Home",
+    "constructor": "Constructor",
+    "skills-forge": "Skills Forge"
+  },
+  "home": {
+    "header":  {
+      "title": "Forge Your Destiny in",
+      "sub-title": "Plan your gear, work out your defences and optimise your affinity before heading out to hunt in the Forbidden Lands."
+    },
+    "features": {
+      "defense": {
+        "title": "Defense Calculator",
+        "lbl": "Add up the maximum defence of your armour pieces and check your elemental resistances in real time."
+      },
+      "arsenal": {
+        "title": "Complete Arsenal",
+        "lbl": "Filter and select any type of weapon to instantly check its base attack and affinity."
+      },
+      "search": {
+        "title": "Advanced Search",
+        "lbl": "Find items quickly thanks to the new smart selectors with Spanish-language filtering."
+      },
+      "skill-forge": {
+        "title": "Skill Forge",
+        "lbl": "Combine armour pieces, stack their skills and discover which set bonuses you activate."
+      }
+    }
+  },
+  "buttons": {
+    "open-forge": "Open the Forge"
+  }
+}

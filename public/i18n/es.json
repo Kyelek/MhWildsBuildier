@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "home": "Home",
+    "constructor": "Constructor",
+    "skills-forge": "Forja de Habilidades"
+  },
+  "home": {
+    "header": {
+      "title": "Forja tu destino en",
+      "sub-title": "Planifica tu equipamiento, calcula tus defensas y optimiza tu afinidad antes de salir a cazar en las Tierras Prohibidas."
+    },
+    "features": {
+      "defense": {
+        "title": "Calculadora de Defensa",
+        "lbl": "Suma la defensa máxima de cada pieza de armadura y consulta tus resistencias elementales en tiempo real."
+      },
+      "arsenal": {
+        "title": "Arsenal Completo",
+        "lbl": "Filtra y selecciona cualquier tipo de arma para consultar al instante su ataque base y afinidad."
+      },
+      "search": {
+        "title": "Búsqueda Avanzada",
+        "lbl": "Encuentra objetos rápidamente gracias a los nuevos filtros inteligentes en español."
+      },
+      "skill-forge": {
+        "title": "Forja de Habilidades",
+        "lbl": "Combina piezas de armadura, acumula sus habilidades y descubre qué bonificaciones de conjunto activas."
+      }
+    }
+  },
+  "buttons": {
+    "open-forge": "Abrir la Forja"
+  }
+}
