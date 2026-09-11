@@ -62,6 +62,7 @@
   },
   "builder": {
     "title": "Equipamiento del Cazador",
+    "loading": "Cargando catálogo de armas y armaduras...",
     "weapon": {
       "label": "Arma Principal",
       "search": "Buscar arma...",

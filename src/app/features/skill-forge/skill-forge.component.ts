@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -97,6 +97,34 @@ export class SkillForgeComponent {
   readonly selectedArms = signal<ArmorPiece | null>(null);
   readonly selectedWaist = signal<ArmorPiece | null>(null);
   readonly selectedLegs = signal<ArmorPiece | null>(null);
+
+  // 🌐 PERSISTENCIA DE LA SELECCIÓN ENTRE IDIOMAS
+  //
+  // Las piezas seleccionadas guardan nombre/descripción en el idioma con el que se cargaron.
+  // Si el usuario cambia el idioma, el catálogo se recarga ya traducido, pero el objeto que
+  // teníamos guardado en el signal seguiría "congelado" en el idioma anterior. En vez de
+  // perder el equipamiento elegido, en cuanto llega el catálogo nuevo buscamos cada pieza ya
+  // seleccionada por su "id" (estable entre idiomas) y sustituimos el objeto por su versión
+  // traducida. Así el cazador conserva su conjunto y Habilidades del Conjunto / Bonificaciones
+  // de Conjunto se actualizan solas al nuevo idioma sin resetearse.
+  private readonly persistirSeleccionAlCambiarIdioma = effect(() => {
+    const armadura = this.armorResource.value();
+    if (!armadura) return; // seguimos esperando el catálogo en el nuevo idioma
+
+    this.selectedHead.update(actual => this.buscarPorId(actual, armadura));
+    this.selectedChest.update(actual => this.buscarPorId(actual, armadura));
+    this.selectedArms.update(actual => this.buscarPorId(actual, armadura));
+    this.selectedWaist.update(actual => this.buscarPorId(actual, armadura));
+    this.selectedLegs.update(actual => this.buscarPorId(actual, armadura));
+  });
+
+  // Busca en el catálogo (ya en el idioma nuevo) la pieza con el mismo id que la seleccionada
+  // actualmente. Si no la encuentra (no debería pasar, los id son estables entre idiomas),
+  // mantiene el objeto anterior en vez de perder la selección de golpe.
+  private buscarPorId(actual: ArmorPiece | null, catalogo: ArmorPiece[]): ArmorPiece | null {
+    if (!actual) return null;
+    return catalogo.find(pieza => pieza.id === actual.id) ?? actual;
+  }
 
   // 🔍 Texto de búsqueda independiente para cada selector
   readonly headSearch = signal<string>('');

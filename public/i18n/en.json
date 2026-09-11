@@ -62,6 +62,7 @@
   },
   "builder": {
     "title": "Hunter Equipment",
+    "loading": "Loading weapon and armor catalogue...",
     "weapon": {
       "label": "Main Weapon",
       "search": "Search weapon...",

@@ -13,7 +13,7 @@
 
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>{{ 'armorSlots.head.label' | translate }}</mat-label>
-        <mat-select (selectionChange)="selectedHead.set($event.value)">
+        <mat-select [value]="selectedHead()" (selectionChange)="selectedHead.set($event.value)">
 
           <div class="select-search-box">
             <input
@@ -34,7 +34,7 @@
 
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>{{ 'armorSlots.chest.label' | translate }}</mat-label>
-        <mat-select (selectionChange)="selectedChest.set($event.value)">
+        <mat-select [value]="selectedChest()" (selectionChange)="selectedChest.set($event.value)">
 
           <div class="select-search-box">
             <input
@@ -55,7 +55,7 @@
 
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>{{ 'armorSlots.arms.label' | translate }}</mat-label>
-        <mat-select (selectionChange)="selectedArms.set($event.value)">
+        <mat-select [value]="selectedArms()" (selectionChange)="selectedArms.set($event.value)">
 
           <div class="select-search-box">
             <input
@@ -76,7 +76,7 @@
 
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>{{ 'armorSlots.waist.label' | translate }}</mat-label>
-        <mat-select (selectionChange)="selectedWaist.set($event.value)">
+        <mat-select [value]="selectedWaist()" (selectionChange)="selectedWaist.set($event.value)">
 
           <div class="select-search-box">
             <input
@@ -97,7 +97,7 @@
 
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>{{ 'armorSlots.legs.label' | translate }}</mat-label>
-        <mat-select (selectionChange)="selectedLegs.set($event.value)">
+        <mat-select [value]="selectedLegs()" (selectionChange)="selectedLegs.set($event.value)">
 
           <div class="select-search-box">
             <input

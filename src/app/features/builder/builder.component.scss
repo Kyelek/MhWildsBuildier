@@ -32,10 +32,20 @@
   .full-width {
     width: 100%;
     margin-bottom: 20px; // 💡 Más separación vertical entre cada selector (Cabeza, Pecho, etc.)
-    
+
     &:last-child {
       margin-bottom: 0;
     }
+  }
+
+  // Mismo spinner + mensaje de carga que la Forja de Habilidades
+  .loading-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0 24px 0;
+    color: #9e9e93; // Mismo gris apagado que "res-label"
+    font-size: 0.9rem;
   }
 
   // ==========================================

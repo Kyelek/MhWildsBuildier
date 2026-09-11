@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -57,6 +57,11 @@ export class BuilderComponent {
     loader: ({ request }) => this.wildsApi.getWeapons(request)
   });
 
+  // ⏳ Estado de carga combinado de ambos catálogos, para mostrar un único spinner
+  readonly cargando = computed(() =>
+    this.armorResource.isLoading() || this.weaponsResource.isLoading()
+  );
+
   // 2. Estado del equipamiento seleccionado
   readonly selectedWeapon = signal<Weapon | null>(null);
   readonly selectedHead = signal<ArmorPiece | null>(null);
@@ -64,6 +69,39 @@ export class BuilderComponent {
   readonly selectedArms = signal<ArmorPiece | null>(null);
   readonly selectedWaist = signal<ArmorPiece | null>(null);
   readonly selectedLegs = signal<ArmorPiece | null>(null);
+
+  // 🌐 PERSISTENCIA DE LA SELECCIÓN ENTRE IDIOMAS
+  //
+  // Las piezas/arma seleccionadas guardan nombre, descripción, etc. en el idioma con el que
+  // se cargaron. Si el usuario cambia el idioma, el catálogo se recarga ya traducido, pero
+  // el objeto que teníamos guardado en el signal seguiría "congelado" en el idioma anterior.
+  // En vez de perder el equipamiento elegido, en cuanto llega el catálogo nuevo buscamos cada
+  // pieza/arma ya seleccionada por su "id" (estable entre idiomas) y sustituimos el objeto por
+  // su versión traducida. Así el cazador conserva lo que tenía equipado y las Estadísticas
+  // Totales / Resistencias se actualizan solas al nuevo idioma sin resetearse.
+  private readonly persistirSeleccionAlCambiarIdioma = effect(() => {
+    const armadura = this.armorResource.value();
+    if (armadura) {
+      this.selectedHead.update(actual => this.buscarPorId(actual, armadura));
+      this.selectedChest.update(actual => this.buscarPorId(actual, armadura));
+      this.selectedArms.update(actual => this.buscarPorId(actual, armadura));
+      this.selectedWaist.update(actual => this.buscarPorId(actual, armadura));
+      this.selectedLegs.update(actual => this.buscarPorId(actual, armadura));
+    }
+
+    const armas = this.weaponsResource.value() as unknown as Weapon[] | undefined;
+    if (armas) {
+      this.selectedWeapon.update(actual => this.buscarPorId(actual, armas));
+    }
+  });
+
+  // Busca en el catálogo (ya en el idioma nuevo) el elemento con el mismo id que el
+  // seleccionado actualmente. Si no lo encuentra (no debería pasar, los id son estables entre
+  // idiomas), mantiene el objeto anterior en vez de perder la selección de golpe.
+  private buscarPorId<T extends { id: number }>(actual: T | null, catalogo: T[]): T | null {
+    if (!actual) return null;
+    return catalogo.find(item => item.id === actual.id) ?? actual;
+  }
 
   // 🔍 Signals independientes para el texto de búsqueda de cada selector
   readonly weaponSearch = signal<string>('');
