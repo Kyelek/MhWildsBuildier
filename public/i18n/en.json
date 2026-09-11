@@ -30,5 +30,75 @@
   },
   "buttons": {
     "open-forge": "Open the Forge"
+  },
+  "armorSlots": {
+    "head": {
+      "label": "Head (Helmet)",
+      "search": "Search helmet...",
+      "empty": "No helmets found"
+    },
+    "chest": {
+      "label": "Chest (Mail)",
+      "search": "Search chest piece...",
+      "empty": "No pieces found"
+    },
+    "arms": {
+      "label": "Arms (Gauntlets)",
+      "search": "Search gauntlets...",
+      "empty": "No pieces found"
+    },
+    "waist": {
+      "label": "Waist (Faulds)",
+      "search": "Search faulds...",
+      "empty": "No pieces found"
+    },
+    "legs": {
+      "label": "Legs (Greaves)",
+      "search": "Search greaves...",
+      "empty": "No pieces found"
+    },
+    "unequipped": "— Unequipped —",
+    "defenseMax": "Max Def"
+  },
+  "builder": {
+    "title": "Hunter Equipment",
+    "weapon": {
+      "label": "Main Weapon",
+      "search": "Search weapon...",
+      "empty": "No results found",
+      "attack": "Atk"
+    },
+    "stats": {
+      "title": "Total Stats",
+      "defense": "Max Defense:",
+      "attack": "Attack:",
+      "affinity": "Affinity:"
+    },
+    "resistances": {
+      "title": "Resistances",
+      "fire": "🔥 Fire:",
+      "water": "💧 Water:",
+      "thunder": "⚡ Thunder:",
+      "ice": "❄️ Ice:",
+      "dragon": "🐉 Dragon:"
+    }
+  },
+  "skillForge": {
+    "title": "Set Pieces",
+    "loading": "Loading armor and skill catalogue...",
+    "level": "Lv.",
+    "setBonuses": {
+      "title": "Set Bonuses",
+      "empty": "No active set bonus. Equip 2 or more pieces from the same set."
+    },
+    "descriptions": {
+      "title": "Detailed Descriptions",
+      "empty": "No skills to describe yet.",
+      "setBonusOf": "Set Bonus of"
+    },
+    "activeSkills": {
+      "title": "Set Skills",
+      "empty": "Equip armor pieces to see accumulated skills."
+    }
   }
 }

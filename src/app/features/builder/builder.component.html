@@ -1,17 +1,17 @@
 <div class="builder-layout">
-  
+
   <div class="equipment-selectors">
     <mat-card class="section-card">
-      <h2>Equipamiento del Cazador</h2>
+      <h2>{{ 'builder.title' | translate }}</h2>
 
       <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Arma Principal</mat-label>
+        <mat-label>{{ 'builder.weapon.label' | translate }}</mat-label>
         <mat-select (selectionChange)="selectedWeapon.set($event.value)">
-          
+
           <div class="select-search-box">
-            <input 
-              type="text" 
-              placeholder="Buscar arma..."
+            <input
+              type="text"
+              [placeholder]="'builder.weapon.search' | translate"
               (input)="weaponSearch.set($any($event.target).value)"
               (keydown)="$event.stopPropagation()">
           </div>
@@ -21,112 +21,112 @@
             <mat-optgroup [label]="type">
               @for (weapon of getWeaponsByType(type); track weapon.id) {
                 <mat-option [value]="weapon">
-                  {{ weapon.name }} (Atk: {{ weapon.damage.raw }})
+                  {{ weapon.name }} ({{ 'builder.weapon.attack' | translate }}: {{ weapon.damage.raw }})
                 </mat-option>
               }
             </mat-optgroup>
           } @empty {
-            <mat-option disabled>No se encontraron resultados</mat-option>
+            <mat-option disabled>{{ 'builder.weapon.empty' | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Cabeza (Casco)</mat-label>
+        <mat-label>{{ 'armorSlots.head.label' | translate }}</mat-label>
         <mat-select (selectionChange)="selectedHead.set($event.value)">
-          
+
           <div class="select-search-box">
-            <input 
-              type="text" 
-              placeholder="Buscar casco..."
+            <input
+              type="text"
+              [placeholder]="'armorSlots.head.search' | translate"
               (input)="headSearch.set($any($event.target).value)"
               (keydown)="$event.stopPropagation()">
           </div>
 
           @for (piece of helmets(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }} (Def Max: {{ piece.defense.max }})</mat-option>
+            <mat-option [value]="piece">{{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})</mat-option>
           } @empty {
-            <mat-option disabled>No se encontraron cascos</mat-option>
+            <mat-option disabled>{{ 'armorSlots.head.empty' | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Pecho (Coraza)</mat-label>
+        <mat-label>{{ 'armorSlots.chest.label' | translate }}</mat-label>
         <mat-select (selectionChange)="selectedChest.set($event.value)">
-          
+
           <div class="select-search-box">
-            <input 
-              type="text" 
-              placeholder="Buscar pecho..."
+            <input
+              type="text"
+              [placeholder]="'armorSlots.chest.search' | translate"
               (input)="chestSearch.set($any($event.target).value)"
               (keydown)="$event.stopPropagation()">
           </div>
 
           @for (piece of chests(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }} (Def Max: {{ piece.defense.max }})</mat-option>
+            <mat-option [value]="piece">{{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})</mat-option>
           } @empty {
-            <mat-option disabled>No se encontraron piezas</mat-option>
+            <mat-option disabled>{{ 'armorSlots.chest.empty' | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Brazos (Guantes)</mat-label>
+        <mat-label>{{ 'armorSlots.arms.label' | translate }}</mat-label>
         <mat-select (selectionChange)="selectedArms.set($event.value)">
-          
+
           <div class="select-search-box">
-            <input 
-              type="text" 
-              placeholder="Buscar guantes..."
+            <input
+              type="text"
+              [placeholder]="'armorSlots.arms.search' | translate"
               (input)="armsSearch.set($any($event.target).value)"
               (keydown)="$event.stopPropagation()">
           </div>
 
           @for (piece of arms(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }} (Def Max: {{ piece.defense.max }})</mat-option>
+            <mat-option [value]="piece">{{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})</mat-option>
           } @empty {
-            <mat-option disabled>No se encontraron piezas</mat-option>
+            <mat-option disabled>{{ 'armorSlots.arms.empty' | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Cintura (Faja)</mat-label>
+        <mat-label>{{ 'armorSlots.waist.label' | translate }}</mat-label>
         <mat-select (selectionChange)="selectedWaist.set($event.value)">
-          
+
           <div class="select-search-box">
-            <input 
-              type="text" 
-              placeholder="Buscar faja..."
+            <input
+              type="text"
+              [placeholder]="'armorSlots.waist.search' | translate"
               (input)="waistSearch.set($any($event.target).value)"
               (keydown)="$event.stopPropagation()">
           </div>
 
           @for (piece of waists(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }} (Def Max: {{ piece.defense.max }})</mat-option>
+            <mat-option [value]="piece">{{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})</mat-option>
           } @empty {
-            <mat-option disabled>No se encontraron piezas</mat-option>
+            <mat-option disabled>{{ 'armorSlots.waist.empty' | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Piernas (Grebas)</mat-label>
+        <mat-label>{{ 'armorSlots.legs.label' | translate }}</mat-label>
         <mat-select (selectionChange)="selectedLegs.set($event.value)">
-          
+
           <div class="select-search-box">
-            <input 
-              type="text" 
-              placeholder="Buscar grebas..."
+            <input
+              type="text"
+              [placeholder]="'armorSlots.legs.search' | translate"
               (input)="legsSearch.set($any($event.target).value)"
               (keydown)="$event.stopPropagation()">
           </div>
 
           @for (piece of legs(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }} (Def Max: {{ piece.defense.max }})</mat-option>
+            <mat-option [value]="piece">{{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})</mat-option>
           } @empty {
-            <mat-option disabled>No se encontraron piezas</mat-option>
+            <mat-option disabled>{{ 'armorSlots.legs.empty' | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -136,53 +136,53 @@
 
   <div class="stats-panel">
     <mat-card class="section-card status-card">
-      <h2>Estadísticas Totales</h2>
-      
+      <h2>{{ 'builder.stats.title' | translate }}</h2>
+
       <div class="stat-group">
         <div class="stat-row">
-          <span>Defensa Máxima:</span>
+          <span>{{ 'builder.stats.defense' | translate }}</span>
           <span class="stat-value text-gold">{{ totalDefense() }}</span>
         </div>
         <div class="stat-row">
-          <span>Ataque:</span>
+          <span>{{ 'builder.stats.attack' | translate }}</span>
           <span class="stat-value text-gold">{{ totalAttack() }}</span>
         </div>
         <div class="stat-row">
-          <span>Afinidad:</span>
+          <span>{{ 'builder.stats.affinity' | translate }}</span>
           <span class="stat-value text-gold">{{ totalAffinity() }}%</span>
         </div>
       </div>
 
       <mat-divider style="margin: 24px 0; border-color: rgba(197, 160, 89, 0.15);"></mat-divider>
 
-      <h3>Resistencias</h3>
+      <h3>{{ 'builder.resistances.title' | translate }}</h3>
       <div class="stat-group resistances-grid">
         <div class="res-item">
-          <span class="res-label">🔥 Fuego:</span>
+          <span class="res-label">{{ 'builder.resistances.fire' | translate }}</span>
           <span class="res-value" [ngClass]="{'text-positive': totalResistances().fire > 0, 'text-negative': totalResistances().fire < 0}">
             {{ totalResistances().fire }}
           </span>
         </div>
         <div class="res-item">
-          <span class="res-label">💧 Agua:</span>
+          <span class="res-label">{{ 'builder.resistances.water' | translate }}</span>
           <span class="res-value" [ngClass]="{'text-positive': totalResistances().water > 0, 'text-negative': totalResistances().water < 0}">
             {{ totalResistances().water }}
           </span>
         </div>
         <div class="res-item">
-          <span class="res-label">⚡ Rayo:</span>
+          <span class="res-label">{{ 'builder.resistances.thunder' | translate }}</span>
           <span class="res-value" [ngClass]="{'text-positive': totalResistances().thunder > 0, 'text-negative': totalResistances().thunder < 0}">
             {{ totalResistances().thunder }}
           </span>
         </div>
         <div class="res-item">
-          <span class="res-label">❄️ Hielo:</span>
+          <span class="res-label">{{ 'builder.resistances.ice' | translate }}</span>
           <span class="res-value" [ngClass]="{'text-positive': totalResistances().ice > 0, 'text-negative': totalResistances().ice < 0}">
             {{ totalResistances().ice }}
           </span>
         </div>
         <div class="res-item">
-          <span class="res-label">🐉 Draco:</span>
+          <span class="res-label">{{ 'builder.resistances.dragon' | translate }}</span>
           <span class="res-value" [ngClass]="{'text-positive': totalResistances().dragon > 0, 'text-negative': totalResistances().dragon < 0}">
             {{ totalResistances().dragon }}
           </span>

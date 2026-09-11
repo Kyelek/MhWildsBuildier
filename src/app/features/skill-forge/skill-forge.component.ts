@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece } from '../../core/models/wilds.models';
 
@@ -58,25 +59,32 @@ interface DescripcionHabilidad {
     MatSelectModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    TranslatePipe
   ],
   templateUrl: './skill-forge.component.html',
   styleUrl: './skill-forge.component.scss'
 })
 export class SkillForgeComponent {
   private readonly wildsApi = inject(WildsApiService);
+  private readonly translateService = inject(TranslateService);
 
   // 1. Catálogos completos desde la API
+  // 🌐 `request` observa el idioma actual de la API: al cambiarlo (selector EN/ES/JP),
+  // el `loader` se vuelve a ejecutar y los catálogos llegan ya traducidos.
   readonly armorResource = rxResource({
-    loader: () => this.wildsApi.getArmor()
+    request: () => this.wildsApi.locale(),
+    loader: ({ request }) => this.wildsApi.getArmor(request)
   });
 
   readonly armorSetsResource = rxResource({
-    loader: () => this.wildsApi.getArmorSets()
+    request: () => this.wildsApi.locale(),
+    loader: ({ request }) => this.wildsApi.getArmorSets(request)
   });
 
   readonly skillsResource = rxResource({
-    loader: () => this.wildsApi.getSkills()
+    request: () => this.wildsApi.locale(),
+    loader: ({ request }) => this.wildsApi.getSkills(request)
   });
 
   readonly cargando = computed(() =>
@@ -215,10 +223,11 @@ export class SkillForgeComponent {
     }));
 
     // Añadimos una entrada de descripción por CADA bonificación de conjunto activa a la vez
+    const sufijoBonificacion = this.translateService.instant('skillForge.descriptions.setBonusOf');
     for (const bono of this.bonificacionesSet()) {
       lista.push({
         clave: `set-${bono.setId}`,
-        nombre: `${bono.nombreHabilidad} (Bonificación de ${bono.nombreSet})`,
+        nombre: `${bono.nombreHabilidad} (${sufijoBonificacion} ${bono.nombreSet})`,
         nivel: bono.nivel,
         descripcion: bono.descripcion,
         esBonificacionSet: true

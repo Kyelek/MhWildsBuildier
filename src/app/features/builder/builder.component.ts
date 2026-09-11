@@ -1,6 +1,7 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece } from '../../core/models/wilds.models';
 
@@ -34,7 +35,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatSelectModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    TranslatePipe
   ],
   templateUrl: './builder.component.html',
   styleUrl: './builder.component.scss'
@@ -43,12 +45,16 @@ export class BuilderComponent {
   private readonly wildsApi = inject(WildsApiService);
 
   // 1. Catálogos completos desde la API
+  // 🌐 `request` observa el idioma actual de la API: al cambiarlo (selector EN/ES/JP),
+  // el `loader` se vuelve a ejecutar y los catálogos llegan ya traducidos.
   readonly armorResource = rxResource({
-    loader: () => this.wildsApi.getArmor()
+    request: () => this.wildsApi.locale(),
+    loader: ({ request }) => this.wildsApi.getArmor(request)
   });
 
   readonly weaponsResource = rxResource({
-    loader: () => this.wildsApi.getWeapons()
+    request: () => this.wildsApi.locale(),
+    loader: ({ request }) => this.wildsApi.getWeapons(request)
   });
 
   // 2. Estado del equipamiento seleccionado

@@ -30,5 +30,75 @@
   },
   "buttons": {
     "open-forge": "工房を開く"
+  },
+  "armorSlots": {
+    "head": {
+      "label": "頭部(兜)",
+      "search": "兜を検索...",
+      "empty": "兜が見つかりません"
+    },
+    "chest": {
+      "label": "胴部(鎧)",
+      "search": "胴防具を検索...",
+      "empty": "防具が見つかりません"
+    },
+    "arms": {
+      "label": "腕部(小手)",
+      "search": "小手を検索...",
+      "empty": "防具が見つかりません"
+    },
+    "waist": {
+      "label": "腰部(腰当て)",
+      "search": "腰当てを検索...",
+      "empty": "防具が見つかりません"
+    },
+    "legs": {
+      "label": "脚部(脛当て)",
+      "search": "脛当てを検索...",
+      "empty": "防具が見つかりません"
+    },
+    "unequipped": "— 未装備 —",
+    "defenseMax": "最大防御力"
+  },
+  "builder": {
+    "title": "ハンター装備",
+    "weapon": {
+      "label": "メイン武器",
+      "search": "武器を検索...",
+      "empty": "結果が見つかりません",
+      "attack": "攻撃力"
+    },
+    "stats": {
+      "title": "合計ステータス",
+      "defense": "最大防御力:",
+      "attack": "攻撃力:",
+      "affinity": "会心率:"
+    },
+    "resistances": {
+      "title": "耐性",
+      "fire": "🔥 火属性:",
+      "water": "💧 水属性:",
+      "thunder": "⚡ 雷属性:",
+      "ice": "❄️ 氷属性:",
+      "dragon": "🐉 龍属性:"
+    }
+  },
+  "skillForge": {
+    "title": "防具パーツ",
+    "loading": "防具とスキルのカタログを読み込み中...",
+    "level": "Lv.",
+    "setBonuses": {
+      "title": "シリーズスキルボーナス",
+      "empty": "発動中のシリーズスキルボーナスはありません。同じシリーズの防具を2部位以上装備してください。"
+    },
+    "descriptions": {
+      "title": "詳細説明",
+      "empty": "まだ表示できるスキルがありません。",
+      "setBonusOf": "シリーズボーナス:"
+    },
+    "activeSkills": {
+      "title": "スキル一覧",
+      "empty": "防具を装備してスキルを確認しましょう。"
+    }
   }
 }

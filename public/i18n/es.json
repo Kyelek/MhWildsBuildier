@@ -30,5 +30,75 @@
   },
   "buttons": {
     "open-forge": "Abrir la Forja"
+  },
+  "armorSlots": {
+    "head": {
+      "label": "Cabeza (Casco)",
+      "search": "Buscar casco...",
+      "empty": "No se encontraron cascos"
+    },
+    "chest": {
+      "label": "Pecho (Coraza)",
+      "search": "Buscar pecho...",
+      "empty": "No se encontraron piezas"
+    },
+    "arms": {
+      "label": "Brazos (Guantes)",
+      "search": "Buscar guantes...",
+      "empty": "No se encontraron piezas"
+    },
+    "waist": {
+      "label": "Cintura (Faja)",
+      "search": "Buscar faja...",
+      "empty": "No se encontraron piezas"
+    },
+    "legs": {
+      "label": "Piernas (Grebas)",
+      "search": "Buscar grebas...",
+      "empty": "No se encontraron piezas"
+    },
+    "unequipped": "— Sin equipar —",
+    "defenseMax": "Def Max"
+  },
+  "builder": {
+    "title": "Equipamiento del Cazador",
+    "weapon": {
+      "label": "Arma Principal",
+      "search": "Buscar arma...",
+      "empty": "No se encontraron resultados",
+      "attack": "Atk"
+    },
+    "stats": {
+      "title": "Estadísticas Totales",
+      "defense": "Defensa Máxima:",
+      "attack": "Ataque:",
+      "affinity": "Afinidad:"
+    },
+    "resistances": {
+      "title": "Resistencias",
+      "fire": "🔥 Fuego:",
+      "water": "💧 Agua:",
+      "thunder": "⚡ Rayo:",
+      "ice": "❄️ Hielo:",
+      "dragon": "🐉 Draco:"
+    }
+  },
+  "skillForge": {
+    "title": "Piezas del Conjunto",
+    "loading": "Cargando catálogo de armaduras y habilidades...",
+    "level": "Nv.",
+    "setBonuses": {
+      "title": "Bonificaciones de Conjunto",
+      "empty": "Ninguna bonificación de conjunto activa. Equipa 2 o más piezas del mismo conjunto."
+    },
+    "descriptions": {
+      "title": "Descripciones Detalladas",
+      "empty": "Aún no hay habilidades que describir.",
+      "setBonusOf": "Bonificación de"
+    },
+    "activeSkills": {
+      "title": "Habilidades del Conjunto",
+      "empty": "Equipa piezas de armadura para ver las habilidades acumuladas."
+    }
   }
 }
