@@ -16,7 +16,7 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 | 3 | Manejo de errores HTTP en `WildsApiService` | ✅ Hecho |
 | 4 | Componente compartido de selección con buscador | ✅ Hecho |
 | 5 | Activar el Router real | ✅ Hecho |
-| 6 | Tests de la lógica de cálculo | ⏳ Pendiente |
+| 6 | Tests de la lógica de cálculo | ✅ Hecho |
 | 7 | Convención única de idioma en nombres | ⏳ Pendiente |
 
 > 🔧 **Hallazgo adicional durante la verificación del punto 1**: el arnés de tests
@@ -201,15 +201,32 @@ un aviso (`common.errors.catalogLoad`, ya traducido a ES/EN/JP) con un botón
 bloqueando de verdad las peticiones a `wilds.mhdb.io` (ver captura del aviso) y
 comprobando que "Reintentar" recupera los datos.
 
-### 3.7 Tests solo boilerplate
+### 3.7 ✅ [Resuelto] Los tests eran solo boilerplate
 
-Los `.spec.ts` existentes son los que genera `ng generate` por defecto (comprueban
-que el componente "se crea"). La lógica de negocio real más delicada del proyecto
-— `totalDefense`/`totalResistances` en el *builder*, y sobre todo el cálculo de
-`habilidadesActivas` y `bonificacionesSet` en *skill-forge* (acumulación de
-niveles, detección de bonificaciones de varios sets a la vez) — no tiene ni un
-solo test. Es precisamente el tipo de cálculo donde un refactor futuro puede
-romper algo sin que nadie lo note hasta producción.
+Los `.spec.ts` existentes eran los que genera `ng generate` por defecto
+(comprobaban que el componente "se crea"). La lógica de negocio real más
+delicada del proyecto — `totalDefense`/`totalResistances` en el *builder*, y
+sobre todo el cálculo de `habilidadesActivas` y `bonificacionesSet` en
+*skill-forge* (acumulación de niveles, detección de bonificaciones de varios
+sets a la vez) — no tenía ni un solo test.
+
+**Solución aplicada:** se añadieron tests con `HttpTestingController` (mockeando
+la respuesta de `WildsApiService` en vez de golpear la API real) que cubren:
+- `BuilderComponent`: `totalDefense` y `totalResistances` sumando varias piezas
+  (incluyendo resistencias negativas), y `totalAttack`/`totalAffinity` con y sin
+  arma equipada.
+- `SkillForgeComponent`: acumulación de nivel de una misma habilidad entre dos
+  piezas distintas, y — el caso más delicado — **dos bonificaciones de set
+  activas a la vez** (2 piezas de un set + 3 de otro), verificando que cada una
+  activa el rango más alto que alcanza sus piezas (no el primero que encuentra)
+  y que se ordenan por piezas equipadas.
+
+Detalle técnico registrado para el futuro: `rxResource` actualiza su signal
+`value()` en un microtask tras `HttpTestingController.flush()`, así que un test
+que dependa de leer ese valor justo después de un flush necesita
+`await fixture.whenStable()` antes de continuar (afectó al test de
+bonificaciones de set, que sí lee `armorSetsResource`; no hizo falta en los que
+solo dependen de signals locales como los de `totalDefense`).
 
 ### 3.8 Mezcla de idioma en nombres de código
 
@@ -270,9 +287,10 @@ dónde empezar — ninguno de estos cambios se ha aplicado todavía:
    `<app-navbar /> + <router-outlet />`, con tres rutas lazy reales (`''`,
    `builder`, `skill-forge`) y el navbar real movido a `core/components/navbar`.
    Efecto colateral medido: bundle inicial de producción 534.90 kB → 296.19 kB.
-6. **Tests de la lógica de cálculo**: cubrir `totalDefense`/`totalResistances` en
-   el *builder* y, sobre todo, `habilidadesActivas`/`bonificacionesSet` en
-   *skill-forge* (incluyendo el caso de dos o más sets activos a la vez).
+6. ✅ **Tests de la lógica de cálculo**: `totalDefense`/`totalResistances`/
+   `totalAttack`/`totalAffinity` en el *builder*, y `habilidadesActivas`/
+   `bonificacionesSet` en *skill-forge* (con el caso de dos sets activos a la
+   vez), usando `HttpTestingController` para no depender de la API real.
 7. **Fijar y documentar un criterio único de idioma** para nombres de variables y
    métodos en el código nuevo (recomendación: castellano, ya que es el idioma
    principal del proyecto según `CLAUDE.md`), y homogeneizar poco a poco el código
