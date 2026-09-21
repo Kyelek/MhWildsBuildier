@@ -1,0 +1,16 @@
+// El host es "block" (por defecto los componentes son "inline" y el ancho no aplicaría)
+// y reproduce el espaciado vertical que antes daba la clase ".full-width" de cada feature:
+// separación entre selectores consecutivos, sin margen extra tras el último.
+:host {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+:host(:last-of-type) {
+  margin-bottom: 0;
+}
+
+mat-form-field {
+  width: 100%;
+}

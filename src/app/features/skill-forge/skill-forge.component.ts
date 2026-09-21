@@ -4,11 +4,10 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece } from '../../core/models/wilds.models';
+import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 
 // Importaciones Standalone de Angular Material
 import { MatCardModule } from '@angular/material/card';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 
@@ -56,11 +55,10 @@ interface DescripcionHabilidad {
   imports: [
     CommonModule,
     MatCardModule,
-    MatSelectModule,
-    MatFormFieldModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    TranslatePipe
+    TranslatePipe,
+    SelectorBuscableComponent
   ],
   templateUrl: './skill-forge.component.html',
   styleUrl: './skill-forge.component.scss'
@@ -138,19 +136,13 @@ export class SkillForgeComponent {
     return catalogo.find(pieza => pieza.id === actual.id) ?? actual;
   }
 
-  // 🔍 Texto de búsqueda independiente para cada selector
-  readonly headSearch = signal<string>('');
-  readonly chestSearch = signal<string>('');
-  readonly armsSearch = signal<string>('');
-  readonly waistSearch = signal<string>('');
-  readonly legsSearch = signal<string>('');
-
-  // 3. Listas filtradas reactivamente por tipo de pieza y texto de búsqueda
-  readonly helmets = computed(() => this.filterArmorBySlot('head', this.headSearch()));
-  readonly chests = computed(() => this.filterArmorBySlot('chest', this.chestSearch()));
-  readonly arms = computed(() => this.filterArmorBySlot('arms', this.armsSearch()));
-  readonly waists = computed(() => this.filterArmorBySlot('waist', this.waistSearch()));
-  readonly legs = computed(() => this.filterArmorBySlot('legs', this.legsSearch()));
+  // 3. Piezas de armadura acotadas por ranura. El buscador de texto de cada selector ya lo
+  // resuelve internamente <app-selector-buscable> (ver shared/components/selector-buscable).
+  readonly helmets = computed(() => this.armorPorRanura('head'));
+  readonly chests = computed(() => this.armorPorRanura('chest'));
+  readonly arms = computed(() => this.armorPorRanura('arms'));
+  readonly waists = computed(() => this.armorPorRanura('waist'));
+  readonly legs = computed(() => this.armorPorRanura('legs'));
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {
@@ -281,16 +273,8 @@ export class SkillForgeComponent {
   // ⚙️ MÉTODOS INTERNOS
   // ==========================================
 
-  private filterArmorBySlot(slotType: TipoPieza, searchTerm: string): ArmorPiece[] {
-    const allArmor = this.armorResource.value() ?? [];
-    const piecesOfSlot = allArmor.filter(piece => piece.kind === slotType);
-
-    if (searchTerm.trim()) {
-      return piecesOfSlot.filter(piece =>
-        piece.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    return piecesOfSlot;
+  private armorPorRanura(ranura: TipoPieza): ArmorPiece[] {
+    return (this.armorResource.value() ?? []).filter(piece => piece.kind === ranura);
   }
 
   // Busca en el catálogo de /skills la descripción exacta del nivel total alcanzado.

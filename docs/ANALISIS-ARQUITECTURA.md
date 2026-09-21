@@ -14,7 +14,7 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 | 1 | Unificar el modelo `Weapon` | ✅ Hecho |
 | 2 | Crear `environments/` | ✅ Hecho |
 | 3 | Manejo de errores HTTP en `WildsApiService` | ✅ Hecho |
-| 4 | Componente compartido de selección con buscador | ⏳ Pendiente |
+| 4 | Componente compartido de selección con buscador | ✅ Hecho |
 | 5 | Activar el Router real | ⏳ Pendiente |
 | 6 | Tests de la lógica de cálculo | ⏳ Pendiente |
 | 7 | Convención única de idioma en nombres | ⏳ Pendiente |
@@ -58,6 +58,8 @@ src/app/
 │   ├── components/navbar/         # Componente scaffold, generado y NUNCA usado
 │   ├── models/wilds.models.ts     # Modelos de dominio: ArmorPiece, ArmorSet, Weapon...
 │   └── services/wilds-api.service.ts
+├── shared/
+│   └── components/selector-buscable/  # mat-select + buscador + filtrado, reutilizable
 └── features/
     ├── builder/                   # Constructor de equipo (arma + 5 piezas de armadura)
     └── skill-forge/               # Calculadora de habilidades acumuladas + bonif. de set
@@ -127,15 +129,37 @@ sustituye el fichero de desarrollo por el de producción vía `fileReplacements`
 en la configuración `production` del builder. `WildsApiService.apiRoot` ahora
 lee `environment.apiRoot` en vez de tener la URL escrita en el propio servicio.
 
-### 3.5 UI repetida sin componente compartido
+### 3.5 ✅ [Resuelto] UI repetida sin componente compartido
 
-`BuilderComponent` y `SkillForgeComponent` reimplementan, cada uno por su lado,
+`BuilderComponent` y `SkillForgeComponent` reimplementaban, cada uno por su lado,
 el mismo patrón: un `mat-select` con caja de búsqueda interna (`.select-search-box`,
 resuelto además con overrides globales `!important` en `styles.scss` por cómo el
 CDK monta el panel fuera del DOM del componente) y el mismo filtrado por
 `kind`/texto. `CLAUDE.md` menciona reutilizar componentes de `src/app/shared/`,
-pero esa carpeta **no existe todavía**: cada nueva pantalla que necesite "elegir
-un ítem de un catálogo con buscador" va a copiar y pegar este patrón de nuevo.
+pero esa carpeta no existía todavía.
+
+**Solución aplicada:** se creó `shared/components/selector-buscable/` — un
+`SelectorBuscableComponent<T>` genérico y *standalone* con:
+- Caja de búsqueda interna que filtra por `item.name` (el consumidor solo pasa el
+  catálogo ya acotado, p. ej. "solo piezas de la ranura `head`").
+- `value = model<T | null>(null)` para *two-way binding* directo con un signal del
+  consumidor (`[(value)]="selectedHead"`), sin escribir un `(selectionChange)` manual.
+- Agrupación opcional por `mat-optgroup` vía la función `[agruparPor]` (usada por el
+  selector de armas del Constructor, agrupando por `kind`; solo se muestran los
+  grupos con resultados tras el filtro, igual que antes).
+- Opción "vacío"/"sin equipar" opcional (`permitirVacio` + `etiquetaVacio`), usada
+  por los 5 selectores de la Forja de Habilidades pero no por el Constructor.
+- Texto de cada opción personalizable proyectando un `<ng-template let-item>` (p. ej.
+  para mostrar "Nombre (Def Max: X)" o "Nombre (Atk: X)"); si no se proyecta nada,
+  usa `item.name` por defecto — lo que usan los 5 selectores de la Forja.
+
+`BuilderComponent` y `SkillForgeComponent` ya no declaran signals de texto de
+búsqueda (`headSearch`, `weaponSearch`...) ni lógica de filtrado por texto —
+ambos quedan notablemente más cortos, y el filtrado por ranura/tipo (lo único que
+sigue siendo responsabilidad de cada feature) es un `computed` de una línea.
+Verificado en navegador: catálogo, buscador, agrupado por tipo de arma, opción
+"Sin equipar" y actualización reactiva de estadísticas/habilidades — todo
+funciona igual que antes de la migración.
 
 ### 3.6 ✅ [Resuelto] No había manejo de errores HTTP
 
@@ -217,9 +241,10 @@ dónde empezar — ninguno de estos cambios se ha aplicado todavía:
    por `fileReplacements` en `angular.json` según la configuración de build.
 3. ✅ **Añadir manejo de errores en `WildsApiService`** (`catchError`): estado de
    error expuesto y mostrado en ambos features, con botón de reintentar.
-4. **Extraer un componente compartido** (`shared/components/selector-buscable/` o
-   similar) que encapsule el `mat-select` + caja de búsqueda + filtrado, y
-   sustituir la lógica duplicada de *builder* y *skill-forge* por él.
+4. ✅ **Extraer un componente compartido** (`shared/components/selector-buscable/`):
+   encapsula el `mat-select` + caja de búsqueda + filtrado (+ agrupado opcional
+   por `mat-optgroup` y opción "vacío" opcional), sustituyendo toda la lógica
+   duplicada de *builder* y *skill-forge*.
 5. **Activar el Router de verdad**: mover el navbar real a
    `core/components/navbar` (o borrarlo si se prefiere mantener el `@switch`,
    pero entonces borrando también `app.routes.ts` y el `provideRouter` para no

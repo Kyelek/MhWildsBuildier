@@ -4,11 +4,10 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, Weapon } from '../../core/models/wilds.models';
+import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 
 // Importaciones Standalone de Angular Material
 import { MatCardModule } from '@angular/material/card';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 
@@ -18,11 +17,10 @@ import { MatDividerModule } from '@angular/material/divider';
   imports: [
     CommonModule,
     MatCardModule,
-    MatSelectModule,
-    MatFormFieldModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    TranslatePipe
+    TranslatePipe,
+    SelectorBuscableComponent
   ],
   templateUrl: './builder.component.html',
   styleUrl: './builder.component.scss'
@@ -100,34 +98,20 @@ export class BuilderComponent {
     return catalogo.find(item => item.id === actual.id) ?? actual;
   }
 
-  // 🔍 Signals independientes para el texto de búsqueda de cada selector
-  readonly weaponSearch = signal<string>('');
-  readonly headSearch = signal<string>('');
-  readonly chestSearch = signal<string>('');
-  readonly armsSearch = signal<string>('');
-  readonly waistSearch = signal<string>('');
-  readonly legsSearch = signal<string>('');
+  // 3. Catálogo de armas y piezas de armadura acotadas por tipo/ranura. El buscador de
+  // texto de cada selector ya lo resuelve internamente <app-selector-buscable> (ver
+  // shared/components/selector-buscable), así que aquí solo queda el filtro por ranura.
+  readonly weapons = computed(() => this.weaponsResource.value() ?? []);
 
-  // 3. Listas filtradas reactivamente por tipo y por texto de búsqueda
-  readonly helmets = computed(() => this.filterArmorBySlot('head', this.headSearch()));
-  readonly chests = computed(() => this.filterArmorBySlot('chest', this.chestSearch()));
-  readonly arms = computed(() => this.filterArmorBySlot('arms', this.armsSearch()));
-  readonly waists = computed(() => this.filterArmorBySlot('waist', this.waistSearch()));
-  readonly legs = computed(() => this.filterArmorBySlot('legs', this.legsSearch()));
+  readonly helmets = computed(() => this.armorPorRanura('head'));
+  readonly chests = computed(() => this.armorPorRanura('chest'));
+  readonly arms = computed(() => this.armorPorRanura('arms'));
+  readonly waists = computed(() => this.armorPorRanura('waist'));
+  readonly legs = computed(() => this.armorPorRanura('legs'));
 
-  // Mapeamos las categorías de armas únicas utilizando 'kind'
-// 💡 Solo muestra tipos de armas que tengan al menos un resultado con el filtro actual
-  readonly weaponTypes = computed(() => {
-    const search = this.weaponSearch().toLowerCase();
-    const allWeapons = this.weaponsResource.value() ?? [];
-    
-    // Filtramos los tipos que contienen armas cuyo nombre coincida con la búsqueda
-    const activeTypes = allWeapons
-      .filter(w => w.name.toLowerCase().includes(search))
-      .map(w => w.kind);
-
-    return [...new Set(activeTypes)];
-  });
+  // Referencia estable (no se recrea en cada ciclo) para agrupar el selector de armas
+  // por tipo ('kind') dentro de <app-selector-buscable>.
+  readonly agruparArmaPorTipo = (weapon: Weapon) => weapon.kind;
 
   // ==========================================
   // 📊 CÁLCULOS REACTIVOS (STAT PANEL)
@@ -177,30 +161,8 @@ export class BuilderComponent {
   // ==========================================
   // ⚙️ MÉTODOS DE FILTRADO INTERNOS
   // ==========================================
-  
-  private filterArmorBySlot(slotType: 'head' | 'chest' | 'arms' | 'waist' | 'legs', searchTerm: string): ArmorPiece[] {
-    const allArmor = this.armorResource.value() ?? [];
-    const piecesOfSlot = allArmor.filter(piece => piece.kind === slotType);
-    
-    if (searchTerm.trim()) {
-      return piecesOfSlot.filter(piece => 
-        piece.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    return piecesOfSlot;
-  }
 
-  // Filtra las armas según su categoría y el buscador de armas
-  getWeaponsByType(type: string): Weapon[] {
-    const allWeapons = this.weaponsResource.value() ?? [];
-    const weaponsOfType = allWeapons.filter(w => w.kind === type);
-    const search = this.weaponSearch();
-
-    if (search.trim()) {
-      return weaponsOfType.filter(w => 
-        w.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    return weaponsOfType;
+  private armorPorRanura(ranura: ArmorPiece['kind']): ArmorPiece[] {
+    return (this.armorResource.value() ?? []).filter(piece => piece.kind === ranura);
   }
 }

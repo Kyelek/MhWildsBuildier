@@ -18,110 +18,50 @@
         </div>
       }
 
-      <mat-form-field class="full-width" appearance="outline">
-        <mat-label>{{ 'armorSlots.head.label' | translate }}</mat-label>
-        <mat-select [value]="selectedHead()" (selectionChange)="selectedHead.set($event.value)">
+      <app-selector-buscable
+        [items]="helmets()"
+        [(value)]="selectedHead"
+        [label]="'armorSlots.head.label' | translate"
+        [searchPlaceholder]="'armorSlots.head.search' | translate"
+        [emptyText]="'armorSlots.head.empty' | translate"
+        [permitirVacio]="true"
+        [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
-          <div class="select-search-box">
-            <input
-              type="text"
-              [placeholder]="'armorSlots.head.search' | translate"
-              (input)="headSearch.set($any($event.target).value)"
-              (keydown)="$event.stopPropagation()">
-          </div>
+      <app-selector-buscable
+        [items]="chests()"
+        [(value)]="selectedChest"
+        [label]="'armorSlots.chest.label' | translate"
+        [searchPlaceholder]="'armorSlots.chest.search' | translate"
+        [emptyText]="'armorSlots.chest.empty' | translate"
+        [permitirVacio]="true"
+        [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
-          <mat-option [value]="null">{{ 'armorSlots.unequipped' | translate }}</mat-option>
-          @for (piece of helmets(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }}</mat-option>
-          } @empty {
-            <mat-option disabled>{{ 'armorSlots.head.empty' | translate }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <app-selector-buscable
+        [items]="arms()"
+        [(value)]="selectedArms"
+        [label]="'armorSlots.arms.label' | translate"
+        [searchPlaceholder]="'armorSlots.arms.search' | translate"
+        [emptyText]="'armorSlots.arms.empty' | translate"
+        [permitirVacio]="true"
+        [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
-      <mat-form-field class="full-width" appearance="outline">
-        <mat-label>{{ 'armorSlots.chest.label' | translate }}</mat-label>
-        <mat-select [value]="selectedChest()" (selectionChange)="selectedChest.set($event.value)">
+      <app-selector-buscable
+        [items]="waists()"
+        [(value)]="selectedWaist"
+        [label]="'armorSlots.waist.label' | translate"
+        [searchPlaceholder]="'armorSlots.waist.search' | translate"
+        [emptyText]="'armorSlots.waist.empty' | translate"
+        [permitirVacio]="true"
+        [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
-          <div class="select-search-box">
-            <input
-              type="text"
-              [placeholder]="'armorSlots.chest.search' | translate"
-              (input)="chestSearch.set($any($event.target).value)"
-              (keydown)="$event.stopPropagation()">
-          </div>
-
-          <mat-option [value]="null">{{ 'armorSlots.unequipped' | translate }}</mat-option>
-          @for (piece of chests(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }}</mat-option>
-          } @empty {
-            <mat-option disabled>{{ 'armorSlots.chest.empty' | translate }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="full-width" appearance="outline">
-        <mat-label>{{ 'armorSlots.arms.label' | translate }}</mat-label>
-        <mat-select [value]="selectedArms()" (selectionChange)="selectedArms.set($event.value)">
-
-          <div class="select-search-box">
-            <input
-              type="text"
-              [placeholder]="'armorSlots.arms.search' | translate"
-              (input)="armsSearch.set($any($event.target).value)"
-              (keydown)="$event.stopPropagation()">
-          </div>
-
-          <mat-option [value]="null">{{ 'armorSlots.unequipped' | translate }}</mat-option>
-          @for (piece of arms(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }}</mat-option>
-          } @empty {
-            <mat-option disabled>{{ 'armorSlots.arms.empty' | translate }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="full-width" appearance="outline">
-        <mat-label>{{ 'armorSlots.waist.label' | translate }}</mat-label>
-        <mat-select [value]="selectedWaist()" (selectionChange)="selectedWaist.set($event.value)">
-
-          <div class="select-search-box">
-            <input
-              type="text"
-              [placeholder]="'armorSlots.waist.search' | translate"
-              (input)="waistSearch.set($any($event.target).value)"
-              (keydown)="$event.stopPropagation()">
-          </div>
-
-          <mat-option [value]="null">{{ 'armorSlots.unequipped' | translate }}</mat-option>
-          @for (piece of waists(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }}</mat-option>
-          } @empty {
-            <mat-option disabled>{{ 'armorSlots.waist.empty' | translate }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="full-width" appearance="outline">
-        <mat-label>{{ 'armorSlots.legs.label' | translate }}</mat-label>
-        <mat-select [value]="selectedLegs()" (selectionChange)="selectedLegs.set($event.value)">
-
-          <div class="select-search-box">
-            <input
-              type="text"
-              [placeholder]="'armorSlots.legs.search' | translate"
-              (input)="legsSearch.set($any($event.target).value)"
-              (keydown)="$event.stopPropagation()">
-          </div>
-
-          <mat-option [value]="null">{{ 'armorSlots.unequipped' | translate }}</mat-option>
-          @for (piece of legs(); track piece.id) {
-            <mat-option [value]="piece">{{ piece.name }}</mat-option>
-          } @empty {
-            <mat-option disabled>{{ 'armorSlots.legs.empty' | translate }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <app-selector-buscable
+        [items]="legs()"
+        [(value)]="selectedLegs"
+        [label]="'armorSlots.legs.label' | translate"
+        [searchPlaceholder]="'armorSlots.legs.search' | translate"
+        [emptyText]="'armorSlots.legs.empty' | translate"
+        [permitirVacio]="true"
+        [etiquetaVacio]="'armorSlots.unequipped' | translate" />
     </mat-card>
 
     <!-- 🎖️📖 REESTRUCTURACIÓN: las bonificaciones de conjunto y las descripciones detalladas
