@@ -82,8 +82,8 @@ describe('SkillForgeComponent', () => {
   it('acumula el nivel de una misma habilidad entre varias piezas equipadas', () => {
     flushCatalogos();
 
-    component.selectedHead.set(crearPiezaDePrueba({ id: 10, kind: 'head', skills: [habilidadDePrueba()] }));
-    component.selectedChest.set(crearPiezaDePrueba({ id: 11, kind: 'chest', skills: [habilidadDePrueba()] }));
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 10, kind: 'head', skills: [habilidadDePrueba()] }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 11, kind: 'chest', skills: [habilidadDePrueba()] }));
     fixture.detectChanges();
 
     expect(component.habilidadesActivas()).toEqual([
@@ -144,12 +144,12 @@ describe('SkillForgeComponent', () => {
     await fixture.whenStable();
 
     // 2 piezas del Set A (llega justo al único rango, de 2 piezas)
-    component.selectedHead.set(crearPiezaDePrueba({ id: 20, kind: 'head', armorSet: { id: 1, name: 'Set A' } }));
-    component.selectedChest.set(crearPiezaDePrueba({ id: 21, kind: 'chest', armorSet: { id: 1, name: 'Set A' } }));
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 20, kind: 'head', armorSet: { id: 1, name: 'Set A' } }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 21, kind: 'chest', armorSet: { id: 1, name: 'Set A' } }));
     // 3 piezas del Set B (supera el rango de 2 y alcanza también el de 3)
-    component.selectedArms.set(crearPiezaDePrueba({ id: 22, kind: 'arms', armorSet: { id: 2, name: 'Set B' } }));
-    component.selectedWaist.set(crearPiezaDePrueba({ id: 23, kind: 'waist', armorSet: { id: 2, name: 'Set B' } }));
-    component.selectedLegs.set(crearPiezaDePrueba({ id: 24, kind: 'legs', armorSet: { id: 2, name: 'Set B' } }));
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 22, kind: 'arms', armorSet: { id: 2, name: 'Set B' } }));
+    component.piezaCintura.set(crearPiezaDePrueba({ id: 23, kind: 'waist', armorSet: { id: 2, name: 'Set B' } }));
+    component.piezaPiernas.set(crearPiezaDePrueba({ id: 24, kind: 'legs', armorSet: { id: 2, name: 'Set B' } }));
     fixture.detectChanges();
 
     const bonificaciones = component.bonificacionesSet();

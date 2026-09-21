@@ -11,7 +11,7 @@ describe('SelectorBuscableComponent', () => {
   let component: SelectorBuscableComponent<ItemDePrueba>;
   let fixture: ComponentFixture<SelectorBuscableComponent<ItemDePrueba>>;
 
-  const items: ItemDePrueba[] = [
+  const elementos: ItemDePrueba[] = [
     { id: 1, name: 'Espada larga' },
     { id: 2, name: 'Hacha cargada' },
     { id: 3, name: 'Espada y escudo' }
@@ -24,7 +24,7 @@ describe('SelectorBuscableComponent', () => {
 
     fixture = TestBed.createComponent(SelectorBuscableComponent<ItemDePrueba>);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('items', items);
+    fixture.componentRef.setInput('elementos', elementos);
     fixture.detectChanges();
   });
 
@@ -32,17 +32,17 @@ describe('SelectorBuscableComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('muestra todos los items cuando no hay texto de búsqueda', () => {
-    expect(component.itemsFiltrados()).toEqual(items);
+  it('muestra todos los elementos cuando no hay texto de búsqueda', () => {
+    expect(component.elementosFiltrados()).toEqual(elementos);
   });
 
   it('filtra por nombre al escribir en el buscador (sin importar mayúsculas)', () => {
     component.onBusquedaInput('espada');
-    expect(component.itemsFiltrados()).toEqual([items[0], items[2]]);
+    expect(component.elementosFiltrados()).toEqual([elementos[0], elementos[2]]);
   });
 
-  it('actualiza el value seleccionado al elegir una opción', () => {
-    component.onSelectionChange(items[1]);
-    expect(component.value()).toEqual(items[1]);
+  it('actualiza el valor seleccionado al elegir una opción', () => {
+    component.onSelectionChange(elementos[1]);
+    expect(component.valor()).toEqual(elementos[1]);
   });
 });

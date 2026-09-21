@@ -19,47 +19,47 @@
       }
 
       <app-selector-buscable
-        [items]="helmets()"
-        [(value)]="selectedHead"
-        [label]="'armorSlots.head.label' | translate"
-        [searchPlaceholder]="'armorSlots.head.search' | translate"
-        [emptyText]="'armorSlots.head.empty' | translate"
+        [elementos]="cascos()"
+        [(valor)]="piezaCabeza"
+        [etiqueta]="'armorSlots.head.label' | translate"
+        [textoBuscador]="'armorSlots.head.search' | translate"
+        [textoVacio]="'armorSlots.head.empty' | translate"
         [permitirVacio]="true"
         [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
       <app-selector-buscable
-        [items]="chests()"
-        [(value)]="selectedChest"
-        [label]="'armorSlots.chest.label' | translate"
-        [searchPlaceholder]="'armorSlots.chest.search' | translate"
-        [emptyText]="'armorSlots.chest.empty' | translate"
+        [elementos]="pechos()"
+        [(valor)]="piezaPecho"
+        [etiqueta]="'armorSlots.chest.label' | translate"
+        [textoBuscador]="'armorSlots.chest.search' | translate"
+        [textoVacio]="'armorSlots.chest.empty' | translate"
         [permitirVacio]="true"
         [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
       <app-selector-buscable
-        [items]="arms()"
-        [(value)]="selectedArms"
-        [label]="'armorSlots.arms.label' | translate"
-        [searchPlaceholder]="'armorSlots.arms.search' | translate"
-        [emptyText]="'armorSlots.arms.empty' | translate"
+        [elementos]="brazos()"
+        [(valor)]="piezaBrazos"
+        [etiqueta]="'armorSlots.arms.label' | translate"
+        [textoBuscador]="'armorSlots.arms.search' | translate"
+        [textoVacio]="'armorSlots.arms.empty' | translate"
         [permitirVacio]="true"
         [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
       <app-selector-buscable
-        [items]="waists()"
-        [(value)]="selectedWaist"
-        [label]="'armorSlots.waist.label' | translate"
-        [searchPlaceholder]="'armorSlots.waist.search' | translate"
-        [emptyText]="'armorSlots.waist.empty' | translate"
+        [elementos]="cinturas()"
+        [(valor)]="piezaCintura"
+        [etiqueta]="'armorSlots.waist.label' | translate"
+        [textoBuscador]="'armorSlots.waist.search' | translate"
+        [textoVacio]="'armorSlots.waist.empty' | translate"
         [permitirVacio]="true"
         [etiquetaVacio]="'armorSlots.unequipped' | translate" />
 
       <app-selector-buscable
-        [items]="legs()"
-        [(value)]="selectedLegs"
-        [label]="'armorSlots.legs.label' | translate"
-        [searchPlaceholder]="'armorSlots.legs.search' | translate"
-        [emptyText]="'armorSlots.legs.empty' | translate"
+        [elementos]="piernas()"
+        [(valor)]="piezaPiernas"
+        [etiqueta]="'armorSlots.legs.label' | translate"
+        [textoBuscador]="'armorSlots.legs.search' | translate"
+        [textoVacio]="'armorSlots.legs.empty' | translate"
         [permitirVacio]="true"
         [etiquetaVacio]="'armorSlots.unequipped' | translate" />
     </mat-card>

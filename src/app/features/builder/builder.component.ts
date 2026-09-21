@@ -58,12 +58,12 @@ export class BuilderComponent {
   }
 
   // 2. Estado del equipamiento seleccionado
-  readonly selectedWeapon = signal<Weapon | null>(null);
-  readonly selectedHead = signal<ArmorPiece | null>(null);
-  readonly selectedChest = signal<ArmorPiece | null>(null);
-  readonly selectedArms = signal<ArmorPiece | null>(null);
-  readonly selectedWaist = signal<ArmorPiece | null>(null);
-  readonly selectedLegs = signal<ArmorPiece | null>(null);
+  readonly armaSeleccionada = signal<Weapon | null>(null);
+  readonly piezaCabeza = signal<ArmorPiece | null>(null);
+  readonly piezaPecho = signal<ArmorPiece | null>(null);
+  readonly piezaBrazos = signal<ArmorPiece | null>(null);
+  readonly piezaCintura = signal<ArmorPiece | null>(null);
+  readonly piezaPiernas = signal<ArmorPiece | null>(null);
 
   // 🌐 PERSISTENCIA DE LA SELECCIÓN ENTRE IDIOMAS
   //
@@ -77,16 +77,16 @@ export class BuilderComponent {
   private readonly persistirSeleccionAlCambiarIdioma = effect(() => {
     const armadura = this.armorResource.value();
     if (armadura) {
-      this.selectedHead.update(actual => this.buscarPorId(actual, armadura));
-      this.selectedChest.update(actual => this.buscarPorId(actual, armadura));
-      this.selectedArms.update(actual => this.buscarPorId(actual, armadura));
-      this.selectedWaist.update(actual => this.buscarPorId(actual, armadura));
-      this.selectedLegs.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaCabeza.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaPecho.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaBrazos.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaCintura.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
     }
 
     const armas = this.weaponsResource.value();
     if (armas) {
-      this.selectedWeapon.update(actual => this.buscarPorId(actual, armas));
+      this.armaSeleccionada.update(actual => this.buscarPorId(actual, armas));
     }
   });
 
@@ -101,61 +101,61 @@ export class BuilderComponent {
   // 3. Catálogo de armas y piezas de armadura acotadas por tipo/ranura. El buscador de
   // texto de cada selector ya lo resuelve internamente <app-selector-buscable> (ver
   // shared/components/selector-buscable), así que aquí solo queda el filtro por ranura.
-  readonly weapons = computed(() => this.weaponsResource.value() ?? []);
+  readonly armas = computed(() => this.weaponsResource.value() ?? []);
 
-  readonly helmets = computed(() => this.armorPorRanura('head'));
-  readonly chests = computed(() => this.armorPorRanura('chest'));
-  readonly arms = computed(() => this.armorPorRanura('arms'));
-  readonly waists = computed(() => this.armorPorRanura('waist'));
-  readonly legs = computed(() => this.armorPorRanura('legs'));
+  readonly cascos = computed(() => this.armorPorRanura('head'));
+  readonly pechos = computed(() => this.armorPorRanura('chest'));
+  readonly brazos = computed(() => this.armorPorRanura('arms'));
+  readonly cinturas = computed(() => this.armorPorRanura('waist'));
+  readonly piernas = computed(() => this.armorPorRanura('legs'));
 
   // Referencia estable (no se recrea en cada ciclo) para agrupar el selector de armas
   // por tipo ('kind') dentro de <app-selector-buscable>.
-  readonly agruparArmaPorTipo = (weapon: Weapon) => weapon.kind;
+  readonly agruparArmaPorTipo = (arma: Weapon) => arma.kind;
 
   // ==========================================
   // 📊 CÁLCULOS REACTIVOS (STAT PANEL)
   // ==========================================
 
-  readonly totalDefense = computed(() => {
-    return (this.selectedHead()?.defense.max ?? 0) +
-           (this.selectedChest()?.defense.max ?? 0) +
-           (this.selectedArms()?.defense.max ?? 0) +
-           (this.selectedWaist()?.defense.max ?? 0) +
-           (this.selectedLegs()?.defense.max ?? 0);
+  readonly defensaTotal = computed(() => {
+    return (this.piezaCabeza()?.defense.max ?? 0) +
+           (this.piezaPecho()?.defense.max ?? 0) +
+           (this.piezaBrazos()?.defense.max ?? 0) +
+           (this.piezaCintura()?.defense.max ?? 0) +
+           (this.piezaPiernas()?.defense.max ?? 0);
   });
 
-  readonly totalAttack = computed(() => {
-    return this.selectedWeapon()?.damage?.raw ?? 0;
+  readonly ataqueTotal = computed(() => {
+    return this.armaSeleccionada()?.damage?.raw ?? 0;
   });
 
-  readonly totalAffinity = computed(() => {
-    const weapon = this.selectedWeapon();
-    if (!weapon) return 0;
-    return weapon.affinity !== undefined && weapon.affinity !== null ? weapon.affinity : 0;
+  readonly afinidadTotal = computed(() => {
+    const arma = this.armaSeleccionada();
+    if (!arma) return 0;
+    return arma.affinity !== undefined && arma.affinity !== null ? arma.affinity : 0;
   });
 
-  readonly totalResistances = computed(() => {
-    const pieces = [
-      this.selectedHead(),
-      this.selectedChest(),
-      this.selectedArms(),
-      this.selectedWaist(),
-      this.selectedLegs()
+  readonly resistenciasTotales = computed(() => {
+    const piezas = [
+      this.piezaCabeza(),
+      this.piezaPecho(),
+      this.piezaBrazos(),
+      this.piezaCintura(),
+      this.piezaPiernas()
     ];
 
-    const totals = { fire: 0, water: 0, thunder: 0, ice: 0, dragon: 0 };
+    const totales = { fire: 0, water: 0, thunder: 0, ice: 0, dragon: 0 };
 
-    for (const piece of pieces) {
-      if (piece?.resistances) {
-        totals.fire += piece.resistances.fire ?? 0;
-        totals.water += piece.resistances.water ?? 0;
-        totals.thunder += piece.resistances.thunder ?? 0;
-        totals.ice += piece.resistances.ice ?? 0;
-        totals.dragon += piece.resistances.dragon ?? 0;
+    for (const pieza of piezas) {
+      if (pieza?.resistances) {
+        totales.fire += pieza.resistances.fire ?? 0;
+        totales.water += pieza.resistances.water ?? 0;
+        totales.thunder += pieza.resistances.thunder ?? 0;
+        totales.ice += pieza.resistances.ice ?? 0;
+        totales.dragon += pieza.resistances.dragon ?? 0;
       }
     }
-    return totals;
+    return totales;
   });
 
   // ==========================================

@@ -72,33 +72,33 @@ describe('BuilderComponent', () => {
   });
 
   it('sin nada equipado, todas las estadísticas totales son 0', () => {
-    expect(component.totalDefense()).toEqual(0);
-    expect(component.totalAttack()).toEqual(0);
-    expect(component.totalAffinity()).toEqual(0);
-    expect(component.totalResistances()).toEqual({ fire: 0, water: 0, thunder: 0, ice: 0, dragon: 0 });
+    expect(component.defensaTotal()).toEqual(0);
+    expect(component.ataqueTotal()).toEqual(0);
+    expect(component.afinidadTotal()).toEqual(0);
+    expect(component.resistenciasTotales()).toEqual({ fire: 0, water: 0, thunder: 0, ice: 0, dragon: 0 });
   });
 
   it('suma la defensa máxima de las piezas equipadas', () => {
-    component.selectedHead.set(crearPiezaDePrueba({ defense: { base: 5, max: 10 } }));
-    component.selectedChest.set(crearPiezaDePrueba({ defense: { base: 5, max: 20 } }));
+    component.piezaCabeza.set(crearPiezaDePrueba({ defense: { base: 5, max: 10 } }));
+    component.piezaPecho.set(crearPiezaDePrueba({ defense: { base: 5, max: 20 } }));
     fixture.detectChanges();
 
-    expect(component.totalDefense()).toEqual(30);
+    expect(component.defensaTotal()).toEqual(30);
   });
 
   it('usa el ataque bruto y la afinidad del arma equipada', () => {
-    component.selectedWeapon.set(crearArmaDePrueba({ damage: { raw: 150, display: 150 }, affinity: 25 }));
+    component.armaSeleccionada.set(crearArmaDePrueba({ damage: { raw: 150, display: 150 }, affinity: 25 }));
     fixture.detectChanges();
 
-    expect(component.totalAttack()).toEqual(150);
-    expect(component.totalAffinity()).toEqual(25);
+    expect(component.ataqueTotal()).toEqual(150);
+    expect(component.afinidadTotal()).toEqual(25);
   });
 
   it('suma las resistencias elementales (positivas y negativas) de todas las piezas', () => {
-    component.selectedHead.set(crearPiezaDePrueba({ resistances: { fire: 3, water: -2, ice: 0, thunder: 1, dragon: 0 } }));
-    component.selectedLegs.set(crearPiezaDePrueba({ resistances: { fire: 2, water: 0, ice: 0, thunder: 0, dragon: 5 } }));
+    component.piezaCabeza.set(crearPiezaDePrueba({ resistances: { fire: 3, water: -2, ice: 0, thunder: 1, dragon: 0 } }));
+    component.piezaPiernas.set(crearPiezaDePrueba({ resistances: { fire: 2, water: 0, ice: 0, thunder: 0, dragon: 5 } }));
     fixture.detectChanges();
 
-    expect(component.totalResistances()).toEqual({ fire: 5, water: -2, thunder: 1, ice: 0, dragon: 5 });
+    expect(component.resistenciasTotales()).toEqual({ fire: 5, water: -2, thunder: 1, ice: 0, dragon: 5 });
   });
 });

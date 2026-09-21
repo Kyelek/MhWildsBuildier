@@ -19,69 +19,69 @@
       }
 
       <app-selector-buscable
-        [items]="weapons()"
-        [(value)]="selectedWeapon"
-        [label]="'builder.weapon.label' | translate"
-        [searchPlaceholder]="'builder.weapon.search' | translate"
-        [emptyText]="'builder.weapon.empty' | translate"
+        [elementos]="armas()"
+        [(valor)]="armaSeleccionada"
+        [etiqueta]="'builder.weapon.label' | translate"
+        [textoBuscador]="'builder.weapon.search' | translate"
+        [textoVacio]="'builder.weapon.empty' | translate"
         [agruparPor]="agruparArmaPorTipo">
-        <ng-template let-weapon>
-          {{ weapon.name }} ({{ 'builder.weapon.attack' | translate }}: {{ weapon.damage.raw }})
+        <ng-template let-arma>
+          {{ arma.name }} ({{ 'builder.weapon.attack' | translate }}: {{ arma.damage.raw }})
         </ng-template>
       </app-selector-buscable>
 
       <app-selector-buscable
-        [items]="helmets()"
-        [(value)]="selectedHead"
-        [label]="'armorSlots.head.label' | translate"
-        [searchPlaceholder]="'armorSlots.head.search' | translate"
-        [emptyText]="'armorSlots.head.empty' | translate">
-        <ng-template let-piece>
-          {{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})
+        [elementos]="cascos()"
+        [(valor)]="piezaCabeza"
+        [etiqueta]="'armorSlots.head.label' | translate"
+        [textoBuscador]="'armorSlots.head.search' | translate"
+        [textoVacio]="'armorSlots.head.empty' | translate">
+        <ng-template let-pieza>
+          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
         </ng-template>
       </app-selector-buscable>
 
       <app-selector-buscable
-        [items]="chests()"
-        [(value)]="selectedChest"
-        [label]="'armorSlots.chest.label' | translate"
-        [searchPlaceholder]="'armorSlots.chest.search' | translate"
-        [emptyText]="'armorSlots.chest.empty' | translate">
-        <ng-template let-piece>
-          {{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})
+        [elementos]="pechos()"
+        [(valor)]="piezaPecho"
+        [etiqueta]="'armorSlots.chest.label' | translate"
+        [textoBuscador]="'armorSlots.chest.search' | translate"
+        [textoVacio]="'armorSlots.chest.empty' | translate">
+        <ng-template let-pieza>
+          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
         </ng-template>
       </app-selector-buscable>
 
       <app-selector-buscable
-        [items]="arms()"
-        [(value)]="selectedArms"
-        [label]="'armorSlots.arms.label' | translate"
-        [searchPlaceholder]="'armorSlots.arms.search' | translate"
-        [emptyText]="'armorSlots.arms.empty' | translate">
-        <ng-template let-piece>
-          {{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})
+        [elementos]="brazos()"
+        [(valor)]="piezaBrazos"
+        [etiqueta]="'armorSlots.arms.label' | translate"
+        [textoBuscador]="'armorSlots.arms.search' | translate"
+        [textoVacio]="'armorSlots.arms.empty' | translate">
+        <ng-template let-pieza>
+          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
         </ng-template>
       </app-selector-buscable>
 
       <app-selector-buscable
-        [items]="waists()"
-        [(value)]="selectedWaist"
-        [label]="'armorSlots.waist.label' | translate"
-        [searchPlaceholder]="'armorSlots.waist.search' | translate"
-        [emptyText]="'armorSlots.waist.empty' | translate">
-        <ng-template let-piece>
-          {{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})
+        [elementos]="cinturas()"
+        [(valor)]="piezaCintura"
+        [etiqueta]="'armorSlots.waist.label' | translate"
+        [textoBuscador]="'armorSlots.waist.search' | translate"
+        [textoVacio]="'armorSlots.waist.empty' | translate">
+        <ng-template let-pieza>
+          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
         </ng-template>
       </app-selector-buscable>
 
       <app-selector-buscable
-        [items]="legs()"
-        [(value)]="selectedLegs"
-        [label]="'armorSlots.legs.label' | translate"
-        [searchPlaceholder]="'armorSlots.legs.search' | translate"
-        [emptyText]="'armorSlots.legs.empty' | translate">
-        <ng-template let-piece>
-          {{ piece.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ piece.defense.max }})
+        [elementos]="piernas()"
+        [(valor)]="piezaPiernas"
+        [etiqueta]="'armorSlots.legs.label' | translate"
+        [textoBuscador]="'armorSlots.legs.search' | translate"
+        [textoVacio]="'armorSlots.legs.empty' | translate">
+        <ng-template let-pieza>
+          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
         </ng-template>
       </app-selector-buscable>
 
@@ -95,15 +95,15 @@
       <div class="stat-group">
         <div class="stat-row">
           <span>{{ 'builder.stats.defense' | translate }}</span>
-          <span class="stat-value text-gold">{{ totalDefense() }}</span>
+          <span class="stat-value text-gold">{{ defensaTotal() }}</span>
         </div>
         <div class="stat-row">
           <span>{{ 'builder.stats.attack' | translate }}</span>
-          <span class="stat-value text-gold">{{ totalAttack() }}</span>
+          <span class="stat-value text-gold">{{ ataqueTotal() }}</span>
         </div>
         <div class="stat-row">
           <span>{{ 'builder.stats.affinity' | translate }}</span>
-          <span class="stat-value text-gold">{{ totalAffinity() }}%</span>
+          <span class="stat-value text-gold">{{ afinidadTotal() }}%</span>
         </div>
       </div>
 
@@ -113,32 +113,32 @@
       <div class="stat-group resistances-grid">
         <div class="res-item">
           <span class="res-label">{{ 'builder.resistances.fire' | translate }}</span>
-          <span class="res-value" [ngClass]="{'text-positive': totalResistances().fire > 0, 'text-negative': totalResistances().fire < 0}">
-            {{ totalResistances().fire }}
+          <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().fire > 0, 'text-negative': resistenciasTotales().fire < 0}">
+            {{ resistenciasTotales().fire }}
           </span>
         </div>
         <div class="res-item">
           <span class="res-label">{{ 'builder.resistances.water' | translate }}</span>
-          <span class="res-value" [ngClass]="{'text-positive': totalResistances().water > 0, 'text-negative': totalResistances().water < 0}">
-            {{ totalResistances().water }}
+          <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().water > 0, 'text-negative': resistenciasTotales().water < 0}">
+            {{ resistenciasTotales().water }}
           </span>
         </div>
         <div class="res-item">
           <span class="res-label">{{ 'builder.resistances.thunder' | translate }}</span>
-          <span class="res-value" [ngClass]="{'text-positive': totalResistances().thunder > 0, 'text-negative': totalResistances().thunder < 0}">
-            {{ totalResistances().thunder }}
+          <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().thunder > 0, 'text-negative': resistenciasTotales().thunder < 0}">
+            {{ resistenciasTotales().thunder }}
           </span>
         </div>
         <div class="res-item">
           <span class="res-label">{{ 'builder.resistances.ice' | translate }}</span>
-          <span class="res-value" [ngClass]="{'text-positive': totalResistances().ice > 0, 'text-negative': totalResistances().ice < 0}">
-            {{ totalResistances().ice }}
+          <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().ice > 0, 'text-negative': resistenciasTotales().ice < 0}">
+            {{ resistenciasTotales().ice }}
           </span>
         </div>
         <div class="res-item">
           <span class="res-label">{{ 'builder.resistances.dragon' | translate }}</span>
-          <span class="res-value" [ngClass]="{'text-positive': totalResistances().dragon > 0, 'text-negative': totalResistances().dragon < 0}">
-            {{ totalResistances().dragon }}
+          <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().dragon > 0, 'text-negative': resistenciasTotales().dragon < 0}">
+            {{ resistenciasTotales().dragon }}
           </span>
         </div>
       </div>

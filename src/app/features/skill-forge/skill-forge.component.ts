@@ -102,11 +102,11 @@ export class SkillForgeComponent {
   }
 
   // 2. Estado de las piezas seleccionadas para construir el conjunto personalizado
-  readonly selectedHead = signal<ArmorPiece | null>(null);
-  readonly selectedChest = signal<ArmorPiece | null>(null);
-  readonly selectedArms = signal<ArmorPiece | null>(null);
-  readonly selectedWaist = signal<ArmorPiece | null>(null);
-  readonly selectedLegs = signal<ArmorPiece | null>(null);
+  readonly piezaCabeza = signal<ArmorPiece | null>(null);
+  readonly piezaPecho = signal<ArmorPiece | null>(null);
+  readonly piezaBrazos = signal<ArmorPiece | null>(null);
+  readonly piezaCintura = signal<ArmorPiece | null>(null);
+  readonly piezaPiernas = signal<ArmorPiece | null>(null);
 
   // 🌐 PERSISTENCIA DE LA SELECCIÓN ENTRE IDIOMAS
   //
@@ -121,11 +121,11 @@ export class SkillForgeComponent {
     const armadura = this.armorResource.value();
     if (!armadura) return; // seguimos esperando el catálogo en el nuevo idioma
 
-    this.selectedHead.update(actual => this.buscarPorId(actual, armadura));
-    this.selectedChest.update(actual => this.buscarPorId(actual, armadura));
-    this.selectedArms.update(actual => this.buscarPorId(actual, armadura));
-    this.selectedWaist.update(actual => this.buscarPorId(actual, armadura));
-    this.selectedLegs.update(actual => this.buscarPorId(actual, armadura));
+    this.piezaCabeza.update(actual => this.buscarPorId(actual, armadura));
+    this.piezaPecho.update(actual => this.buscarPorId(actual, armadura));
+    this.piezaBrazos.update(actual => this.buscarPorId(actual, armadura));
+    this.piezaCintura.update(actual => this.buscarPorId(actual, armadura));
+    this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
   });
 
   // Busca en el catálogo (ya en el idioma nuevo) la pieza con el mismo id que la seleccionada
@@ -138,20 +138,20 @@ export class SkillForgeComponent {
 
   // 3. Piezas de armadura acotadas por ranura. El buscador de texto de cada selector ya lo
   // resuelve internamente <app-selector-buscable> (ver shared/components/selector-buscable).
-  readonly helmets = computed(() => this.armorPorRanura('head'));
-  readonly chests = computed(() => this.armorPorRanura('chest'));
-  readonly arms = computed(() => this.armorPorRanura('arms'));
-  readonly waists = computed(() => this.armorPorRanura('waist'));
-  readonly legs = computed(() => this.armorPorRanura('legs'));
+  readonly cascos = computed(() => this.armorPorRanura('head'));
+  readonly pechos = computed(() => this.armorPorRanura('chest'));
+  readonly brazos = computed(() => this.armorPorRanura('arms'));
+  readonly cinturas = computed(() => this.armorPorRanura('waist'));
+  readonly piernas = computed(() => this.armorPorRanura('legs'));
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {
     const piezas = [
-      this.selectedHead(),
-      this.selectedChest(),
-      this.selectedArms(),
-      this.selectedWaist(),
-      this.selectedLegs()
+      this.piezaCabeza(),
+      this.piezaPecho(),
+      this.piezaBrazos(),
+      this.piezaCintura(),
+      this.piezaPiernas()
     ];
     return piezas.filter((pieza): pieza is ArmorPiece => pieza !== null);
   });

@@ -17,7 +17,7 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 | 4 | Componente compartido de selección con buscador | ✅ Hecho |
 | 5 | Activar el Router real | ✅ Hecho |
 | 6 | Tests de la lógica de cálculo | ✅ Hecho |
-| 7 | Convención única de idioma en nombres | ⏳ Pendiente |
+| 7 | Convención única de idioma en nombres | ✅ Hecho |
 
 > 🔧 **Hallazgo adicional durante la verificación del punto 1**: el arnés de tests
 > (`*.spec.ts`) no compilaba ni corría — `app.component.spec.ts` era el boilerplate
@@ -228,15 +228,39 @@ que dependa de leer ese valor justo después de un flush necesita
 bonificaciones de set, que sí lee `armorSetsResource`; no hizo falta en los que
 solo dependen de signals locales como los de `totalDefense`).
 
-### 3.8 Mezcla de idioma en nombres de código
+### 3.8 ✅ [Resuelto] Mezcla de idioma en nombres de código
 
-`CLAUDE.md` pide consistencia en el idioma de nombres de variables/métodos. Hoy
-conviven dos convenciones dentro del propio código: `builder.component.ts` nombra
-todo en inglés (`selectedWeapon`, `totalDefense`, `filterArmorBySlot`), mientras
-que `skill-forge.component.ts` nombra en castellano
-(`habilidadesActivas`, `bonificacionesSet`, `filterArmorBySlot` es la excepción
-mixta). No es un error funcional, pero si el proyecto sigue creciendo con más
-gente tocando código, conviene fijar un único criterio.
+`CLAUDE.md` pide consistencia en el idioma de nombres de variables/métodos. Antes
+convivían dos convenciones dentro del propio código: `builder.component.ts`
+nombraba todo en inglés (`selectedWeapon`, `totalDefense`, `filterArmorBySlot`,
+`helmets`/`chests`/`arms`...), mientras que `skill-forge.component.ts` mezclaba:
+sus signals de selección también en inglés (`selectedHead`...) pero la lógica de
+negocio más reciente ya en castellano (`habilidadesActivas`, `bonificacionesSet`).
+
+**Criterio fijado (y aplicado en todo el código de la app):**
+- **Castellano** para todo identificador que sea vocabulario propio de la
+  aplicación: signals/estado de componentes, `computed`, métodos, inputs/outputs
+  de componentes propios (`shared/`, `core/components/`), nombres de interfaces
+  internas. Es el idioma principal del proyecto según `CLAUDE.md` y ya era el que
+  usaba la lógica más nueva de `skill-forge`.
+- **Se mantiene el nombre tal cual venga del inglés únicamente cuando el
+  identificador *es* literalmente un dato o contrato externo**, no vocabulario
+  propio: los campos de `core/models/wilds.models.ts` (`defense`, `resistances`,
+  `skills`, `armorSet`, `kind`...) reflejan el JSON real que devuelve
+  `wilds.mhdb.io`, y los métodos `get*` de `WildsApiService` (`getArmor`,
+  `getWeapons`...) reflejan sus propios segmentos de URL (`/armor`, `/weapons`).
+  Traducirlos exigiría mantener un mapeo adicional sin aportar claridad, y
+  desalinearía el código del contrato real de la API.
+
+**Renombrados aplicados** para que ambos *features* usen exactamente el mismo
+vocabulario: `selectedWeapon`→`armaSeleccionada`, `selectedHead/Chest/Arms/
+Waist/Legs`→`piezaCabeza/Pecho/Brazos/Cintura/Piernas` (en los dos componentes),
+`helmets/chests/arms/waists/legs`→`cascos/pechos/brazos/cinturas/piernas`,
+`totalDefense/Attack/Affinity/Resistances`→`defensaTotal/ataqueTotal/
+afinidadTotal/resistenciasTotales`. También se completó `SelectorBuscableComponent`
+(creado en la mejora 4, con nombres mixtos): `items`→`elementos`, `label`→
+`etiqueta`, `value`→`valor`, `searchPlaceholder`→`textoBuscador`, `emptyText`→
+`textoVacio`, `itemsFiltrados`→`elementosFiltrados`.
 
 ## 4. ¿Qué tan preparado está para escalar?
 
@@ -291,12 +315,17 @@ dónde empezar — ninguno de estos cambios se ha aplicado todavía:
    `totalAttack`/`totalAffinity` en el *builder*, y `habilidadesActivas`/
    `bonificacionesSet` en *skill-forge* (con el caso de dos sets activos a la
    vez), usando `HttpTestingController` para no depender de la API real.
-7. **Fijar y documentar un criterio único de idioma** para nombres de variables y
-   métodos en el código nuevo (recomendación: castellano, ya que es el idioma
-   principal del proyecto según `CLAUDE.md`), y homogeneizar poco a poco el código
-   existente.
+7. ✅ **Fijar y documentar un criterio único de idioma**: castellano para todo
+   identificador propio de la app; se mantiene el inglés solo donde el nombre
+   *es* el contrato externo (campos de modelos que reflejan el JSON de la API,
+   métodos `get*` que reflejan la URL). Ver criterio completo y renombrados
+   aplicados en §3.8.
 
-Ninguno de estos cambios es urgente para que la app funcione hoy — son ajustes
-de fondo para que el proyecto aguante bien el crecimiento que se plantea
-(más pantallas, más catálogos, guardado de builds). Dime cuáles quieres que
-aborde y en qué orden, y voy directo a por ellos.
+## 6. Resultado final
+
+Los 7 puntos de la sección anterior están aplicados, verificados (`ng build`
+development y production, `ng test`, y comprobación manual en navegador tras
+cada cambio) y confirmados sin regresiones. El detalle de qué se hizo en cada
+uno, y por qué, está documentado en la sección §3 (cada inconsistencia original
+enlaza con su solución) y en el historial de commits del repositorio, uno por
+mejora.

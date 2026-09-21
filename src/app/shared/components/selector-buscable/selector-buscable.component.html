@@ -1,11 +1,11 @@
 <mat-form-field appearance="outline">
-  <mat-label>{{ label() }}</mat-label>
-  <mat-select [value]="value()" (selectionChange)="onSelectionChange($event.value)">
+  <mat-label>{{ etiqueta() }}</mat-label>
+  <mat-select [value]="valor()" (selectionChange)="onSelectionChange($event.value)">
 
     <div class="select-search-box">
       <input
         type="text"
-        [placeholder]="searchPlaceholder()"
+        [placeholder]="textoBuscador()"
         (input)="onBusquedaInput($any($event.target).value)"
         (keydown)="$event.stopPropagation()">
     </div>
@@ -14,22 +14,22 @@
       <mat-option [value]="null">{{ etiquetaVacio() }}</mat-option>
     }
 
-    @if (itemsFiltrados().length === 0) {
-      <mat-option disabled>{{ emptyText() }}</mat-option>
+    @if (elementosFiltrados().length === 0) {
+      <mat-option disabled>{{ textoVacio() }}</mat-option>
     } @else {
       @for (grupo of grupos(); track grupo.etiqueta) {
         @if (grupo.etiqueta) {
           <mat-optgroup [label]="grupo.etiqueta">
-            @for (item of grupo.items; track item.id) {
-              <mat-option [value]="item">
-                <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: item }" />
+            @for (elemento of grupo.elementos; track elemento.id) {
+              <mat-option [value]="elemento">
+                <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: elemento }" />
               </mat-option>
             }
           </mat-optgroup>
         } @else {
-          @for (item of grupo.items; track item.id) {
-            <mat-option [value]="item">
-              <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: item }" />
+          @for (elemento of grupo.elementos; track elemento.id) {
+            <mat-option [value]="elemento">
+              <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: elemento }" />
             </mat-option>
           }
         }
@@ -38,4 +38,4 @@
   </mat-select>
 </mat-form-field>
 
-<ng-template #plantillaPorDefecto let-item>{{ item.name }}</ng-template>
+<ng-template #plantillaPorDefecto let-elemento>{{ elemento.name }}</ng-template>
