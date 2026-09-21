@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, of, shareReplay, tap, throwError } from 'rxjs';
 import { SkillDetail, ArmorPiece, ArmorSet, Weapon } from '../models/wilds.models';
 import { environment } from '../../../environments/environment';
 
@@ -39,32 +39,102 @@ export class WildsApiService {
     this.setLocale(WildsApiService.LOCALE_POR_IDIOMA_UI[language] ?? 'en');
   }
 
+  // 🗄️ CACHÉ DE CATÁLOGOS EN localStorage
+  //
+  // Builder y Skill Forge piden los mismos catálogos (armor, weapons, armor/sets, skills) y,
+  // al ser páginas que Angular destruye/recrea en cada navegación, cada visita repetía la
+  // llamada a la API aunque ya tuviéramos los datos. Guardamos la respuesta en `localStorage`
+  // (una entrada por endpoint + idioma) para que, mientras el catálogo siga ahí, ni siquiera
+  // haga falta pedirlo de nuevo al navegar por la web ni al recargar la página. Un `Map` en
+  // memoria evita además volver a leer/parsear `localStorage` en cada suscripción dentro de
+  // la misma sesión.
+  private static readonly PREFIJO_CACHE = 'mhwb:cache';
+  private readonly cacheEnMemoria = new Map<string, Observable<unknown>>();
+
   // 💡 Catálogo completo de habilidades, incluye la descripción de cada nivel (ranks)
   getSkills(locale: ApiLocale = this.locale()): Observable<SkillDetail[]> {
-    return this.http.get<SkillDetail[]>(`${this.apiRoot}/${locale}/skills`).pipe(
-      catchError(error => this.manejarError('skills', error))
+    return this.cachearEnLocalStorage('skills', locale, () =>
+      this.http.get<SkillDetail[]>(`${this.apiRoot}/${locale}/skills`)
     );
   }
 
   // 💡 Nuevo método: Trae todo el catálogo de armaduras indexado por la API
   getArmor(locale: ApiLocale = this.locale()): Observable<ArmorPiece[]> {
-    return this.http.get<ArmorPiece[]>(`${this.apiRoot}/${locale}/armor`).pipe(
-      catchError(error => this.manejarError('armor', error))
+    return this.cachearEnLocalStorage('armor', locale, () =>
+      this.http.get<ArmorPiece[]>(`${this.apiRoot}/${locale}/armor`)
     );
   }
 
   // 🎖️ Trae los conjuntos de armadura con sus bonificaciones de set (bonus.ranks)
   getArmorSets(locale: ApiLocale = this.locale()): Observable<ArmorSet[]> {
-    return this.http.get<ArmorSet[]>(`${this.apiRoot}/${locale}/armor/sets`).pipe(
-      catchError(error => this.manejarError('armor/sets', error))
+    return this.cachearEnLocalStorage('armor-sets', locale, () =>
+      this.http.get<ArmorSet[]>(`${this.apiRoot}/${locale}/armor/sets`)
     );
   }
 
   // ⚔️ Nuevo método: Trae el catálogo de armas (Gran Espada, Katana, etc.)
   getWeapons(locale: ApiLocale = this.locale()): Observable<Weapon[]> {
-    return this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`).pipe(
-      catchError(error => this.manejarError('weapons', error))
+    return this.cachearEnLocalStorage('weapons', locale, () =>
+      this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`)
     );
+  }
+
+  // 🗄️ Punto único de caché: primero mira en memoria (evita releer localStorage dentro de la
+  // misma sesión), luego en localStorage (persiste entre navegaciones y recargas de página) y,
+  // solo si no hay nada, llama a la API. Si la llamada falla no se guarda nada, así que la
+  // próxima vez se vuelve a intentar en vez de quedar cacheado el error.
+  private cachearEnLocalStorage<T>(
+    nombreEndpoint: string,
+    locale: ApiLocale,
+    peticion: () => Observable<T>
+  ): Observable<T> {
+    const clave = `${WildsApiService.PREFIJO_CACHE}:${nombreEndpoint}:${locale}`;
+
+    const enMemoria = this.cacheEnMemoria.get(clave);
+    if (enMemoria) {
+      return enMemoria as Observable<T>;
+    }
+
+    const guardadoEnDisco = this.leerCache<T>(clave);
+    if (guardadoEnDisco) {
+      const observableGuardado$ = of(guardadoEnDisco);
+      this.cacheEnMemoria.set(clave, observableGuardado$);
+      return observableGuardado$;
+    }
+
+    const observable$ = peticion().pipe(
+      tap(datos => this.guardarCache(clave, datos)),
+      catchError(error => {
+        this.cacheEnMemoria.delete(clave);
+        return this.manejarError(`${nombreEndpoint} (${locale})`, error);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+
+    this.cacheEnMemoria.set(clave, observable$);
+    return observable$;
+  }
+
+  // Lee y parsea una entrada de localStorage. Si no existe, está corrupta o localStorage no
+  // está disponible (modo privado, cuota agotada...), se trata como si no hubiera caché.
+  private leerCache<T>(clave: string): T | null {
+    try {
+      const guardado = localStorage.getItem(clave);
+      return guardado ? (JSON.parse(guardado) as T) : null;
+    } catch (error) {
+      console.warn(`[WildsApiService] No se pudo leer la caché "${clave}" de localStorage:`, error);
+      return null;
+    }
+  }
+
+  // Guarda una entrada en localStorage. Si falla (cuota agotada, modo privado...) no se
+  // interrumpe el flujo: simplemente esa respuesta no queda cacheada para la próxima visita.
+  private guardarCache<T>(clave: string, datos: T): void {
+    try {
+      localStorage.setItem(clave, JSON.stringify(datos));
+    } catch (error) {
+      console.warn(`[WildsApiService] No se pudo guardar la caché "${clave}" en localStorage:`, error);
+    }
   }
 
   // 🚨 Normaliza cualquier fallo HTTP en un Error legible por la UI (los componentes

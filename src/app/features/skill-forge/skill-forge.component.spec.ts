@@ -40,6 +40,10 @@ describe('SkillForgeComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    // El servicio cachea los catálogos en localStorage: lo limpiamos antes de cada prueba
+    // para que una prueba anterior no "esconda" la petición HTTP que este test espera.
+    localStorage.clear();
+
     await TestBed.configureTestingModule({
       imports: [SkillForgeComponent],
       providers: [
