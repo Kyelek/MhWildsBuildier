@@ -32,17 +32,27 @@ describe('SelectorBuscableComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('muestra todos los elementos cuando no hay texto de búsqueda', () => {
-    expect(component.elementosFiltrados()).toEqual(elementos);
+  it('todos los elementos coinciden cuando no hay texto de búsqueda', () => {
+    expect(elementos.every(elemento => component.coincide(elemento))).toBeTrue();
   });
 
   it('filtra por nombre al escribir en el buscador (sin importar mayúsculas)', () => {
     component.onBusquedaInput('espada');
-    expect(component.elementosFiltrados()).toEqual([elementos[0], elementos[2]]);
+    expect(elementos.map(elemento => component.coincide(elemento))).toEqual([true, false, true]);
   });
 
   it('actualiza el valor seleccionado al elegir una opción', () => {
     component.onSelectionChange(elementos[1]);
     expect(component.valor()).toEqual(elementos[1]);
+  });
+
+  it('hayResultados es false cuando ningún elemento coincide con la búsqueda', () => {
+    component.onBusquedaInput('no existe ninguno así');
+    expect(component.hayResultados()).toBeFalse();
+  });
+
+  it('hayResultados es true mientras al menos un elemento coincida', () => {
+    component.onBusquedaInput('espada');
+    expect(component.hayResultados()).toBeTrue();
   });
 });

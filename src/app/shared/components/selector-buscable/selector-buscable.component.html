@@ -1,41 +1,45 @@
 <mat-form-field appearance="outline">
   <mat-label>{{ etiqueta() }}</mat-label>
-  <mat-select [value]="valor()" (selectionChange)="onSelectionChange($event.value)">
+  <input
+    #campoBusqueda
+    matInput
+    type="text"
+    autocomplete="off"
+    [placeholder]="textoBuscador()"
+    [matAutocomplete]="panelOpciones"
+    (input)="onBusquedaInput($any($event.target).value)"
+    (focus)="onFocus(campoBusqueda)"
+    (click)="onFocus(campoBusqueda)">
+  <span class="campo-flecha" matSuffix>▾</span>
 
-    <div class="select-search-box">
-      <input
-        type="text"
-        [placeholder]="textoBuscador()"
-        (input)="onBusquedaInput($any($event.target).value)"
-        (keydown)="$event.stopPropagation()">
-    </div>
-
+  <mat-autocomplete
+    #panelOpciones="matAutocomplete"
+    (optionSelected)="onSelectionChange($event.option.value)"
+    (closed)="onPanelCerrado()">
     @if (permitirVacio()) {
       <mat-option [value]="null">{{ etiquetaVacio() }}</mat-option>
     }
 
-    @if (elementosFiltrados().length === 0) {
-      <mat-option disabled>{{ textoVacio() }}</mat-option>
-    } @else {
-      @for (grupo of grupos(); track grupo.etiqueta) {
-        @if (grupo.etiqueta) {
-          <mat-optgroup [label]="grupo.etiqueta">
-            @for (elemento of grupo.elementos; track elemento.id) {
-              <mat-option [value]="elemento">
-                <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: elemento }" />
-              </mat-option>
-            }
-          </mat-optgroup>
-        } @else {
+    <mat-option disabled [hidden]="hayResultados()">{{ textoVacio() }}</mat-option>
+
+    @for (grupo of grupos(); track grupo.etiqueta) {
+      @if (grupo.etiqueta) {
+        <mat-optgroup [label]="grupo.etiqueta" [hidden]="!grupoTieneCoincidencias(grupo)">
           @for (elemento of grupo.elementos; track elemento.id) {
-            <mat-option [value]="elemento">
+            <mat-option [value]="elemento" [hidden]="!coincide(elemento)">
               <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: elemento }" />
             </mat-option>
           }
+        </mat-optgroup>
+      } @else {
+        @for (elemento of grupo.elementos; track elemento.id) {
+          <mat-option [value]="elemento" [hidden]="!coincide(elemento)">
+            <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: elemento }" />
+          </mat-option>
         }
       }
     }
-  </mat-select>
+  </mat-autocomplete>
 </mat-form-field>
 
 <ng-template #plantillaPorDefecto let-elemento>{{ elemento.name }}</ng-template>
