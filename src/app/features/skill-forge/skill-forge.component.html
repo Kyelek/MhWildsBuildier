@@ -11,6 +11,13 @@
         </div>
       }
 
+      @if (error() && !cargando()) {
+        <div class="error-box">
+          <span>⚠️ {{ 'common.errors.catalogLoad' | translate }}</span>
+          <button class="btn-retry" (click)="reintentar()">{{ 'common.errors.retry' | translate }}</button>
+        </div>
+      }
+
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>{{ 'armorSlots.head.label' | translate }}</mat-label>
         <mat-select [value]="selectedHead()" (selectionChange)="selectedHead.set($event.value)">

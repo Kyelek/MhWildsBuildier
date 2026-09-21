@@ -1,4 +1,10 @@
 {
+  "common": {
+    "errors": {
+      "catalogLoad": "Couldn't load data from the Monster Hunter Wilds API. Check your connection and try again.",
+      "retry": "Retry"
+    }
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",

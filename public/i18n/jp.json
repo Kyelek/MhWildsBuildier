@@ -1,4 +1,10 @@
 {
+  "common": {
+    "errors": {
+      "catalogLoad": "Monster Hunter Wilds APIからデータを読み込めませんでした。接続を確認して再試行してください。",
+      "retry": "再試行"
+    }
+  },
   "nav": {
     "home": "ホーム",
     "constructor": "ビルダー",

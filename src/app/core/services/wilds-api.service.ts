@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
 import { SkillDetail, ArmorPiece, ArmorSet, Weapon } from '../models/wilds.models';
 import { environment } from '../../../environments/environment';
 
@@ -26,22 +26,37 @@ export class WildsApiService {
 
   // 💡 Catálogo completo de habilidades, incluye la descripción de cada nivel (ranks)
   getSkills(locale: ApiLocale = this.locale()): Observable<SkillDetail[]> {
-    return this.http.get<SkillDetail[]>(`${this.apiRoot}/${locale}/skills`);
+    return this.http.get<SkillDetail[]>(`${this.apiRoot}/${locale}/skills`).pipe(
+      catchError(error => this.manejarError('skills', error))
+    );
   }
 
   // 💡 Nuevo método: Trae todo el catálogo de armaduras indexado por la API
   getArmor(locale: ApiLocale = this.locale()): Observable<ArmorPiece[]> {
-    return this.http.get<ArmorPiece[]>(`${this.apiRoot}/${locale}/armor`);
+    return this.http.get<ArmorPiece[]>(`${this.apiRoot}/${locale}/armor`).pipe(
+      catchError(error => this.manejarError('armor', error))
+    );
   }
 
   // 🎖️ Trae los conjuntos de armadura con sus bonificaciones de set (bonus.ranks)
   getArmorSets(locale: ApiLocale = this.locale()): Observable<ArmorSet[]> {
-    return this.http.get<ArmorSet[]>(`${this.apiRoot}/${locale}/armor/sets`);
+    return this.http.get<ArmorSet[]>(`${this.apiRoot}/${locale}/armor/sets`).pipe(
+      catchError(error => this.manejarError('armor/sets', error))
+    );
   }
 
   // ⚔️ Nuevo método: Trae el catálogo de armas (Gran Espada, Katana, etc.)
   getWeapons(locale: ApiLocale = this.locale()): Observable<Weapon[]> {
-    return this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`);
+    return this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`).pipe(
+      catchError(error => this.manejarError('weapons', error))
+    );
   }
 
+  // 🚨 Normaliza cualquier fallo HTTP en un Error legible por la UI (los componentes
+  // no necesitan saber interpretar un HttpErrorResponse), dejando constancia en
+  // consola del endpoint y el error original para depurar.
+  private manejarError(endpoint: string, error: HttpErrorResponse): Observable<never> {
+    console.error(`[WildsApiService] Fallo al pedir "${endpoint}":`, error);
+    return throwError(() => new Error(`No se pudo cargar "${endpoint}" desde la API de Monster Hunter Wilds.`));
+  }
 }

@@ -91,6 +91,18 @@ export class SkillForgeComponent {
     this.armorResource.isLoading() || this.armorSetsResource.isLoading() || this.skillsResource.isLoading()
   );
 
+  // 🚨 Si cualquiera de los tres catálogos falló al cargar, mostramos el primer error
+  readonly error = computed(() =>
+    this.armorResource.error() ?? this.armorSetsResource.error() ?? this.skillsResource.error()
+  );
+
+  // Vuelve a pedir los tres catálogos (usado por el botón "Reintentar")
+  reintentar(): void {
+    this.armorResource.reload();
+    this.armorSetsResource.reload();
+    this.skillsResource.reload();
+  }
+
   // 2. Estado de las piezas seleccionadas para construir el conjunto personalizado
   readonly selectedHead = signal<ArmorPiece | null>(null);
   readonly selectedChest = signal<ArmorPiece | null>(null);

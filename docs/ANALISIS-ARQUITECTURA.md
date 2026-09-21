@@ -13,7 +13,7 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 |---|--------|--------|
 | 1 | Unificar el modelo `Weapon` | ✅ Hecho |
 | 2 | Crear `environments/` | ✅ Hecho |
-| 3 | Manejo de errores HTTP en `WildsApiService` | ⏳ Pendiente |
+| 3 | Manejo de errores HTTP en `WildsApiService` | ✅ Hecho |
 | 4 | Componente compartido de selección con buscador | ⏳ Pendiente |
 | 5 | Activar el Router real | ⏳ Pendiente |
 | 6 | Tests de la lógica de cálculo | ⏳ Pendiente |
@@ -137,12 +137,24 @@ CDK monta el panel fuera del DOM del componente) y el mismo filtrado por
 pero esa carpeta **no existe todavía**: cada nueva pantalla que necesite "elegir
 un ítem de un catálogo con buscador" va a copiar y pegar este patrón de nuevo.
 
-### 3.6 Sin manejo de errores HTTP
+### 3.6 ✅ [Resuelto] No había manejo de errores HTTP
 
-`WildsApiService` no aplica `catchError` ni expone un estado de error. Si
-`wilds.mhdb.io` cae o devuelve un 5xx, el `rxResource` queda en estado de error
-internamente pero ningún componente lo lee ni lo muestra — el usuario solo ve que
-el spinner (`cargando`) no llega a completarse, sin ningún mensaje.
+`WildsApiService` no aplicaba `catchError` ni exponía un estado de error. Si
+`wilds.mhdb.io` caía o devolvía un 5xx, el `rxResource` quedaba en estado de error
+internamente pero ningún componente lo leía ni lo mostraba — el usuario solo veía
+que el spinner (`cargando`) no llegaba a completarse, sin ningún mensaje.
+
+**Solución aplicada:** los 4 métodos de `WildsApiService` aplican
+`catchError` → `manejarError(endpoint, error)`, que registra el fallo en consola
+(con el endpoint y el `HttpErrorResponse` original para depurar) y relanza un
+`Error` legible, en vez de un `HttpErrorResponse` crudo que la UI tendría que
+saber interpretar. `BuilderComponent` y `SkillForgeComponent` exponen un
+`computed error` (el primer error entre sus `rxResource`) y un método
+`reintentar()` que llama a `.reload()` en cada catálogo. Las plantillas muestran
+un aviso (`common.errors.catalogLoad`, ya traducido a ES/EN/JP) con un botón
+"Reintentar" cuando hay error y no está cargando. Verificado en navegador
+bloqueando de verdad las peticiones a `wilds.mhdb.io` (ver captura del aviso) y
+comprobando que "Reintentar" recupera los datos.
 
 ### 3.7 Tests solo boilerplate
 
@@ -203,9 +215,8 @@ dónde empezar — ninguno de estos cambios se ha aplicado todavía:
 2. ✅ **Crear `environments/environment.ts`**: `apiRoot` ahora vive en
    `src/environments/environment.ts` / `environment.production.ts`, intercambiados
    por `fileReplacements` en `angular.json` según la configuración de build.
-3. **Añadir manejo de errores en `WildsApiService`** (`catchError`) y exponer un
-   estado de error que `BuilderComponent`/`SkillForgeComponent` puedan mostrar en
-   vez de un spinner infinito.
+3. ✅ **Añadir manejo de errores en `WildsApiService`** (`catchError`): estado de
+   error expuesto y mostrado en ambos features, con botón de reintentar.
 4. **Extraer un componente compartido** (`shared/components/selector-buscable/` o
    similar) que encapsule el `mat-select` + caja de búsqueda + filtrado, y
    sustituir la lógica duplicada de *builder* y *skill-forge* por él.

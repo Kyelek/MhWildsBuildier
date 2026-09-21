@@ -48,6 +48,17 @@ export class BuilderComponent {
     this.armorResource.isLoading() || this.weaponsResource.isLoading()
   );
 
+  // 🚨 Si cualquiera de los dos catálogos falló al cargar, mostramos el primer error
+  readonly error = computed(() =>
+    this.armorResource.error() ?? this.weaponsResource.error()
+  );
+
+  // Vuelve a pedir ambos catálogos (usado por el botón "Reintentar")
+  reintentar(): void {
+    this.armorResource.reload();
+    this.weaponsResource.reload();
+  }
+
   // 2. Estado del equipamiento seleccionado
   readonly selectedWeapon = signal<Weapon | null>(null);
   readonly selectedHead = signal<ArmorPiece | null>(null);
