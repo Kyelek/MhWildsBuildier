@@ -1,8 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideRouter } from '@angular/router';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { AppComponent } from './app.component';
+import { routes } from './app.routes';
+import { WildsApiService } from './core/services/wilds-api.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -11,6 +14,7 @@ describe('AppComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter(routes),
         provideTranslateService({ lang: 'en', fallbackLang: 'en' })
       ]
     }).compileComponents();
@@ -22,9 +26,14 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should start on the "home" screen', () => {
+  it('pone el idioma de la app y de la API en español al arrancar', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.currentScreen()).toEqual('home');
+    fixture.detectChanges();
+
+    const translateService = TestBed.inject(TranslateService);
+    const wildsApi = TestBed.inject(WildsApiService);
+
+    expect(translateService.getCurrentLang()).toEqual('es');
+    expect(wildsApi.locale()).toEqual('es');
   });
 });

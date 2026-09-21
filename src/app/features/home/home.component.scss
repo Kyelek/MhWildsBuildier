@@ -1,0 +1,107 @@
+$color-gold: #c5a059;
+$font-main: 'Montserrat', sans-serif;
+
+// 🏡 ESTILOS DE LA PÁGINA DE INICIO (HOME)
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+  padding: 40px 0;
+
+  .hero-section {
+    text-align: center;
+    padding: 60px 20px;
+    background: radial-gradient(circle, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: #ffffff;
+
+      .text-gold { color: $color-gold; }
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 700px;
+      margin: 0 auto 40px auto;
+      line-height: 1.6;
+    }
+
+    .btn-cta {
+      display: inline-block;
+      background: transparent;
+      border: 2px solid $color-gold;
+      color: $color-gold;
+      padding: 14px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: $font-main;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(197, 160, 89, 0.1);
+
+      &:hover {
+        background: $color-gold;
+        color: #14120f;
+        box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  // REJILLA DE CARACTERÍSTICAS
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(197, 160, 89, 0.1);
+      padding: 30px;
+      border-radius: 4px;
+      text-align: center;
+      transition: all 0.3s ease;
+      user-select: none;
+      cursor: pointer;
+
+      &:hover {
+        border-color: rgba(197, 160, 89, 0.3);
+        background: rgba(197, 160, 89, 0.02);
+        transform: translateY(-4px);
+      }
+
+      &:active {
+        transition: all 0.1s ease;
+        background: rgba(197, 160, 89, 0.1);
+      }
+
+      .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        color: #ffffff;
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0;
+      }
+    }
+  }
+}

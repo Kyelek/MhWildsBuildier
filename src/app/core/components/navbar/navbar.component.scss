@@ -1,0 +1,84 @@
+$color-gold: #c5a059;
+$font-main: 'Montserrat', sans-serif;
+
+// 🌐 NAVBAR ESTILO GLASSMORPHISM
+.main-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  box-sizing: border-box;
+  background: rgba(20, 18, 15, 0.75); // Translúcido oscuro
+  backdrop-filter: blur(12px);         // Desenfoque de fondo
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+  z-index: 1000;
+  font-family: $font-main;
+
+  .nav-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+
+    .text-gold {
+      color: $color-gold;
+    }
+  }
+
+  .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+
+    // Los enlaces de navegación son <a routerLink> y los de idioma son <button>:
+    // comparten la misma apariencia y estado ".active" (marcado por routerLinkActive).
+    a, button {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-family: $font-main;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+      position: relative;
+
+      &:hover {
+        color: #ffffff;
+      }
+
+      &.active {
+        color: $color-gold;
+        font-weight: 600;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 16px;
+          right: 16px;
+          height: 2px;
+          background: $color-gold;
+          box-shadow: 0 0 8px $color-gold;
+        }
+      }
+    }
+  }
+}

@@ -24,6 +24,21 @@ export class WildsApiService {
     this.locale.set(locale);
   }
 
+  // 🌐 El selector de idioma de la UI usa "jp" (nombre del fichero de traducción),
+  // pero la API identifica el japonés como "ja". Este mapa traduce el idioma de la
+  // interfaz al locale real que hay que pedirle a la API.
+  private static readonly LOCALE_POR_IDIOMA_UI: Record<string, ApiLocale> = {
+    es: 'es',
+    en: 'en',
+    jp: 'ja'
+  };
+
+  // Punto único que usa cualquier componente que cambie el idioma de la interfaz
+  // (hoy el Navbar) para mantener sincronizado el idioma que se le pide a la API.
+  setLocaleFromUiLanguage(language: string): void {
+    this.setLocale(WildsApiService.LOCALE_POR_IDIOMA_UI[language] ?? 'en');
+  }
+
   // 💡 Catálogo completo de habilidades, incluye la descripción de cada nivel (ranks)
   getSkills(locale: ApiLocale = this.locale()): Observable<SkillDetail[]> {
     return this.http.get<SkillDetail[]>(`${this.apiRoot}/${locale}/skills`).pipe(

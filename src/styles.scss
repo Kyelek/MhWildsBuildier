@@ -25,6 +25,23 @@ body {
   background-repeat: no-repeat;
 }
 
+// 🎬 ANIMACIÓN SUTIL DE ENTRADA, global para que cualquier pantalla ruteada
+// (Home, Constructor, Forja de Habilidades...) pueda aplicarla a su contenedor raíz.
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // Estilos por defecto para títulos con la fuente de MH
 h1, h2, h3, h4 {
   font-family: $font-titles;

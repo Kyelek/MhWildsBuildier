@@ -15,7 +15,7 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 | 2 | Crear `environments/` | ✅ Hecho |
 | 3 | Manejo de errores HTTP en `WildsApiService` | ✅ Hecho |
 | 4 | Componente compartido de selección con buscador | ✅ Hecho |
-| 5 | Activar el Router real | ⏳ Pendiente |
+| 5 | Activar el Router real | ✅ Hecho |
 | 6 | Tests de la lógica de cálculo | ⏳ Pendiente |
 | 7 | Convención única de idioma en nombres | ⏳ Pendiente |
 
@@ -51,24 +51,24 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 
 ```
 src/app/
-├── app.component.ts/html/scss     # Shell de la app: navbar + switch de "pantallas"
+├── app.component.ts/html/scss     # Shell de la app: <app-navbar /> + <router-outlet />
 ├── app.config.ts                  # Providers globales (router, http, i18n, animations)
-├── app.routes.ts                  # Rutas declaradas... pero no usadas realmente (ver §3.1)
+├── app.routes.ts                  # 3 rutas reales, las 3 con loadComponent perezoso
 ├── core/
-│   ├── components/navbar/         # Componente scaffold, generado y NUNCA usado
+│   ├── components/navbar/         # Navbar real: routerLink/routerLinkActive + idioma
 │   ├── models/wilds.models.ts     # Modelos de dominio: ArmorPiece, ArmorSet, Weapon...
 │   └── services/wilds-api.service.ts
 ├── shared/
 │   └── components/selector-buscable/  # mat-select + buscador + filtrado, reutilizable
 └── features/
+    ├── home/                      # Pantalla de inicio (antes vivía dentro de AppComponent)
     ├── builder/                   # Constructor de equipo (arma + 5 piezas de armadura)
     └── skill-forge/               # Calculadora de habilidades acumuladas + bonif. de set
 ```
 
 Es la separación `core` / `features` recomendada en Angular y coincide con lo que
-pide `CLAUDE.md`. Con solo dos *features*, hoy es simple y legible. El problema no
-es la carpeta en sí, sino varias piezas que quedaron a medio montar dentro de ella
-(detalladas abajo).
+pide `CLAUDE.md`. Todas las inconsistencias detectadas en la revisión inicial
+(§3) ya están resueltas — ver el estado de implementación en §0.
 
 ## 3. Inconsistencias detectadas
 
@@ -76,28 +76,49 @@ Esto no es una lista de "bugs" visibles para el usuario final — la app funcion
 sino de deuda estructural que, si el proyecto crece (más pantallas, más catálogos,
 guardado de builds...), se va a notar cada vez más.
 
-### 3.1 El Router está configurado pero no se usa
+### 3.1 ✅ [Resuelto] El Router estaba configurado pero no se usaba
 
-`app.routes.ts` define una ruta lazy (`loadComponent` hacia `BuilderComponent`) y
-`app.config.ts` llama a `provideRouter(routes)`. Pero `app.component.html` **no
-tiene `<router-outlet>`**: la navegación real es un `@switch (currentScreen())`
-sobre un `signal` en `AppComponent`, que importa `BuilderComponent` y
-`SkillForgeComponent` **de forma directa y eager** (no perezosa).
+`app.routes.ts` definía una ruta lazy (`loadComponent` hacia `BuilderComponent`) y
+`app.config.ts` llamaba a `provideRouter(routes)`. Pero `app.component.html` no
+tenía `<router-outlet>`: la navegación real era un `@switch (currentScreen())`
+sobre un `signal` en `AppComponent`, que importaba `BuilderComponent` y
+`SkillForgeComponent` de forma directa y *eager* (no perezosa).
 
-Consecuencia: el *lazy loading* declarado en las rutas no ocurre nunca (ambos
-componentes se cargan siempre, estén o no en pantalla), no hay URLs navegables
-(`/builder`, `/skill-forge`), no funciona el botón "atrás" del navegador, y no se
-puede compartir un enlace directo a una pantalla. Son dos sistemas de navegación
-en paralelo, y solo uno de los dos hace algo.
+Consecuencia: el *lazy loading* declarado en las rutas no ocurría nunca (ambos
+componentes se cargaban siempre, estuvieran o no en pantalla), no había URLs
+navegables (`/builder`, `/skill-forge`), no funcionaba el botón "atrás" del
+navegador, y no se podía compartir un enlace directo a una pantalla.
 
-### 3.2 `NavbarComponent` es un componente fantasma
+**Solución aplicada:** `app.routes.ts` ahora tiene tres rutas reales, las tres
+con `loadComponent` perezoso: `''` → `HomeComponent` (nuevo, ver §3.2), `builder`
+→ `BuilderComponent`, `skill-forge` → `SkillForgeComponent`, y `**` redirige a
+`''`. `AppComponent` quedó reducido a `<app-navbar />` + `<router-outlet />`, sin
+ningún signal de navegación ni import directo de los *features*.
 
-`core/components/navbar/navbar.component.html` todavía tiene el contenido por
-defecto de `ng generate component` (`<p>navbar works!</p>`) y no se importa en
-ningún sitio. El navbar real (logo, enlaces, selector de idioma) está escrito
-directamente dentro de `app.component.html`. Es código muerto que puede confundir
-a quien llegue nuevo al proyecto, y además una oportunidad perdida: ese navbar
-"real" debería vivir precisamente ahí.
+Efecto medible: el bundle inicial de desarrollo bajó de ~2.45 MB a ~1.51 MB, y en
+producción de 534.90 kB (con **aviso de presupuesto superado**) a 296.19 kB —
+`builder-component`, `skill-forge-component` y `home-component` son ahora chunks
+lazy reales, cada uno con solo los módulos de Angular Material que usa.
+Verificado en navegador: la URL cambia al navegar (`/builder`, `/skill-forge`),
+cargar directamente `http://localhost:4300/skill-forge` funciona, y el botón
+"atrás" del navegador vuelve a la pantalla anterior.
+
+### 3.2 ✅ [Resuelto] `NavbarComponent` era un componente fantasma
+
+`core/components/navbar/navbar.component.html` todavía tenía el contenido por
+defecto de `ng generate component` (`<p>navbar works!</p>`) y no se importaba en
+ningún sitio. El navbar real (logo, enlaces, selector de idioma) estaba escrito
+directamente dentro de `app.component.html`.
+
+**Solución aplicada:** el navbar real ahora vive en
+`core/components/navbar/navbar.component.ts`, con lógica propia: los enlaces de
+pantalla son `routerLink` + `routerLinkActive` (en vez de comparar un signal
+`currentScreen` a mano) y el cambio de idioma (`useLanguage`) se movió aquí desde
+`AppComponent`, ya que es el propio Navbar quien dispara esa acción. El mapeo
+"idioma de la UI → locale de la API" (`jp` de la interfaz es `ja` para
+`wilds.mhdb.io`) se centralizó como método público en `WildsApiService`
+(`setLocaleFromUiLanguage`) en vez de vivir duplicado como constante suelta en
+cada componente que lo necesite.
 
 ### 3.3 ✅ [Resuelto] El modelo `Weapon` estaba duplicado (y uno de los dos usaba `any`)
 
@@ -245,11 +266,10 @@ dónde empezar — ninguno de estos cambios se ha aplicado todavía:
    encapsula el `mat-select` + caja de búsqueda + filtrado (+ agrupado opcional
    por `mat-optgroup` y opción "vacío" opcional), sustituyendo toda la lógica
    duplicada de *builder* y *skill-forge*.
-5. **Activar el Router de verdad**: mover el navbar real a
-   `core/components/navbar` (o borrarlo si se prefiere mantener el `@switch`,
-   pero entonces borrando también `app.routes.ts` y el `provideRouter` para no
-   dejar código muerto), añadir `<router-outlet>` y rutas reales para
-   `/builder` y `/skill-forge`, recuperando lazy loading real y URLs navegables.
+5. ✅ **Activar el Router de verdad**: `AppComponent` es ahora
+   `<app-navbar /> + <router-outlet />`, con tres rutas lazy reales (`''`,
+   `builder`, `skill-forge`) y el navbar real movido a `core/components/navbar`.
+   Efecto colateral medido: bundle inicial de producción 534.90 kB → 296.19 kB.
 6. **Tests de la lógica de cálculo**: cubrir `totalDefense`/`totalResistances` en
    el *builder* y, sobre todo, `habilidadesActivas`/`bonificacionesSet` en
    *skill-forge* (incluyendo el caso de dos o más sets activos a la vez).
