@@ -3,20 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-
-// Cualquier catálogo consumido por este selector (armas, piezas de armadura...)
-// necesita al menos un id estable y un "name" para poder buscarse/mostrarse: ese
-// campo se llama igual que en el JSON de la API (ArmorPiece.name, Weapon.name),
-// así que se deja en inglés a propósito en vez de traducirlo a "nombre".
-export interface ItemSeleccionable {
-  id: number;
-  name: string;
-}
-
-interface GrupoDeOpciones<T> {
-  etiqueta: string | null;
-  elementos: T[];
-}
+import { GrupoDeOpciones, ItemSeleccionable } from '../../models/selector-buscable.models';
 
 // 🎯 Selector genérico con buscador integrado, pensado para sustituir el patrón
 // repetido "elegir un elemento de un catálogo con texto" que existía por separado
