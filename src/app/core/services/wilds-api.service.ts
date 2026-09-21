@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SkillDetail, ArmorPiece, ArmorSet, Weapon } from '../models/wilds.models';
+import { environment } from '../../../environments/environment';
 
 // 🌐 Idiomas que realmente sirve https://wilds.mhdb.io con contenido traducido
 // (probado a mano: "ja" devuelve nombres/descripciones en japonés; "jp" existe pero
@@ -13,7 +14,7 @@ export type ApiLocale = 'es' | 'en' | 'ja';
 })
 export class WildsApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiRoot = 'https://wilds.mhdb.io';
+  private readonly apiRoot = environment.apiRoot;
 
   // 🌐 Idioma actual de la API. Los componentes que consuman datos deben incluirlo
   // en el `request` de su `rxResource` para que las peticiones se repitan al cambiarlo.

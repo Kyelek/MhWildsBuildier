@@ -12,7 +12,7 @@ cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
 | # | Mejora | Estado |
 |---|--------|--------|
 | 1 | Unificar el modelo `Weapon` | ✅ Hecho |
-| 2 | Crear `environments/` | ⏳ Pendiente |
+| 2 | Crear `environments/` | ✅ Hecho |
 | 3 | Manejo de errores HTTP en `WildsApiService` | ⏳ Pendiente |
 | 4 | Componente compartido de selección con buscador | ⏳ Pendiente |
 | 5 | Activar el Router real | ⏳ Pendiente |
@@ -114,12 +114,18 @@ tipó `slots: number[]` (igual que en `ArmorPiece`, en vez de `any[]`) y se
 quitaron los tres `as unknown as Weapon[]` que existían para "engañar" al
 compilador entre ambos tipos.
 
-### 3.4 No hay `environments/`
+### 3.4 ✅ [Resuelto] No había `environments/`
 
-La URL base de la API (`https://wilds.mhdb.io`) está *hardcodeada* dentro de
-`WildsApiService`. Sin `environment.ts` / `environment.production.ts` no hay
+La URL base de la API (`https://wilds.mhdb.io`) estaba *hardcodeada* dentro de
+`WildsApiService`. Sin `environment.ts` / `environment.production.ts` no había
 forma limpia de apuntar a un mock, a un proxy propio, o a una versión de
 pre-producción de la API sin tocar código fuente.
+
+**Solución aplicada:** se creó `src/environments/environment.ts` (desarrollo) y
+`environment.production.ts`, ambos con `{ production, apiRoot }`. `angular.json`
+sustituye el fichero de desarrollo por el de producción vía `fileReplacements`
+en la configuración `production` del builder. `WildsApiService.apiRoot` ahora
+lee `environment.apiRoot` en vez de tener la URL escrita en el propio servicio.
 
 ### 3.5 UI repetida sin componente compartido
 
@@ -194,8 +200,9 @@ dónde empezar — ninguno de estos cambios se ha aplicado todavía:
    `slots: number[]` bien tipado y sin los `as unknown as Weapon[]`. De paso se
    reparó el arnés de tests (ver §0) para poder verificar este y los siguientes
    cambios con `ng build` + `ng test`.
-2. **Crear `environments/environment.ts`** y mover ahí `apiRoot`, para poder
-   apuntar la app a otro backend sin tocar `WildsApiService`.
+2. ✅ **Crear `environments/environment.ts`**: `apiRoot` ahora vive en
+   `src/environments/environment.ts` / `environment.production.ts`, intercambiados
+   por `fileReplacements` en `angular.json` según la configuración de build.
 3. **Añadir manejo de errores en `WildsApiService`** (`catchError`) y exponer un
    estado de error que `BuilderComponent`/`SkillForgeComponent` puedan mostrar en
    vez de un spinner infinito.
