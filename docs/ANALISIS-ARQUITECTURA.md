@@ -4,6 +4,32 @@
 > Objetivo: dejar constancia de cómo está montado el proyecto hoy, qué tan preparado
 > está para crecer, y qué cambios concretos propongo para reforzar esa escalabilidad.
 
+## 0. Estado de implementación
+
+Cada mejora de la §5 se aplica en un commit independiente, verificando antes de
+cada uno que el proyecto compila (`ng build`) y que los tests pasan (`ng test`).
+
+| # | Mejora | Estado |
+|---|--------|--------|
+| 1 | Unificar el modelo `Weapon` | ✅ Hecho |
+| 2 | Crear `environments/` | ⏳ Pendiente |
+| 3 | Manejo de errores HTTP en `WildsApiService` | ⏳ Pendiente |
+| 4 | Componente compartido de selección con buscador | ⏳ Pendiente |
+| 5 | Activar el Router real | ⏳ Pendiente |
+| 6 | Tests de la lógica de cálculo | ⏳ Pendiente |
+| 7 | Convención única de idioma en nombres | ⏳ Pendiente |
+
+> 🔧 **Hallazgo adicional durante la verificación del punto 1**: el arnés de tests
+> (`*.spec.ts`) no compilaba ni corría — `app.component.spec.ts` era el boilerplate
+> de `ng new` sin adaptar (referenciaba una propiedad `title` que ya no existe) y
+> ninguno de los `TestBed.configureTestingModule` de `AppComponent`, `BuilderComponent`
+> ni `SkillForgeComponent` proveía `HttpClient`/`TranslateService`, con lo que
+> fallaban con `NullInjectorError` en cuanto se ejecutaban de verdad (antes de este
+> cambio nunca se habían corrido en CI ni a mano). Se ha corregido como parte del
+> punto 1, ya que sin una base de tests que arranque no hay forma fiable de verificar
+> ningún cambio posterior. La cobertura real de la lógica de negocio se añade en el
+> punto 6.
+
 ## 1. Resumen del stack
 
 - **Angular 19**, componentes *standalone* (sin `NgModule`), con
@@ -71,16 +97,22 @@ directamente dentro de `app.component.html`. Es código muerto que puede confund
 a quien llegue nuevo al proyecto, y además una oportunidad perdida: ese navbar
 "real" debería vivir precisamente ahí.
 
-### 3.3 El modelo `Weapon` está duplicado (y uno de los dos usa `any`)
+### 3.3 ✅ [Resuelto] El modelo `Weapon` estaba duplicado (y uno de los dos usaba `any`)
 
-Existe `Weapon` en `core/models/wilds.models.ts` (el modelo "oficial") y una
+Existía `Weapon` en `core/models/wilds.models.ts` (el modelo "oficial") y una
 **segunda copia**, casi idéntica, declarada dentro de
-`features/builder/builder.component.ts` — con la diferencia de que esta usa
-`slots: any[]`. Eso obliga a castear con `as unknown as Weapon[]` en varios
+`features/builder/builder.component.ts` — con la diferencia de que esta usaba
+`slots: any[]`. Eso obligaba a castear con `as unknown as Weapon[]` en varios
 puntos del componente para reconciliar ambos tipos. `CLAUDE.md` pide TypeScript
 estricto sin `any` y modelos centralizados en `core/models` — este archivo
-incumple ambas reglas al mismo tiempo, y es fácil que los dos tipos diverjan sin
-que nadie se dé cuenta.
+incumplía ambas reglas a la vez, y era fácil que los dos tipos divergieran sin
+que nadie se diera cuenta.
+
+**Solución aplicada:** se eliminó la interfaz `Weapon` duplicada de
+`builder.component.ts` (ahora importa la de `core/models/wilds.models.ts`), se
+tipó `slots: number[]` (igual que en `ArmorPiece`, en vez de `any[]`) y se
+quitaron los tres `as unknown as Weapon[]` que existían para "engañar" al
+compilador entre ambos tipos.
 
 ### 3.4 No hay `environments/`
 
@@ -157,10 +189,11 @@ gente tocando código, conviene fijar un único criterio.
 Propuesta ordenada por impacto/riesgo (de menor a mayor), para decidir juntos por
 dónde empezar — ninguno de estos cambios se ha aplicado todavía:
 
-1. **Unificar el modelo `Weapon`**: eliminar la copia duplicada en
-   `builder.component.ts`, usar solo `core/models/wilds.models.ts`, tipar bien
-   `slots` (según lo que devuelva realmente la API) y quitar los
-   `as unknown as Weapon[]`.
+1. ✅ **Unificar el modelo `Weapon`**: eliminada la copia duplicada en
+   `builder.component.ts`, ahora usa solo `core/models/wilds.models.ts`, con
+   `slots: number[]` bien tipado y sin los `as unknown as Weapon[]`. De paso se
+   reparó el arnés de tests (ver §0) para poder verificar este y los siguientes
+   cambios con `ng build` + `ng test`.
 2. **Crear `environments/environment.ts`** y mover ahí `apiRoot`, para poder
    apuntar la app a otro backend sin tocar `WildsApiService`.
 3. **Añadir manejo de errores en `WildsApiService`** (`catchError`) y exponer un

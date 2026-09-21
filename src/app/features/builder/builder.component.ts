@@ -3,21 +3,7 @@ import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
-import { ArmorPiece } from '../../core/models/wilds.models';
-
-// Interfaz adaptada al JSON de tu API
-export interface Weapon {
-  id: number;
-  name: string;
-  kind: string; 
-  rarity: number;
-  affinity: number;   
-  damage: {           
-    raw: number;
-    display: number;
-  };
-  slots: any[];
-}
+import { ArmorPiece, Weapon } from '../../core/models/wilds.models';
 
 // Importaciones Standalone de Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -89,7 +75,7 @@ export class BuilderComponent {
       this.selectedLegs.update(actual => this.buscarPorId(actual, armadura));
     }
 
-    const armas = this.weaponsResource.value() as unknown as Weapon[] | undefined;
+    const armas = this.weaponsResource.value();
     if (armas) {
       this.selectedWeapon.update(actual => this.buscarPorId(actual, armas));
     }
@@ -122,7 +108,7 @@ export class BuilderComponent {
 // 💡 Solo muestra tipos de armas que tengan al menos un resultado con el filtro actual
   readonly weaponTypes = computed(() => {
     const search = this.weaponSearch().toLowerCase();
-    const allWeapons = this.weaponsResource.value() as unknown as Weapon[] ?? [];
+    const allWeapons = this.weaponsResource.value() ?? [];
     
     // Filtramos los tipos que contienen armas cuyo nombre coincida con la búsqueda
     const activeTypes = allWeapons
@@ -195,7 +181,7 @@ export class BuilderComponent {
 
   // Filtra las armas según su categoría y el buscador de armas
   getWeaponsByType(type: string): Weapon[] {
-    const allWeapons = this.weaponsResource.value() as unknown as Weapon[] ?? [];
+    const allWeapons = this.weaponsResource.value() ?? [];
     const weaponsOfType = allWeapons.filter(w => w.kind === type);
     const search = this.weaponSearch();
 

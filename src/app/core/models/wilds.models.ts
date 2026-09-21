@@ -90,5 +90,5 @@ export interface Weapon {
     raw: number;
     display: number;
   };
-  slots: any[];
+  slots: number[]; // Niveles de hueco para decoraciones, igual que en ArmorPiece
 }
