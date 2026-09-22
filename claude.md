@@ -43,3 +43,11 @@
 - Code Inspections First: Inspect existing components, models, and services before creating new ones to maintain consistent naming and folder structure.
 - Explanations Before Edits: Provide a brief summary of planned architectural or file changes before making extensive code modifications.
 </agent_guidelines>
+
+<git_workflow>
+- Vivimos en `desarrollo`: es la rama base de la que sale todo el trabajo nuevo y a la que vuelve.
+- Para cualquier tarea nueva, crea una rama a partir de `desarrollo` (`git checkout -b <nombre-rama> desarrollo`). No trabajes con commits directamente en `desarrollo` salvo que el usuario pida explícitamente lo contrario para un cambio puntual.
+- Cuando el trabajo de esa rama funcione, fusiónala de vuelta en `desarrollo` y súbela a origin.
+- `master` es producción. Nunca fusiones ni subas nada a `master` sin que el usuario lo pruebe primero en `desarrollo` y dé la orden explícita de subirlo.
+- No dejes cabos sueltos: cuando una rama de feature quede fusionada, borra la rama local (y ofrece borrar la remota) y elimina cualquier worktree que se haya usado para ella.
+</git_workflow>
