@@ -12,11 +12,8 @@
         {{ "nav.home" | translate }}
       </a>
     </li>
-    <li>
-      <a routerLink="/builder" routerLinkActive="active">
-        {{ "nav.constructor" | translate }}
-      </a>
-    </li>
+    <!-- 🙈 Constructor oculto temporalmente al usuario: el componente y la ruta se mantienen
+         intactos para reutilizarlos más adelante, solo se retira el enlace del menú. -->
     <li>
       <a routerLink="/skill-forge" routerLinkActive="active">
         {{ "nav.skills-forge" | translate }}
