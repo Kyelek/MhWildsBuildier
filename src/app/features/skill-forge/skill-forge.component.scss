@@ -193,6 +193,65 @@
   .text-gold {
     color: #c5a059;
   }
+
+  // ==========================================
+  // 🗂️ PESTAÑAS ESTILO NAVEGADOR sobre "Habilidades del Conjunto" / "Estadísticas Totales".
+  // La pestaña activa "se funde" con la tarjeta de debajo (mismo fondo, sin borde inferior,
+  // sin radio arriba); las inactivas quedan más apagadas y ligeramente hundidas, como en
+  // las pestañas de un navegador.
+  // ==========================================
+  .chrome-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 4px;
+  }
+
+  .chrome-tab {
+    appearance: none;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 12px 20px;
+    border: 1px solid rgba(197, 160, 89, 0.15);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    transform: translateY(3px);
+    transition: all 0.2s ease;
+
+    &:hover:not(.active) {
+      color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &.active {
+      position: relative;
+      z-index: 1;
+      color: #c5a059;
+      background-color: rgba(25, 23, 20, 0.8); // mismo fondo que .mat-mdc-card (ver styles.scss)
+      border-color: rgba(197, 160, 89, 0.3);
+      transform: translateY(0);
+    }
+  }
+
+  .tab-content {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
+}
+
+// ==========================================
+// 💡 CLASES DE UTILIDAD DINÁMICAS (RESISTENCIAS), idénticas a las del Constructor
+// (ver builder.component.scss): cada componente tiene su propio encapsulado de estilos.
+// ==========================================
+.text-positive {
+  color: #4caf50 !important;
+}
+
+.text-negative {
+  color: #f44336 !important;
 }
 
 // ==========================================
