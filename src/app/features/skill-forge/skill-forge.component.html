@@ -19,6 +19,20 @@
       }
 
       <app-selector-buscable
+        [elementos]="armas()"
+        [(valor)]="armaSeleccionada"
+        [etiqueta]="'builder.weapon.label' | translate"
+        [textoBuscador]="'builder.weapon.search' | translate"
+        [textoVacio]="'builder.weapon.empty' | translate"
+        [agruparPor]="agruparArmaPorTipo"
+        [permitirVacio]="true"
+        [etiquetaVacio]="'armorSlots.unequipped' | translate">
+        <ng-template let-arma>
+          {{ arma.name }} ({{ 'builder.weapon.attack' | translate }}: {{ arma.damage.raw }})
+        </ng-template>
+      </app-selector-buscable>
+
+      <app-selector-buscable
         [elementos]="cascos()"
         [(valor)]="piezaCabeza"
         [etiqueta]="'armorSlots.head.label' | translate"
@@ -100,24 +114,99 @@
   </div>
 
   <!-- 📊 La tarjeta principal "Habilidades del Conjunto" permanece en su ubicación de siempre
-       (panel lateral derecho), solo con la lista de habilidades activas y sus niveles. -->
+       (panel lateral derecho). Ahora comparte hueco, mediante pestañas estilo navegador, con
+       "Estadísticas Totales": ambas se recalculan solas al cambiar cualquier pieza o el arma. -->
   <div class="stats-panel">
-    <mat-card class="section-card status-card">
-      <h2>{{ 'skillForge.activeSkills.title' | translate }}</h2>
+    <div class="chrome-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="chrome-tab"
+        [class.active]="pestanaActiva() === 'habilidades'"
+        [attr.aria-selected]="pestanaActiva() === 'habilidades'"
+        (click)="pestanaActiva.set('habilidades')">
+        {{ 'skillForge.activeSkills.title' | translate }}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="chrome-tab"
+        [class.active]="pestanaActiva() === 'estadisticas'"
+        [attr.aria-selected]="pestanaActiva() === 'estadisticas'"
+        (click)="pestanaActiva.set('estadisticas')">
+        {{ 'builder.stats.title' | translate }}
+      </button>
+    </div>
 
-      <div class="stat-group">
-        @if (habilidadesActivas().length === 0) {
-          <p class="empty-state">{{ 'skillForge.activeSkills.empty' | translate }}</p>
-        } @else {
-          @for (habilidad of habilidadesActivas(); track habilidad.skillId) {
-            <div class="stat-row">
-              <span>{{ habilidad.nombre }}</span>
-              <span class="stat-value text-gold">{{ 'skillForge.level' | translate }} {{ habilidad.nivel }}</span>
-            </div>
+    @if (pestanaActiva() === 'habilidades') {
+      <mat-card class="section-card status-card tab-content">
+        <div class="stat-group">
+          @if (habilidadesActivas().length === 0) {
+            <p class="empty-state">{{ 'skillForge.activeSkills.empty' | translate }}</p>
+          } @else {
+            @for (habilidad of habilidadesActivas(); track habilidad.skillId) {
+              <div class="stat-row">
+                <span>{{ habilidad.nombre }}</span>
+                <span class="stat-value text-gold">{{ 'skillForge.level' | translate }} {{ habilidad.nivel }}</span>
+              </div>
+            }
           }
-        }
-      </div>
-    </mat-card>
+        </div>
+      </mat-card>
+    } @else {
+      <mat-card class="section-card status-card tab-content">
+        <div class="stat-group">
+          <div class="stat-row">
+            <span>{{ 'builder.stats.defense' | translate }}</span>
+            <span class="stat-value text-gold">{{ defensaTotal() }}</span>
+          </div>
+          <div class="stat-row">
+            <span>{{ 'builder.stats.attack' | translate }}</span>
+            <span class="stat-value text-gold">{{ ataqueTotal() }}</span>
+          </div>
+          <div class="stat-row">
+            <span>{{ 'builder.stats.affinity' | translate }}</span>
+            <span class="stat-value text-gold">{{ afinidadTotal() }}%</span>
+          </div>
+        </div>
+
+        <mat-divider style="margin: 24px 0; border-color: rgba(197, 160, 89, 0.15);"></mat-divider>
+
+        <h3>{{ 'builder.resistances.title' | translate }}</h3>
+        <div class="stat-group resistances-grid">
+          <div class="res-item">
+            <span class="res-label">{{ 'builder.resistances.fire' | translate }}</span>
+            <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().fire > 0, 'text-negative': resistenciasTotales().fire < 0}">
+              {{ resistenciasTotales().fire }}
+            </span>
+          </div>
+          <div class="res-item">
+            <span class="res-label">{{ 'builder.resistances.water' | translate }}</span>
+            <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().water > 0, 'text-negative': resistenciasTotales().water < 0}">
+              {{ resistenciasTotales().water }}
+            </span>
+          </div>
+          <div class="res-item">
+            <span class="res-label">{{ 'builder.resistances.thunder' | translate }}</span>
+            <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().thunder > 0, 'text-negative': resistenciasTotales().thunder < 0}">
+              {{ resistenciasTotales().thunder }}
+            </span>
+          </div>
+          <div class="res-item">
+            <span class="res-label">{{ 'builder.resistances.ice' | translate }}</span>
+            <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().ice > 0, 'text-negative': resistenciasTotales().ice < 0}">
+              {{ resistenciasTotales().ice }}
+            </span>
+          </div>
+          <div class="res-item">
+            <span class="res-label">{{ 'builder.resistances.dragon' | translate }}</span>
+            <span class="res-value" [ngClass]="{'text-positive': resistenciasTotales().dragon > 0, 'text-negative': resistenciasTotales().dragon < 0}">
+              {{ resistenciasTotales().dragon }}
+            </span>
+          </div>
+        </div>
+      </mat-card>
+    }
   </div>
 
 </div>
