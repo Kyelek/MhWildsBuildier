@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
-import { ArmorPiece } from '../../core/models/wilds.models';
+import { ArmorPiece, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 import {
   BonificacionSetActiva,
@@ -55,28 +55,43 @@ export class SkillForgeComponent {
     loader: ({ request }) => this.wildsApi.getSkills(request)
   });
 
+  // 🗡️ Catálogo de armas: solo lo necesita la pestaña "Estadísticas Totales" (ataque/afinidad),
+  // pero se pide junto al resto para que esa pestaña ya tenga el dato listo al cambiar a ella.
+  readonly weaponsResource = rxResource({
+    request: () => this.wildsApi.locale(),
+    loader: ({ request }) => this.wildsApi.getWeapons(request)
+  });
+
   readonly cargando = computed(() =>
-    this.armorResource.isLoading() || this.armorSetsResource.isLoading() || this.skillsResource.isLoading()
+    this.armorResource.isLoading() || this.armorSetsResource.isLoading() ||
+    this.skillsResource.isLoading() || this.weaponsResource.isLoading()
   );
 
-  // 🚨 Si cualquiera de los tres catálogos falló al cargar, mostramos el primer error
+  // 🚨 Si cualquiera de los catálogos falló al cargar, mostramos el primer error
   readonly error = computed(() =>
-    this.armorResource.error() ?? this.armorSetsResource.error() ?? this.skillsResource.error()
+    this.armorResource.error() ?? this.armorSetsResource.error() ??
+    this.skillsResource.error() ?? this.weaponsResource.error()
   );
 
-  // Vuelve a pedir los tres catálogos (usado por el botón "Reintentar")
+  // Vuelve a pedir los catálogos (usado por el botón "Reintentar")
   reintentar(): void {
     this.armorResource.reload();
     this.armorSetsResource.reload();
     this.skillsResource.reload();
+    this.weaponsResource.reload();
   }
 
-  // 2. Estado de las piezas seleccionadas para construir el conjunto personalizado
+  // 2. Estado de las piezas y el arma seleccionadas para construir el conjunto personalizado
   readonly piezaCabeza = signal<ArmorPiece | null>(null);
   readonly piezaPecho = signal<ArmorPiece | null>(null);
   readonly piezaBrazos = signal<ArmorPiece | null>(null);
   readonly piezaCintura = signal<ArmorPiece | null>(null);
   readonly piezaPiernas = signal<ArmorPiece | null>(null);
+  readonly armaSeleccionada = signal<Weapon | null>(null);
+
+  // 🗂️ Pestaña activa sobre "Habilidades del Conjunto" (ver plantilla): por defecto se
+  // muestran las habilidades acumuladas; la otra pestaña muestra las Estadísticas Totales.
+  readonly pestanaActiva = signal<'habilidades' | 'estadisticas'>('habilidades');
 
   // 🌐 PERSISTENCIA DE LA SELECCIÓN ENTRE IDIOMAS
   //
@@ -89,21 +104,26 @@ export class SkillForgeComponent {
   // de Conjunto se actualizan solas al nuevo idioma sin resetearse.
   private readonly persistirSeleccionAlCambiarIdioma = effect(() => {
     const armadura = this.armorResource.value();
-    if (!armadura) return; // seguimos esperando el catálogo en el nuevo idioma
+    if (armadura) {
+      this.piezaCabeza.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaPecho.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaBrazos.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaCintura.update(actual => this.buscarPorId(actual, armadura));
+      this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
+    }
 
-    this.piezaCabeza.update(actual => this.buscarPorId(actual, armadura));
-    this.piezaPecho.update(actual => this.buscarPorId(actual, armadura));
-    this.piezaBrazos.update(actual => this.buscarPorId(actual, armadura));
-    this.piezaCintura.update(actual => this.buscarPorId(actual, armadura));
-    this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
+    const armas = this.weaponsResource.value();
+    if (armas) {
+      this.armaSeleccionada.update(actual => this.buscarPorId(actual, armas));
+    }
   });
 
-  // Busca en el catálogo (ya en el idioma nuevo) la pieza con el mismo id que la seleccionada
-  // actualmente. Si no la encuentra (no debería pasar, los id son estables entre idiomas),
-  // mantiene el objeto anterior en vez de perder la selección de golpe.
-  private buscarPorId(actual: ArmorPiece | null, catalogo: ArmorPiece[]): ArmorPiece | null {
+  // Busca en el catálogo (ya en el idioma nuevo) el elemento con el mismo id que el
+  // seleccionado actualmente. Si no lo encuentra (no debería pasar, los id son estables entre
+  // idiomas), mantiene el objeto anterior en vez de perder la selección de golpe.
+  private buscarPorId<T extends { id: number }>(actual: T | null, catalogo: T[]): T | null {
     if (!actual) return null;
-    return catalogo.find(pieza => pieza.id === actual.id) ?? actual;
+    return catalogo.find(item => item.id === actual.id) ?? actual;
   }
 
   // 3. Piezas de armadura acotadas por ranura. El buscador de texto de cada selector ya lo
@@ -113,6 +133,12 @@ export class SkillForgeComponent {
   readonly brazos = computed(() => this.armorPorRanura('arms'));
   readonly cinturas = computed(() => this.armorPorRanura('waist'));
   readonly piernas = computed(() => this.armorPorRanura('legs'));
+
+  readonly armas = computed(() => this.weaponsResource.value() ?? []);
+
+  // Referencia estable (no se recrea en cada ciclo) para agrupar el selector de armas
+  // por tipo ('kind') dentro de <app-selector-buscable>.
+  readonly agruparArmaPorTipo = (arma: Weapon) => arma.kind;
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {
@@ -237,6 +263,44 @@ export class SkillForgeComponent {
     }
 
     return lista;
+  });
+
+  // ==========================================
+  // 📊 PESTAÑA "ESTADÍSTICAS TOTALES" (mismo cálculo que el Constructor, ver
+  // builder.component.ts, aplicado aquí a las piezas y el arma de esta pantalla)
+  // ==========================================
+  readonly defensaTotal = computed(() => {
+    return (this.piezaCabeza()?.defense.max ?? 0) +
+           (this.piezaPecho()?.defense.max ?? 0) +
+           (this.piezaBrazos()?.defense.max ?? 0) +
+           (this.piezaCintura()?.defense.max ?? 0) +
+           (this.piezaPiernas()?.defense.max ?? 0);
+  });
+
+  readonly ataqueTotal = computed(() => {
+    return this.armaSeleccionada()?.damage?.raw ?? 0;
+  });
+
+  readonly afinidadTotal = computed(() => {
+    const arma = this.armaSeleccionada();
+    if (!arma) return 0;
+    return arma.affinity !== undefined && arma.affinity !== null ? arma.affinity : 0;
+  });
+
+  readonly resistenciasTotales = computed(() => {
+    const piezas = this.piezasSeleccionadas();
+    const totales = { fire: 0, water: 0, thunder: 0, ice: 0, dragon: 0 };
+
+    for (const pieza of piezas) {
+      if (pieza.resistances) {
+        totales.fire += pieza.resistances.fire ?? 0;
+        totales.water += pieza.resistances.water ?? 0;
+        totales.thunder += pieza.resistances.thunder ?? 0;
+        totales.ice += pieza.resistances.ice ?? 0;
+        totales.dragon += pieza.resistances.dragon ?? 0;
+      }
+    }
+    return totales;
   });
 
   // ==========================================

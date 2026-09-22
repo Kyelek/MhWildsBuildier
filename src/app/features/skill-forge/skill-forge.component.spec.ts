@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideTranslateService } from '@ngx-translate/core';
 
 import { SkillForgeComponent } from './skill-forge.component';
-import { ArmorPiece, ArmorSet, ArmorSkill } from '../../core/models/wilds.models';
+import { ArmorPiece, ArmorSet, ArmorSkill, Weapon } from '../../core/models/wilds.models';
 
 function crearPiezaDePrueba(overrides: Partial<ArmorPiece> = {}): ArmorPiece {
   return {
@@ -19,6 +19,19 @@ function crearPiezaDePrueba(overrides: Partial<ArmorPiece> = {}): ArmorPiece {
     skills: [],
     slots: [],
     armorSet: { id: 1, name: 'Set de prueba' },
+    ...overrides
+  };
+}
+
+function crearArmaDePrueba(overrides: Partial<Weapon> = {}): Weapon {
+  return {
+    id: 1,
+    name: 'Arma de prueba',
+    kind: 'great-sword',
+    rarity: 1,
+    affinity: 0,
+    damage: { raw: 100, display: 100 },
+    slots: [],
     ...overrides
   };
 }
@@ -60,12 +73,13 @@ describe('SkillForgeComponent', () => {
     fixture.detectChanges();
   });
 
-  // Responde los 3 catálogos que pide el componente al crearse (rxResource).
+  // Responde los 4 catálogos que pide el componente al crearse (rxResource).
   // Por defecto, vacíos; cada test pasa los que necesite.
   function flushCatalogos(armorSets: ArmorSet[] = []): void {
     httpMock.expectOne(req => req.url.endsWith('/armor')).flush([]);
     httpMock.expectOne(req => req.url.endsWith('/armor/sets')).flush(armorSets);
     httpMock.expectOne(req => req.url.endsWith('/skills')).flush([]);
+    httpMock.expectOne(req => req.url.endsWith('/weapons')).flush([]);
   }
 
   afterEach(() => {
@@ -170,5 +184,43 @@ describe('SkillForgeComponent', () => {
     expect(bonificaciones[1].piezasEquipadas).toEqual(2);
     expect(bonificaciones[1].piezasRequeridas).toEqual(2);
     expect(bonificaciones[1].nombreHabilidad).toEqual('Bono Set A');
+  });
+
+  // ==========================================
+  // 📊 PESTAÑA "ESTADÍSTICAS TOTALES" (mismo comportamiento que en el Constructor)
+  // ==========================================
+  it('sin nada equipado, todas las estadísticas totales son 0', () => {
+    flushCatalogos();
+    expect(component.defensaTotal()).toEqual(0);
+    expect(component.ataqueTotal()).toEqual(0);
+    expect(component.afinidadTotal()).toEqual(0);
+    expect(component.resistenciasTotales()).toEqual({ fire: 0, water: 0, thunder: 0, ice: 0, dragon: 0 });
+  });
+
+  it('suma la defensa máxima de las piezas equipadas', () => {
+    flushCatalogos();
+    component.piezaCabeza.set(crearPiezaDePrueba({ defense: { base: 5, max: 10 } }));
+    component.piezaPecho.set(crearPiezaDePrueba({ defense: { base: 5, max: 20 } }));
+    fixture.detectChanges();
+
+    expect(component.defensaTotal()).toEqual(30);
+  });
+
+  it('usa el ataque bruto y la afinidad del arma equipada', () => {
+    flushCatalogos();
+    component.armaSeleccionada.set(crearArmaDePrueba({ damage: { raw: 150, display: 150 }, affinity: 25 }));
+    fixture.detectChanges();
+
+    expect(component.ataqueTotal()).toEqual(150);
+    expect(component.afinidadTotal()).toEqual(25);
+  });
+
+  it('suma las resistencias elementales (positivas y negativas) de todas las piezas', () => {
+    flushCatalogos();
+    component.piezaCabeza.set(crearPiezaDePrueba({ resistances: { fire: 3, water: -2, ice: 0, thunder: 1, dragon: 0 } }));
+    component.piezaPiernas.set(crearPiezaDePrueba({ resistances: { fire: 2, water: 0, ice: 0, thunder: 0, dragon: 5 } }));
+    fixture.detectChanges();
+
+    expect(component.resistenciasTotales()).toEqual({ fire: 5, water: -2, thunder: 1, ice: 0, dragon: 5 });
   });
 });
