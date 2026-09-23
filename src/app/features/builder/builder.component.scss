@@ -1,3 +1,5 @@
+@use 'responsive' as *;
+
 .builder-layout {
   display: flex;
   gap: 32px; // Un pelín más de separación entre las dos columnas principales
@@ -18,14 +20,42 @@
     min-width: 320px;
   }
 
+  // 📱 TABLET / MÓVIL: una sola columna (estadísticas debajo de los selectores)
+  @include tablet {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 24px;
+    padding: 16px 0;
+    min-height: 0;
+
+    .equipment-selectors,
+    .stats-panel {
+      min-width: 0;
+    }
+  }
+
+  @include movil {
+    gap: 16px;
+    padding: 4px 0;
+  }
+
   .section-card {
     padding: 32px !important; // 💡 Le damos más aire interno a las tarjetas para que respiren los inputs
-    
+
+    @include movil {
+      padding: 20px 16px !important;
+    }
+
     h2 {
       margin-top: 0;
       margin-bottom: 32px; // Más separación bajo el título principal
       border-bottom: 1px solid rgba(197, 160, 89, 0.3);
       padding-bottom: 12px;
+
+      @include movil {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+      }
     }
   }
 
@@ -95,6 +125,11 @@
       font-size: 1.15rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 
+      @include movil {
+        padding: 12px 0;
+        font-size: 1rem;
+      }
+
       &:last-child {
         border-bottom: none;
       }
@@ -134,6 +169,14 @@
         .res-value {
           font-weight: bold;
           font-size: 1rem;
+        }
+      }
+
+      @include movil {
+        gap: 8px;
+
+        .res-item {
+          padding: 8px 12px;
         }
       }
     }

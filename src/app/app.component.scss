@@ -1,3 +1,5 @@
+@use 'responsive' as *;
+
 // 🎨 Variables de color unificadas
 $color-bg-dark: #0f0e0c;
 $color-text: rgba(255, 255, 255, 0.9);
@@ -6,13 +8,22 @@ $font-main: 'Montserrat', sans-serif;
 // 📦 CONTENEDOR PRINCIPAL (Margen superior para no quedar oculto bajo el Navbar)
 // El Navbar (core/components/navbar) y cada pantalla ruteada (features/*) llevan
 // ya sus propios estilos; este componente raíz solo aporta el layout que envuelve
-// al <router-outlet>.
+// al <router-outlet>. La altura del navbar y el relleno lateral salen de las variables
+// CSS de src/styles.scss, que cambian según el tamaño de pantalla.
 .main-content {
-  margin-top: 70px;
-  min-height: calc(100vh - 70px);
-  padding: 40px;
+  margin-top: var(--altura-navbar);
+  min-height: calc(100vh - var(--altura-navbar));
+  min-height: calc(100dvh - var(--altura-navbar)); // Alto real visible en móvil (sin la barra del navegador)
+  padding: var(--relleno-pagina);
   box-sizing: border-box;
   background-color: $color-bg-dark;
   color: $color-text;
   font-family: $font-main;
+
+  @include movil {
+    // Respeta el notch / bordes redondeados en horizontal
+    padding-left: max(var(--relleno-pagina), env(safe-area-inset-left));
+    padding-right: max(var(--relleno-pagina), env(safe-area-inset-right));
+    padding-bottom: max(var(--relleno-pagina), env(safe-area-inset-bottom));
+  }
 }

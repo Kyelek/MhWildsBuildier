@@ -1,41 +1,58 @@
 <nav class="main-navbar">
-  <a class="nav-logo" routerLink="/">
+  <a class="nav-logo" routerLink="/" (click)="cerrarMenu()">
     <span class="logo-icon">⚔️</span> MH <span class="text-gold">Wilds</span> Forge
   </a>
 
-  <ul class="nav-links">
+  <!-- 📱 Botón hamburguesa: solo visible en tablet/móvil (ver navbar.component.scss),
+       donde los enlaces no caben en una fila y pasan a un desplegable. -->
+  <button
+    type="button"
+    class="nav-toggle"
+    [class.abierto]="menuAbierto()"
+    [attr.aria-expanded]="menuAbierto()"
+    aria-controls="nav-menu"
+    [attr.aria-label]="'nav.menu' | translate"
+    (click)="alternarMenu()">
+    <span class="nav-toggle-barra"></span>
+    <span class="nav-toggle-barra"></span>
+    <span class="nav-toggle-barra"></span>
+  </button>
+
+  <ul id="nav-menu" class="nav-links" [class.abierto]="menuAbierto()">
     <li>
       <a
         routerLink="/"
         routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }">
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="cerrarMenu()">
         {{ "nav.home" | translate }}
       </a>
     </li>
     <!-- 🙈 Constructor oculto temporalmente al usuario: el componente y la ruta se mantienen
          intactos para reutilizarlos más adelante, solo se retira el enlace del menú. -->
     <li>
-      <a routerLink="/skill-forge" routerLinkActive="active">
+      <a routerLink="/skill-forge" routerLinkActive="active" (click)="cerrarMenu()">
         {{ "nav.skills-forge" | translate }}
       </a>
     </li>
 
-    <li>
-      <button (click)="useLanguage('en')">
-        EN
-      </button>
-    </li>
-
-    <li>
-      <button (click)="useLanguage('es')">
-        ES
-      </button>
-    </li>
-
-    <li>
-      <button (click)="useLanguage('jp')">
-        JP
-      </button>
+    <!-- Los tres idiomas van juntos para que en el menú móvil queden en una sola fila.
+         En escritorio se ve el código (EN/ES/JP); en el menú desplegable, la bandera,
+         con el idioma activo remarcado. -->
+    <li class="nav-idiomas">
+      @for (idioma of idiomas; track idioma.codigo) {
+        <button
+          type="button"
+          class="nav-idioma"
+          [class.seleccionado]="idiomaActual() === idioma.codigo"
+          [attr.aria-pressed]="idiomaActual() === idioma.codigo"
+          [attr.aria-label]="idioma.nombre"
+          [title]="idioma.nombre"
+          (click)="useLanguage(idioma.codigo)">
+          <span class="idioma-codigo">{{ idioma.etiqueta }}</span>
+          <img class="idioma-bandera" [src]="idioma.bandera" alt="" width="30" height="20">
+        </button>
+      }
     </li>
   </ul>
 </nav>
