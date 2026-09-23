@@ -110,8 +110,9 @@ export class BuilderComponent {
   readonly piernas = computed(() => this.armorPorRanura('legs'));
 
   // Referencia estable (no se recrea en cada ciclo) para agrupar el selector de armas
-  // por tipo ('kind') dentro de <app-selector-buscable>.
-  readonly agruparArmaPorTipo = (arma: Weapon) => arma.kind;
+  // por tipo ('kind') dentro de <app-selector-buscable>. Devuelve la CLAVE de traducción
+  // del tipo (p. ej. "weaponTypes.bow"): el selector la traduce al idioma activo.
+  readonly agruparArmaPorTipo = (arma: Weapon) => `weaponTypes.${arma.kind}`;
 
   // ==========================================
   // 📊 CÁLCULOS REACTIVOS (STAT PANEL)

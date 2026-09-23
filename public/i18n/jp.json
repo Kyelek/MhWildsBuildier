@@ -5,6 +5,22 @@
       "retry": "再試行"
     }
   },
+  "weaponTypes": {
+    "bow": "弓",
+    "charge-blade": "チャージアックス",
+    "dual-blades": "双剣",
+    "great-sword": "大剣",
+    "gunlance": "ガンランス",
+    "hammer": "ハンマー",
+    "heavy-bowgun": "ヘビィボウガン",
+    "hunting-horn": "狩猟笛",
+    "insect-glaive": "操虫棍",
+    "lance": "ランス",
+    "light-bowgun": "ライトボウガン",
+    "long-sword": "太刀",
+    "switch-axe": "スラッシュアックス",
+    "sword-shield": "片手剣"
+  },
   "nav": {
     "home": "ホーム",
     "constructor": "ビルダー",

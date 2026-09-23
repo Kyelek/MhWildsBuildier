@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { TranslatePipe } from '@ngx-translate/core';
 import { GrupoDeOpciones, ItemSeleccionable } from '../../models/selector-buscable.models';
 
 // 🎯 Selector genérico con buscador integrado, pensado para sustituir el patrón
@@ -20,7 +21,7 @@ import { GrupoDeOpciones, ItemSeleccionable } from '../../models/selector-buscab
 @Component({
   selector: 'app-selector-buscable',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule],
+  imports: [CommonModule, MatFormFieldModule, MatInputModule, MatAutocompleteModule, TranslatePipe],
   templateUrl: './selector-buscable.component.html',
   styleUrl: './selector-buscable.component.scss'
 })
@@ -39,6 +40,9 @@ export class SelectorBuscableComponent<T extends ItemSeleccionable> {
 
   // Si se indica, agrupa las opciones con <mat-optgroup> (p. ej. por tipo de arma).
   // Solo aparecen los grupos que tengan alguna opción tras aplicar el buscador.
+  // 🌐 La etiqueta devuelta se muestra pasada por el pipe "translate": si es una clave
+  // de traducción (p. ej. "weaponTypes.bow") sale en el idioma activo y se actualiza
+  // sola al cambiarlo; si no lo es, ngx-translate la devuelve tal cual.
   readonly agruparPor = input<((elemento: T) => string) | null>(null);
 
   readonly valor = model<T | null>(null);

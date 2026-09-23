@@ -26,6 +26,8 @@ mat-form-field {
 // Flecha decorativa que imita la del antiguo mat-select, ya que el campo ahora es
 // un <input> de texto normal (sin ella) para poder escribir directamente en él.
 .campo-flecha {
+  display: inline-block;
+  margin-right: 12px; // Separada del borde derecho del campo, no pegada a él
   color: rgba(197, 160, 89, 0.7);
   pointer-events: none; // No debe robarle clicks/foco al input
   user-select: none;
