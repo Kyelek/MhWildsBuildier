@@ -41,18 +41,55 @@ html, body {
 }
 
 body {
-  // 💡 Aplicamos la imagen fija de fondo ocupando toda la pantalla sin repetirse
+  // 🐛 FIX: sin esto, el "margin-top" de .main-content (hueco del navbar fijo) colapsaba
+  // hacia fuera del <body> y se sumaba a su "height: 100%", de modo que TODAS las páginas
+  // tenían un scroll fantasma de la altura del navbar aunque su contenido cupiera entero.
+  display: flow-root;
+  // Transparente para no tapar la capa del fondo fijo (el color de respaldo queda en <html>)
+  background-color: transparent;
+}
+
+// 🖼️ FONDO FIJO: la imagen va en una capa "position: fixed" detrás de todo en vez de
+// usar "background-attachment: fixed", que iOS/Android ignoran (o pintan con un zoom
+// enorme). Así el fondo se queda quieto al hacer scroll en cualquier dispositivo.
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background-image: url('./assets/images/bg-wilds.png');
   background-size: cover;
   background-position: center center;
-  background-attachment: fixed;
   background-repeat: no-repeat;
+  pointer-events: none;
+}
 
-  // 📱 iOS/Android ignoran (o renderizan mal, con un zoom enorme) "background-attachment:
-  // fixed" en pantallas táctiles: ahí el fondo pasa a desplazarse con la página.
-  @media (hover: none) {
-    background-attachment: scroll;
-  }
+// 🔤 FUENTES DE ANGULAR MATERIAL: el tema precompilado (azure-blue) define toda su
+// tipografía con "Roboto", que este proyecto NO carga, así que el navegador caía a su
+// fuente serif por defecto (labels de los selectores, texto escrito, opciones del
+// desplegable...). Se redirige toda la escala tipográfica de Material a Montserrat.
+html {
+  --mat-sys-display-large-font: #{$font-body};
+  --mat-sys-display-medium-font: #{$font-body};
+  --mat-sys-display-small-font: #{$font-body};
+  --mat-sys-headline-large-font: #{$font-body};
+  --mat-sys-headline-medium-font: #{$font-body};
+  --mat-sys-headline-small-font: #{$font-body};
+  --mat-sys-title-large-font: #{$font-body};
+  --mat-sys-title-medium-font: #{$font-body};
+  --mat-sys-title-small-font: #{$font-body};
+  --mat-sys-body-large-font: #{$font-body};
+  --mat-sys-body-medium-font: #{$font-body};
+  --mat-sys-body-small-font: #{$font-body};
+  --mat-sys-label-large-font: #{$font-body};
+  --mat-sys-label-medium-font: #{$font-body};
+  --mat-sys-label-small-font: #{$font-body};
+}
+
+// Los controles de formulario NO heredan la fuente por defecto en los navegadores
+// (usan la del sistema): se fuerza la herencia para que todos usen la del proyecto.
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 // 🎬 ANIMACIÓN SUTIL DE ENTRADA, global para que cualquier pantalla ruteada
@@ -166,7 +203,7 @@ h1, h2, h3, h4 {
 // 2. Las opciones individuales de la lista (.mat-mdc-option)
 .mat-mdc-option {
   color: #f5f5e9 !important;
-  font-family: 'Montserrat', sans-serif;
+  font-family: $font-body;
 
   // El estado cuando pasas el ratón por encima (Hover) o navegas con teclado (Focus)
   &:hover:not(.mdc-list-item--disabled),

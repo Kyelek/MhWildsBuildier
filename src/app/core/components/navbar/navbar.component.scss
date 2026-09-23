@@ -69,6 +69,11 @@ $font-main: 'Montserrat', sans-serif;
       gap: 20px;
     }
 
+    // En escritorio se muestra el código de idioma; la bandera solo en el menú móvil
+    .idioma-bandera {
+      display: none;
+    }
+
     // Los enlaces de navegación son <a routerLink> y los de idioma son <button>:
     // comparten la misma apariencia y estado ".active" (marcado por routerLinkActive).
     a, button {
@@ -166,8 +171,9 @@ $font-main: 'Montserrat', sans-serif;
       align-items: stretch;
       gap: 4px;
       padding: 8px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
-      // Casi opaco: un backdrop-filter anidado dentro de otro no se aplica en los navegadores
-      background: rgba(20, 18, 15, 0.97);
+      // Opaco: un backdrop-filter anidado dentro de otro no se aplica en los navegadores,
+      // y con cualquier transparencia se adivinaba el texto de la página por debajo.
+      background: #14120f;
       border-bottom: 1px solid rgba(197, 160, 89, 0.2);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
 
@@ -198,11 +204,42 @@ $font-main: 'Montserrat', sans-serif;
         padding-top: 12px;
         border-top: 1px solid rgba(197, 160, 89, 0.15);
 
-        button {
+        .nav-idioma {
           flex: 1;
           max-width: 96px;
-          padding: 12px 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 10px 0;
           border: 1px solid rgba(197, 160, 89, 0.2);
+          -webkit-tap-highlight-color: transparent;
+
+          // 🏳️ Bandera en lugar del código de idioma
+          .idioma-codigo {
+            display: none;
+          }
+
+          .idioma-bandera {
+            display: block;
+            width: 30px;
+            height: 20px;
+            object-fit: cover;
+            border-radius: 3px;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+            opacity: 0.55;
+            transition: opacity 0.2s ease;
+          }
+
+          // Idioma activo: borde dorado con brillo y bandera a plena opacidad
+          &.seleccionado {
+            border-color: $color-gold;
+            background: rgba(197, 160, 89, 0.12);
+            box-shadow: 0 0 0 1px $color-gold, 0 0 10px rgba(197, 160, 89, 0.35);
+
+            .idioma-bandera {
+              opacity: 1;
+            }
+          }
         }
       }
     }
