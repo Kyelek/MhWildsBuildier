@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideTranslateService } from '@ngx-translate/core';
 
 import { SkillForgeComponent } from './skill-forge.component';
-import { ArmorPiece, ArmorSet, ArmorSkill, Weapon } from '../../core/models/wilds.models';
+import { ArmorPiece, ArmorSet, ArmorSetBonus, ArmorSkill, Weapon } from '../../core/models/wilds.models';
 
 function crearPiezaDePrueba(overrides: Partial<ArmorPiece> = {}): ArmorPiece {
   return {
@@ -43,6 +43,31 @@ function habilidadDePrueba(): ArmorSkill {
     level: 1,
     description: 'Descripción de respaldo (pieza)',
     skill: { id: 500, gameId: 500, name: 'Aguante', kind: 'armor' },
+    setPiecesRequired: null
+  };
+}
+
+// Bonificación con un rango por cada entrada [piezas, nivel] (p. ej. [[2, 1], [4, 2]] como Gore α)
+function bonusDePrueba(skillId: number, nombre: string, rangos: [number, number][]): ArmorSetBonus {
+  return {
+    id: skillId,
+    skill: { id: skillId, name: nombre },
+    ranks: rangos.map(([piezas, nivel], i) => ({
+      id: i + 1,
+      pieces: piezas,
+      bonus: { id: skillId },
+      skill: { id: i + 1, level: nivel, name: `${nombre} ${nivel}`, description: `Descripción ${nombre} ${nivel}`, setPiecesRequired: piezas, skill: { id: skillId } }
+    }))
+  };
+}
+
+// Habilidad de grupo "Alma del amo" (id 131) tal y como la aporta cada pieza
+function almaDelAmo(): ArmorSkill {
+  return {
+    id: 2,
+    level: 1,
+    description: 'Descripción de Alma del amo',
+    skill: { id: 131, gameId: 131, name: 'Alma del amo', kind: 'group' },
     setPiecesRequired: null
   };
 }
@@ -174,16 +199,53 @@ describe('SkillForgeComponent', () => {
     expect(bonificaciones.length).toEqual(2);
 
     // Orden: el set con más piezas equipadas va primero
-    expect(bonificaciones[0].setId).toEqual(2);
+    expect(bonificaciones[0].clave).toEqual('set-2');
     expect(bonificaciones[0].piezasEquipadas).toEqual(3);
-    expect(bonificaciones[0].piezasRequeridas).toEqual(3); // el rango más alto alcanzado, no el primero
+    expect(bonificaciones[0].piezasMaximas).toEqual(3);
     expect(bonificaciones[0].nombreHabilidad).toEqual('Bono Set B Nv2');
     expect(bonificaciones[0].nivel).toEqual(2);
 
-    expect(bonificaciones[1].setId).toEqual(1);
+    expect(bonificaciones[1].clave).toEqual('set-1');
     expect(bonificaciones[1].piezasEquipadas).toEqual(2);
-    expect(bonificaciones[1].piezasRequeridas).toEqual(2);
+    expect(bonificaciones[1].piezasMaximas).toEqual(2);
     expect(bonificaciones[1].nombreHabilidad).toEqual('Bono Set A');
+  });
+
+  it('muestra las piezas equipadas sobre el máximo de la bonificación, no sobre el rango activo', async () => {
+    flushCatalogos([
+      { id: 1, gameId: 1, name: 'Gore α', pieces: [], groupBonus: null, bonus: bonusDePrueba(900, 'Eclipse negro', [[2, 1], [4, 2]]) }
+    ]);
+    await fixture.whenStable();
+
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 30, kind: 'head', armorSet: { id: 1, name: 'Gore α' } }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 31, kind: 'chest', armorSet: { id: 1, name: 'Gore α' } }));
+    fixture.detectChanges();
+    expect(component.bonificacionesSet()[0]).toEqual(jasmine.objectContaining({ piezasEquipadas: 2, piezasMaximas: 4, nivel: 1 }));
+
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 32, kind: 'arms', armorSet: { id: 1, name: 'Gore α' } }));
+    fixture.detectChanges();
+    expect(component.bonificacionesSet()[0]).toEqual(jasmine.objectContaining({ piezasEquipadas: 3, piezasMaximas: 4, nivel: 1 }));
+  });
+
+  it('activa "Alma del amo" como bonificación con 3 piezas que la tengan, aunque sean de conjuntos distintos', async () => {
+    flushCatalogos([
+      { id: 1, gameId: 1, name: 'Set A', pieces: [], bonus: null, groupBonus: bonusDePrueba(131, 'Alma del amo', [[3, 1]]) }
+    ]);
+    await fixture.whenStable();
+
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 40, kind: 'head', armorSet: { id: 1, name: 'Set A' }, skills: [almaDelAmo()] }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 41, kind: 'chest', armorSet: { id: 2, name: 'Set B' }, skills: [almaDelAmo()] }));
+    fixture.detectChanges();
+    expect(component.bonificacionesSet()).toEqual([]); // con 2 piezas aún no se activa
+
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 42, kind: 'arms', armorSet: { id: 3, name: 'Set C' }, skills: [almaDelAmo(), habilidadDePrueba()] }));
+    fixture.detectChanges();
+    // La tarjeta de la bonificación se titula "Alma del amo", sin descripción propia...
+    expect(component.bonificacionesSet()).toEqual([
+      jasmine.objectContaining({ clave: 'grupo-131', esGrupo: true, piezasEquipadas: 3, piezasMaximas: 3, nombreHabilidad: 'Alma del amo', descripcion: null })
+    ]);
+    // ...y la habilidad que otorga (su rango activado) va a las descripciones detalladas
+    expect(component.descripcionesDetalladas().map(d => d.nombre)).toEqual(['Aguante', 'Alma del amo 1']);
   });
 
   // ==========================================
