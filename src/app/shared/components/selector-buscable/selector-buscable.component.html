@@ -24,7 +24,7 @@
 
     @for (grupo of grupos(); track grupo.etiqueta) {
       @if (grupo.etiqueta) {
-        <mat-optgroup [label]="grupo.etiqueta" [hidden]="!grupoTieneCoincidencias(grupo)">
+        <mat-optgroup [label]="grupo.etiqueta | translate" [hidden]="!grupoTieneCoincidencias(grupo)">
           @for (elemento of grupo.elementos; track elemento.id) {
             <mat-option [value]="elemento" [hidden]="!coincide(elemento)">
               <ng-container *ngTemplateOutlet="plantillaOpcion ?? plantillaPorDefecto; context: { $implicit: elemento }" />

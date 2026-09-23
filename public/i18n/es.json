@@ -5,6 +5,22 @@
       "retry": "Reintentar"
     }
   },
+  "weaponTypes": {
+    "bow": "Arco",
+    "charge-blade": "Hacha cargada",
+    "dual-blades": "Espadas dobles",
+    "great-sword": "Gran espada",
+    "gunlance": "Lanza pistola",
+    "hammer": "Martillo",
+    "heavy-bowgun": "Ballesta pesada",
+    "hunting-horn": "Cornamusa",
+    "insect-glaive": "Glaive insecto",
+    "lance": "Lanza",
+    "light-bowgun": "Ballesta ligera",
+    "long-sword": "Espada larga",
+    "switch-axe": "Hacha espada",
+    "sword-shield": "Espada y escudo"
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
