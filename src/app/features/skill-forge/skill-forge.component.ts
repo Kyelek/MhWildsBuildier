@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
@@ -35,7 +35,6 @@ type TipoPieza = 'head' | 'chest' | 'arms' | 'waist' | 'legs';
 })
 export class SkillForgeComponent {
   private readonly wildsApi = inject(WildsApiService);
-  private readonly translateService = inject(TranslateService);
 
   // 1. Catálogos completos desde la API
   // 🌐 `request` observa el idioma actual de la API: al cambiarlo (selector EN/ES/JP),
@@ -92,6 +91,11 @@ export class SkillForgeComponent {
   // 🗂️ Pestaña activa sobre "Habilidades del Conjunto" (ver plantilla): por defecto se
   // muestran las habilidades acumuladas; la otra pestaña muestra las Estadísticas Totales.
   readonly pestanaActiva = signal<'habilidades' | 'estadisticas'>('habilidades');
+
+  // 🗂️ Pestaña activa de la tarjeta de detalle (bajo los selectores): las bonificaciones
+  // de conjunto (con la descripción de su habilidad) o las descripciones detalladas de
+  // las habilidades aportadas por las piezas.
+  readonly pestanaDetalle = signal<'bonificaciones' | 'descripciones'>('bonificaciones');
 
   // 🌐 PERSISTENCIA DE LA SELECCIÓN ENTRE IDIOMAS
   //
@@ -240,31 +244,21 @@ export class SkillForgeComponent {
   });
 
   // ==========================================
-  // 📋 REQUISITO 4: Panel de resumen — descripciones detalladas de todo lo obtenido
+  // 📋 REQUISITO 4: Descripciones detalladas de las habilidades aportadas por las piezas
   // ==========================================
-  readonly descripcionesDetalladas = computed<DescripcionHabilidad[]>(() => {
-    const lista: DescripcionHabilidad[] = this.habilidadesActivas().map(habilidad => ({
-      clave: `pieza-${habilidad.skillId}`,
-      nombre: habilidad.nombre,
-      nivel: habilidad.nivel,
-      descripcion: habilidad.descripcion,
-      esBonificacionSet: false
-    }));
-
-    // Añadimos una entrada de descripción por CADA bonificación de conjunto activa a la vez
-    const sufijoBonificacion = this.translateService.instant('skillForge.descriptions.setBonusOf');
-    for (const bono of this.bonificacionesSet()) {
-      lista.push({
-        clave: `set-${bono.setId}`,
-        nombre: `${bono.nombreHabilidad} (${sufijoBonificacion} ${bono.nombreSet})`,
-        nivel: bono.nivel,
-        descripcion: bono.descripcion,
-        esBonificacionSet: true
-      });
-    }
-
-    return lista;
-  });
+  readonly descripcionesDetalladas = computed<DescripcionHabilidad[]>(() =>
+    // Solo las habilidades de las piezas. Se excluyen las de tipo "set" (p. ej. "Tiranía de
+    // Gore Magala"): son la habilidad del conjunto de armadura, cuyo nivel activado ya se
+    // describe en la pestaña "Bonificaciones de Conjunto" (p. ej. "Eclipse negro I").
+    this.habilidadesActivas()
+      .filter(habilidad => habilidad.kind !== 'set')
+      .map(habilidad => ({
+        clave: `pieza-${habilidad.skillId}`,
+        nombre: habilidad.nombre,
+        nivel: habilidad.nivel,
+        descripcion: habilidad.descripcion
+      }))
+  );
 
   // ==========================================
   // 📊 PESTAÑA "ESTADÍSTICAS TOTALES" (mismo cálculo que el Constructor, ver

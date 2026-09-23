@@ -167,8 +167,7 @@
       }
     }
 
-    // Grid de 2 columnas reutilizado tal cual del bloque de resistencias del Constructor,
-    // ahora aplicado a las bonificaciones de conjunto (pueden ser varias a la vez)
+    // Grid de 2 columnas reutilizado tal cual del bloque de resistencias del Constructor
     .resistances-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -207,13 +206,6 @@
       }
     }
 
-    // 📱 Las bonificaciones de set llevan textos largos (nombre del set + habilidad):
-    // en móvil una por fila en vez de dos columnas estrechas.
-    .bonus-grid {
-      @include movil {
-        grid-template-columns: 1fr;
-      }
-    }
 
     // Descripciones detalladas: mismo lenguaje visual (bordes y tonos sutiles del tema dorado)
     .description-item {
@@ -231,6 +223,10 @@
         border: 1px solid rgba(197, 160, 89, 0.1);
         border-bottom: 1px solid rgba(197, 160, 89, 0.1);
         margin-bottom: 8px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
       }
 
       .description-header {
@@ -242,6 +238,13 @@
         font-weight: 600;
         color: #ffffff;
         margin-bottom: 6px;
+      }
+
+      // Conjunto que otorga la bonificación y piezas equipadas / requeridas
+      .bonus-origen {
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+        color: #9e9e93; // Mismo gris apagado que "res-label"
       }
 
       .description-text {

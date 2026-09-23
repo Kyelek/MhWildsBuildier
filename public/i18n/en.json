@@ -117,8 +117,7 @@
     },
     "descriptions": {
       "title": "Detailed Descriptions",
-      "empty": "No skills to describe yet.",
-      "setBonusOf": "Set Bonus of"
+      "empty": "No skills to describe yet."
     },
     "activeSkills": {
       "title": "Set Skills",
