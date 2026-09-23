@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
-import { ArmorPiece, Weapon } from '../../core/models/wilds.models';
+import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 import {
   BonificacionSetActiva,
@@ -18,6 +18,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 
 type TipoPieza = 'head' | 'chest' | 'arms' | 'waist' | 'legs';
+
+// 🌟 EXCEPCIÓN: habilidades de GRUPO que se tratan como una bonificación de conjunto más.
+// Se activan al llevar varias piezas (de cualquier conjunto) que tengan esa habilidad, con
+// los rangos de su "groupBonus" en /armor/sets. De momento solo "Alma del amo" (id 131,
+// el mismo en todos los idiomas: "Lord's Soul" / "ヌシの魂"); el resto de habilidades de
+// grupo siguen mostrándose como habilidades normales.
+const HABILIDADES_GRUPO_COMO_BONIFICACION: readonly number[] = [131];
 
 @Component({
   selector: 'app-skill-forge',
@@ -209,56 +216,105 @@ export class SkillForgeComponent {
     return conteo;
   });
 
-  // Lista de TODAS las bonificaciones de conjunto activas a la vez (una por cada set con 2+ piezas)
+  // Lista de TODAS las bonificaciones activas a la vez: una por cada conjunto con piezas
+  // suficientes, más las bonificaciones de grupo tratadas como excepción ("Alma del amo").
   readonly bonificacionesSet = computed<BonificacionSetActiva[]>(() => {
     const todosLosSets = this.armorSetsResource.value() ?? [];
     const bonificaciones: BonificacionSetActiva[] = [];
 
     for (const [setId, info] of this.conteoPorSet()) {
-      if (info.cantidad < 2) continue; // La bonificación de conjunto mínima requiere al menos 2 piezas
-
-      const conjuntoCompleto = todosLosSets.find(set => set.id === setId);
-      const bonus = conjuntoCompleto?.bonus;
+      const bonus = todosLosSets.find(set => set.id === setId)?.bonus;
       if (!bonus) continue;
 
-      // De todos los rangos cuyo requisito de piezas se cumple, activamos el más alto alcanzado
-      const rangoActivo = bonus.ranks
-        .filter(rango => rango.pieces <= info.cantidad)
-        .sort((a, b) => b.pieces - a.pieces)[0];
+      const bonificacion = this.construirBonificacion(`set-${setId}`, info.nombre, info.cantidad, bonus);
+      if (bonificacion) bonificaciones.push(bonificacion);
+    }
 
-      if (!rangoActivo) continue;
+    for (const skillId of HABILIDADES_GRUPO_COMO_BONIFICACION) {
+      // Los rangos son los mismos en todos los conjuntos que comparten esta habilidad de grupo
+      const grupo = todosLosSets.find(set => set.groupBonus?.skill.id === skillId)?.groupBonus;
+      if (!grupo) continue;
 
+      // Cuenta las piezas equipadas que aportan la habilidad, sean del conjunto que sean
+      const piezas = this.piezasSeleccionadas()
+        .filter(pieza => pieza.skills.some(habilidad => habilidad.skill.id === skillId))
+        .length;
+
+      const bonificacion = this.construirBonificacion(`grupo-${skillId}`, grupo.skill.name, piezas, grupo);
+      if (!bonificacion) continue;
+
+      // La tarjeta se titula con la habilidad de grupo ("Alma del amo"); la habilidad que
+      // otorga ("Agallas (tenacidad)") se describe en "Descripciones Detalladas".
       bonificaciones.push({
-        setId,
-        nombreSet: info.nombre,
-        piezasEquipadas: info.cantidad,
-        piezasRequeridas: rangoActivo.pieces,
-        nombreHabilidad: rangoActivo.skill.name ?? bonus.skill.name,
-        nivel: rangoActivo.skill.level,
-        descripcion: rangoActivo.skill.description
+        ...bonificacion,
+        esGrupo: true,
+        nombreHabilidad: grupo.skill.name,
+        descripcion: null,
+        efectoOtorgado: {
+          clave: `efecto-grupo-${skillId}`,
+          nombre: bonificacion.nombreHabilidad,
+          nivel: bonificacion.nivel,
+          descripcion: bonificacion.descripcion ?? ''
+        }
       });
     }
 
-    // Mostramos primero el conjunto con más piezas equipadas (el más "completo")
+    // Mostramos primero la bonificación con más piezas equipadas (la más "completa")
     return bonificaciones.sort((a, b) => b.piezasEquipadas - a.piezasEquipadas);
   });
+
+  // Activa el rango más alto alcanzado con las piezas equipadas (o null si no llega ni al
+  // primero). "piezasMaximas" son las piezas del rango MÁS ALTO de la bonificación, para
+  // mostrar el progreso real (p. ej. Gore con 2 o 3 piezas: 2/4 y 3/4, no 2/2 ni 3/2).
+  private construirBonificacion(
+    clave: string,
+    nombreOrigen: string,
+    piezasEquipadas: number,
+    bonus: ArmorSetBonus
+  ): BonificacionSetActiva | null {
+    const rangoActivo = bonus.ranks
+      .filter(rango => rango.pieces <= piezasEquipadas)
+      .sort((a, b) => b.pieces - a.pieces)[0];
+
+    if (!rangoActivo) return null;
+
+    return {
+      clave,
+      esGrupo: false,
+      nombreSet: nombreOrigen,
+      piezasEquipadas,
+      piezasMaximas: Math.max(...bonus.ranks.map(rango => rango.pieces)),
+      nombreHabilidad: rangoActivo.skill.name ?? bonus.skill.name,
+      nivel: rangoActivo.skill.level,
+      descripcion: rangoActivo.skill.description,
+      efectoOtorgado: null
+    };
+  }
 
   // ==========================================
   // 📋 REQUISITO 4: Descripciones detalladas de las habilidades aportadas por las piezas
   // ==========================================
-  readonly descripcionesDetalladas = computed<DescripcionHabilidad[]>(() =>
-    // Solo las habilidades de las piezas. Se excluyen las de tipo "set" (p. ej. "Tiranía de
-    // Gore Magala"): son la habilidad del conjunto de armadura, cuyo nivel activado ya se
-    // describe en la pestaña "Bonificaciones de Conjunto" (p. ej. "Eclipse negro I").
-    this.habilidadesActivas()
-      .filter(habilidad => habilidad.kind !== 'set')
+  readonly descripcionesDetalladas = computed<DescripcionHabilidad[]>(() => {
+    // Habilidades de las piezas. Se excluyen las de tipo "set" (p. ej. "Tiranía de Gore
+    // Magala") y las de grupo tratadas como bonificación ("Alma del amo"): su nivel activado
+    // ya se describe en la pestaña "Bonificaciones de Conjunto" (p. ej. "Eclipse negro I").
+    const deLasPiezas = this.habilidadesActivas()
+      .filter(habilidad =>
+        habilidad.kind !== 'set' && !HABILIDADES_GRUPO_COMO_BONIFICACION.includes(habilidad.skillId))
       .map(habilidad => ({
         clave: `pieza-${habilidad.skillId}`,
         nombre: habilidad.nombre,
         nivel: habilidad.nivel,
         descripcion: habilidad.descripcion
-      }))
-  );
+      }));
+
+    // Más las habilidades que otorgan las bonificaciones de grupo activas ("Agallas (tenacidad)")
+    const otorgadas = this.bonificacionesSet()
+      .map(bono => bono.efectoOtorgado)
+      .filter((efecto): efecto is DescripcionHabilidad => efecto !== null);
+
+    return [...deLasPiezas, ...otorgadas];
+  });
 
   // ==========================================
   // 📊 PESTAÑA "ESTADÍSTICAS TOTALES" (mismo cálculo que el Constructor, ver

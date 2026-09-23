@@ -106,14 +106,19 @@
       @if (pestanaDetalle() === 'bonificaciones') {
         <!-- Cada bonificación activa con la descripción de la habilidad que otorga el conjunto -->
         <mat-card class="section-card status-card tab-content">
-          @for (bono of bonificacionesSet(); track bono.setId) {
+          @for (bono of bonificacionesSet(); track bono.clave) {
             <div class="description-item is-set-bonus">
               <div class="description-header">
                 <span class="description-name">{{ bono.nombreHabilidad }}</span>
                 <span class="text-gold">{{ 'skillForge.level' | translate }} {{ bono.nivel }}</span>
               </div>
-              <div class="bonus-origen">🎖️ {{ bono.nombreSet }} ({{ bono.piezasEquipadas }}/{{ bono.piezasRequeridas }})</div>
-              <p class="description-text">{{ bono.descripcion }}</p>
+              <div class="bonus-origen">
+                🎖️ {{ bono.esGrupo ? ('skillForge.setBonuses.groupBonus' | translate) : bono.nombreSet }}
+                ({{ bono.piezasEquipadas }}/{{ bono.piezasMaximas }})
+              </div>
+              @if (bono.descripcion) {
+                <p class="description-text">{{ bono.descripcion }}</p>
+              }
             </div>
           } @empty {
             <p class="empty-state">{{ 'skillForge.setBonuses.empty' | translate }}</p>

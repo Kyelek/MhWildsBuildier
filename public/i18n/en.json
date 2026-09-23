@@ -113,7 +113,8 @@
     "level": "Lv.",
     "setBonuses": {
       "title": "Set Bonuses",
-      "empty": "No active set bonus. Equip 2 or more pieces from the same set."
+      "empty": "No active set bonus. Equip 2 or more pieces from the same set.",
+      "groupBonus": "Group bonus"
     },
     "descriptions": {
       "title": "Detailed Descriptions",

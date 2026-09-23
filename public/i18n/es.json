@@ -113,7 +113,8 @@
     "level": "Nv.",
     "setBonuses": {
       "title": "Bonificaciones de Conjunto",
-      "empty": "Ninguna bonificación de conjunto activa. Equipa 2 o más piezas del mismo conjunto."
+      "empty": "Ninguna bonificación de conjunto activa. Equipa 2 o más piezas del mismo conjunto.",
+      "groupBonus": "Bonificación de grupo"
     },
     "descriptions": {
       "title": "Descripciones Detalladas",
