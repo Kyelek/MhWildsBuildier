@@ -5,6 +5,22 @@
       "retry": "Retry"
     }
   },
+  "weaponTypes": {
+    "bow": "Bow",
+    "charge-blade": "Charge Blade",
+    "dual-blades": "Dual Blades",
+    "great-sword": "Great Sword",
+    "gunlance": "Gunlance",
+    "hammer": "Hammer",
+    "heavy-bowgun": "Heavy Bowgun",
+    "hunting-horn": "Hunting Horn",
+    "insect-glaive": "Insect Glaive",
+    "lance": "Lance",
+    "light-bowgun": "Light Bowgun",
+    "long-sword": "Long Sword",
+    "switch-axe": "Switch Axe",
+    "sword-shield": "Sword & Shield"
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
