@@ -117,8 +117,7 @@
     },
     "descriptions": {
       "title": "Descripciones Detalladas",
-      "empty": "Aún no hay habilidades que describir.",
-      "setBonusOf": "Bonificación de"
+      "empty": "Aún no hay habilidades que describir."
     },
     "activeSkills": {
       "title": "Habilidades del Conjunto",

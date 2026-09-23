@@ -25,11 +25,11 @@ export interface ConteoPorSet {
   cantidad: number;
 }
 
-// 📖 Entrada unificada para el panel de descripciones detalladas
+// 📖 Entrada de la pestaña "Descripciones Detalladas" (habilidades aportadas por las piezas;
+// las bonificaciones de conjunto se describen en su propia pestaña con BonificacionSetActiva)
 export interface DescripcionHabilidad {
   clave: string;
   nombre: string;
   nivel: number;
   descripcion: string;
-  esBonificacionSet: boolean;
 }
