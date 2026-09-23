@@ -8,7 +8,8 @@
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
-    "skills-forge": "Forja de Habilidades"
+    "skills-forge": "Forja de Habilidades",
+    "menu": "Abrir o cerrar el menú"
   },
   "home": {
     "header": {

@@ -1,3 +1,5 @@
+@use 'responsive' as *;
+
 // ==========================================
 // 🎨 HOMOGENEIDAD VISUAL: esta hoja de estilos replica deliberadamente la estructura,
 // las clases y los valores (colores, paddings, márgenes) de builder.component.scss,
@@ -29,14 +31,56 @@
     min-width: 320px;
   }
 
+  // ==========================================
+  // 📱 TABLET / MÓVIL: una sola columna.
+  // ".equipment-selectors" se "disuelve" (display: contents) para poder reordenar sus
+  // dos tarjetas junto al panel de resumen: selectores → Habilidades/Estadísticas →
+  // bonificaciones y descripciones. Así el resultado del set se ve nada más elegir
+  // las piezas, sin tener que bajar hasta el final de las descripciones.
+  // ==========================================
+  @include tablet {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 24px;
+    padding: 16px 0;
+    min-height: 0;
+
+    .equipment-selectors {
+      display: contents;
+    }
+
+    .stats-panel {
+      order: 1;
+      min-width: 0;
+    }
+
+    .descriptions-card {
+      order: 2;
+    }
+  }
+
+  @include movil {
+    gap: 16px;
+    padding: 4px 0;
+  }
+
   .section-card {
     padding: 32px !important; // Mismo "aire" interno que las tarjetas del Constructor
+
+    @include movil {
+      padding: 20px 16px !important;
+    }
 
     h2 {
       margin-top: 0;
       margin-bottom: 32px;
       border-bottom: 1px solid rgba(197, 160, 89, 0.3);
       padding-bottom: 12px;
+
+      @include movil {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+      }
     }
   }
 
@@ -102,9 +146,16 @@
     .stat-row {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
+      gap: 12px; // Evita que un nombre de habilidad largo se pegue a su nivel
       padding: 14px 0;
       font-size: 1.15rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+
+      @include movil {
+        padding: 12px 0;
+        font-size: 1rem;
+      }
 
       &:last-child {
         border-bottom: none;
@@ -112,6 +163,7 @@
 
       .stat-value {
         font-weight: bold;
+        white-space: nowrap;
       }
     }
 
@@ -145,6 +197,22 @@
           font-size: 1rem;
         }
       }
+
+      @include movil {
+        gap: 8px;
+
+        .res-item {
+          padding: 8px 12px;
+        }
+      }
+    }
+
+    // 📱 Las bonificaciones de set llevan textos largos (nombre del set + habilidad):
+    // en móvil una por fila en vez de dos columnas estrechas.
+    .bonus-grid {
+      @include movil {
+        grid-template-columns: 1fr;
+      }
     }
 
     // Descripciones detalladas: mismo lenguaje visual (bordes y tonos sutiles del tema dorado)
@@ -168,6 +236,9 @@
       .description-header {
         display: flex;
         justify-content: space-between;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 4px 12px;
         font-weight: 600;
         color: #ffffff;
         margin-bottom: 6px;
@@ -220,6 +291,18 @@
     border-radius: 10px 10px 0 0;
     transform: translateY(3px);
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    // 📱 En pantallas estrechas las dos pestañas se reparten el ancho a partes iguales
+    // (el texto puede partirse en dos líneas en vez de desbordar la tarjeta).
+    @include movil {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 10px 8px;
+      font-size: 0.85rem;
+      line-height: 1.25;
+      text-align: center;
+    }
 
     &:hover:not(.active) {
       color: rgba(255, 255, 255, 0.8);

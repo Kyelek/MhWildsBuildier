@@ -8,7 +8,8 @@
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
-    "skills-forge": "Skills Forge"
+    "skills-forge": "Skills Forge",
+    "menu": "Open or close the menu"
   },
   "home": {
     "header":  {

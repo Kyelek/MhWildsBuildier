@@ -1,0 +1,33 @@
+// ==========================================
+// 📱 PUNTOS DE CORTE RESPONSIVE compartidos por toda la aplicación.
+//
+// Se importan desde cualquier hoja de estilos con `@use 'responsive' as *;`
+// (la carpeta src/styles está registrada en "stylePreprocessorOptions.includePaths"
+// de angular.json). Enfoque "desktop first": los estilos base son los de escritorio
+// y estos mixins los ajustan hacia abajo, sin alterar la vista de escritorio.
+// ==========================================
+
+$bp-movil: 600px;  // Por debajo: teléfonos (vertical y la mayoría en horizontal)
+$bp-tablet: 960px; // Por debajo: tablets y portátiles muy estrechos
+
+// Pantallas de teléfono
+@mixin movil {
+  @media (max-width: #{$bp-movil - 0.02px}) {
+    @content;
+  }
+}
+
+// Tablets y teléfonos (todo lo que no es escritorio)
+@mixin tablet {
+  @media (max-width: #{$bp-tablet - 0.02px}) {
+    @content;
+  }
+}
+
+// Solo dispositivos con puntero real (ratón): evita que los efectos :hover con
+// desplazamiento se queden "pegados" tras un toque en pantallas táctiles.
+@mixin con-hover {
+  @media (hover: hover) and (pointer: fine) {
+    @content;
+  }
+}

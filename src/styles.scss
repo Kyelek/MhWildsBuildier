@@ -1,3 +1,5 @@
+@use 'responsive' as *;
+
 // Configuración de fuentes globales
 $font-titles: 'Cinzel', serif;
 $font-body: 'Montserrat', sans-serif;
@@ -5,6 +7,28 @@ $font-body: 'Montserrat', sans-serif;
 // Colores base
 $color-gold: #c5a059;
 $color-text: #f5f5e9;
+
+// 📐 Medidas de layout compartidas (navbar fijo y márgenes de página), redefinidas
+// por breakpoint para que todos los componentes se adapten a la vez.
+:root {
+  --altura-navbar: 70px;
+  --relleno-pagina: 40px;
+
+  @include tablet {
+    --relleno-pagina: 24px;
+  }
+
+  @include movil {
+    --altura-navbar: 60px;
+    --relleno-pagina: 12px;
+  }
+}
+
+html {
+  // Evita que iOS/Android agranden el texto por su cuenta al girar el móvil
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 html, body {
   margin: 0;
@@ -23,6 +47,12 @@ body {
   background-position: center center;
   background-attachment: fixed;
   background-repeat: no-repeat;
+
+  // 📱 iOS/Android ignoran (o renderizan mal, con un zoom enorme) "background-attachment:
+  // fixed" en pantallas táctiles: ahí el fondo pasa a desplazarse con la página.
+  @media (hover: none) {
+    background-attachment: scroll;
+  }
 }
 
 // 🎬 ANIMACIÓN SUTIL DE ENTRADA, global para que cualquier pantalla ruteada
@@ -96,6 +126,12 @@ h1, h2, h3, h4 {
 .mat-mdc-autocomplete-panel {
   background-color: #14120f !important;
   border: 1px solid rgba(197, 160, 89, 0.4) !important;
+
+  // 📱 En móvil el teclado virtual se come media pantalla: el desplegable no debe
+  // crecer más allá de lo que queda visible encima/debajo del campo.
+  @include movil {
+    max-height: 40vh !important;
+  }
 }
 
 // 🐛 FIX: SelectorBuscableComponent mantiene SIEMPRE montadas todas las opciones del
