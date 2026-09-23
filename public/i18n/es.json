@@ -113,12 +113,12 @@
     "level": "Nv.",
     "setBonuses": {
       "title": "Bonificaciones de Conjunto",
-      "empty": "Ninguna bonificación de conjunto activa. Equipa 2 o más piezas del mismo conjunto."
+      "empty": "Ninguna bonificación de conjunto activa. Equipa 2 o más piezas del mismo conjunto.",
+      "groupBonus": "Bonificación de grupo"
     },
     "descriptions": {
       "title": "Descripciones Detalladas",
-      "empty": "Aún no hay habilidades que describir.",
-      "setBonusOf": "Bonificación de"
+      "empty": "Aún no hay habilidades que describir."
     },
     "activeSkills": {
       "title": "Habilidades del Conjunto",

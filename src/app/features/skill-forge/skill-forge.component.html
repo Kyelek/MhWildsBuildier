@@ -78,39 +78,68 @@
         [etiquetaVacio]="'armorSlots.unequipped' | translate" />
     </mat-card>
 
-    <!-- 🎖️📖 REESTRUCTURACIÓN: las bonificaciones de conjunto y las descripciones detalladas
-         se muestran ahora justo debajo de los selectores de piezas de armadura, en vez de en el
-         panel lateral. Siguen siendo 100% dinámicas: se recalculan solas al cambiar cualquier pieza. -->
-    <mat-card class="section-card status-card descriptions-card">
-      <h3>{{ 'skillForge.setBonuses.title' | translate }}</h3>
-      @if (bonificacionesSet().length === 0) {
-        <p class="empty-state">{{ 'skillForge.setBonuses.empty' | translate }}</p>
-      } @else {
-        <div class="stat-group resistances-grid bonus-grid">
-          @for (bono of bonificacionesSet(); track bono.setId) {
-            <div class="res-item">
-              <span class="res-label">🎖️ {{ bono.nombreSet }} ({{ bono.piezasEquipadas }}/{{ bono.piezasRequeridas }})</span>
-              <span class="res-value text-gold">{{ bono.nombreHabilidad }} {{ 'skillForge.level' | translate }}{{ bono.nivel }}</span>
+    <!-- 🎖️📖 Bonificaciones de conjunto y descripciones detalladas, justo debajo de los
+         selectores, comparten hueco mediante pestañas estilo navegador (igual que el panel
+         de Habilidades / Estadísticas). Ambas se recalculan solas al cambiar cualquier pieza. -->
+    <div class="descriptions-card">
+      <div class="chrome-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          class="chrome-tab"
+          [class.active]="pestanaDetalle() === 'bonificaciones'"
+          [attr.aria-selected]="pestanaDetalle() === 'bonificaciones'"
+          (click)="pestanaDetalle.set('bonificaciones')">
+          {{ 'skillForge.setBonuses.title' | translate }}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="chrome-tab"
+          [class.active]="pestanaDetalle() === 'descripciones'"
+          [attr.aria-selected]="pestanaDetalle() === 'descripciones'"
+          (click)="pestanaDetalle.set('descripciones')">
+          {{ 'skillForge.descriptions.title' | translate }}
+        </button>
+      </div>
+
+      @if (pestanaDetalle() === 'bonificaciones') {
+        <!-- Cada bonificación activa con la descripción de la habilidad que otorga el conjunto -->
+        <mat-card class="section-card status-card tab-content">
+          @for (bono of bonificacionesSet(); track bono.clave) {
+            <div class="description-item is-set-bonus">
+              <div class="description-header">
+                <span class="description-name">{{ bono.nombreHabilidad }}</span>
+                <span class="text-gold">{{ 'skillForge.level' | translate }} {{ bono.nivel }}</span>
+              </div>
+              <div class="bonus-origen">
+                🎖️ {{ bono.esGrupo ? ('skillForge.setBonuses.groupBonus' | translate) : bono.nombreSet }}
+                ({{ bono.piezasEquipadas }}/{{ bono.piezasMaximas }})
+              </div>
+              @if (bono.descripcion) {
+                <p class="description-text">{{ bono.descripcion }}</p>
+              }
             </div>
+          } @empty {
+            <p class="empty-state">{{ 'skillForge.setBonuses.empty' | translate }}</p>
           }
-        </div>
+        </mat-card>
+      } @else {
+        <mat-card class="section-card status-card tab-content">
+          @for (item of descripcionesDetalladas(); track item.clave) {
+            <div class="description-item">
+              <div class="description-header">
+                <span class="description-name">{{ item.nombre }}</span>
+                <span class="text-gold">{{ 'skillForge.level' | translate }} {{ item.nivel }}</span>
+              </div>
+              <p class="description-text">{{ item.descripcion }}</p>
+            </div>
+          } @empty {
+            <p class="empty-state">{{ 'skillForge.descriptions.empty' | translate }}</p>
+          }
+        </mat-card>
       }
-
-      <mat-divider style="margin: 24px 0; border-color: rgba(197, 160, 89, 0.15);"></mat-divider>
-
-      <h3>{{ 'skillForge.descriptions.title' | translate }}</h3>
-      @for (item of descripcionesDetalladas(); track item.clave) {
-        <div class="description-item" [class.is-set-bonus]="item.esBonificacionSet">
-          <div class="description-header">
-            <span class="description-name">{{ item.nombre }}</span>
-            <span class="text-gold">{{ 'skillForge.level' | translate }} {{ item.nivel }}</span>
-          </div>
-          <p class="description-text">{{ item.descripcion }}</p>
-        </div>
-      } @empty {
-        <p class="empty-state">{{ 'skillForge.descriptions.empty' | translate }}</p>
-      }
-    </mat-card>
+    </div>
   </div>
 
   <!-- 📊 La tarjeta principal "Habilidades del Conjunto" permanece en su ubicación de siempre

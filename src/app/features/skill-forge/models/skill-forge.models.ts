@@ -8,15 +8,20 @@ export interface HabilidadAcumulada {
 }
 
 // 🎖️ Bonificación de conjunto actualmente activada (puede haber varias a la vez, una por cada
-// conjunto del que se tengan 2 o más piezas equipadas simultáneamente)
+// conjunto del que se tengan 2 o más piezas equipadas simultáneamente). También se usa para
+// las bonificaciones de grupo tratadas como excepción (p. ej. "Alma del amo").
 export interface BonificacionSetActiva {
-  setId: number;
-  nombreSet: string;
+  clave: string;           // Identificador único para la plantilla: "set-<id>" o "grupo-<skillId>"
+  esGrupo: boolean;        // true en las bonificaciones de grupo ("Alma del amo")
+  nombreSet: string;       // Conjunto de origen (en las de grupo, la propia habilidad de grupo)
   piezasEquipadas: number;
-  piezasRequeridas: number;
-  nombreHabilidad: string;
+  piezasMaximas: number;   // Piezas que pide el rango MÁS ALTO de la bonificación (p. ej. 4)
+  nombreHabilidad: string; // Conjuntos: nivel activado ("Eclipse negro I"). Grupo: "Alma del amo"
   nivel: number;
-  descripcion: string;
+  // null en las de grupo: su efecto se describe aparte, en "Descripciones Detalladas"
+  descripcion: string | null;
+  // Habilidad que otorga una bonificación de grupo (p. ej. "Agallas (tenacidad)"); null en conjuntos
+  efectoOtorgado: DescripcionHabilidad | null;
 }
 
 // 🔢 Conteo interno de cuántas piezas seleccionadas pertenecen a un mismo conjunto de armadura
@@ -25,11 +30,11 @@ export interface ConteoPorSet {
   cantidad: number;
 }
 
-// 📖 Entrada unificada para el panel de descripciones detalladas
+// 📖 Entrada de la pestaña "Descripciones Detalladas" (habilidades aportadas por las piezas;
+// las bonificaciones de conjunto se describen en su propia pestaña con BonificacionSetActiva)
 export interface DescripcionHabilidad {
   clave: string;
   nombre: string;
   nivel: number;
   descripcion: string;
-  esBonificacionSet: boolean;
 }

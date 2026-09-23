@@ -5,6 +5,7 @@
     matInput
     type="text"
     autocomplete="off"
+    spellcheck="false"
     [placeholder]="textoBuscador()"
     [matAutocomplete]="panelOpciones"
     (input)="onBusquedaInput($any($event.target).value)"
