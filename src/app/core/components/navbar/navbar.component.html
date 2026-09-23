@@ -36,11 +36,23 @@
       </a>
     </li>
 
-    <!-- Los tres idiomas van juntos para que en el menú móvil queden en una sola fila -->
+    <!-- Los tres idiomas van juntos para que en el menú móvil queden en una sola fila.
+         En escritorio se ve el código (EN/ES/JP); en el menú desplegable, la bandera,
+         con el idioma activo remarcado. -->
     <li class="nav-idiomas">
-      <button type="button" (click)="useLanguage('en')">EN</button>
-      <button type="button" (click)="useLanguage('es')">ES</button>
-      <button type="button" (click)="useLanguage('jp')">JP</button>
+      @for (idioma of idiomas; track idioma.codigo) {
+        <button
+          type="button"
+          class="nav-idioma"
+          [class.seleccionado]="idiomaActual() === idioma.codigo"
+          [attr.aria-pressed]="idiomaActual() === idioma.codigo"
+          [attr.aria-label]="idioma.nombre"
+          [title]="idioma.nombre"
+          (click)="useLanguage(idioma.codigo)">
+          <span class="idioma-codigo">{{ idioma.etiqueta }}</span>
+          <img class="idioma-bandera" [src]="idioma.bandera" alt="" width="30" height="20">
+        </button>
+      }
     </li>
   </ul>
 </nav>

@@ -30,7 +30,7 @@ $font-main: 'Montserrat', sans-serif;
       // Escala fluida: 3rem en escritorio, hasta ~1.75rem en teléfonos estrechos
       font-size: clamp(1.75rem, 1rem + 4vw, 3rem);
       overflow-wrap: break-word;
-      font-weight: 800;
+      font-weight: 700; // Cinzel solo se carga hasta 700 (ver index.html)
       line-height: 1.2;
       margin-bottom: 24px;
       color: #ffffff;
