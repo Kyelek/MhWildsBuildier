@@ -81,12 +81,12 @@
     <!-- 🎖️📖 REESTRUCTURACIÓN: las bonificaciones de conjunto y las descripciones detalladas
          se muestran ahora justo debajo de los selectores de piezas de armadura, en vez de en el
          panel lateral. Siguen siendo 100% dinámicas: se recalculan solas al cambiar cualquier pieza. -->
-    <mat-card class="section-card status-card">
+    <mat-card class="section-card status-card descriptions-card">
       <h3>{{ 'skillForge.setBonuses.title' | translate }}</h3>
       @if (bonificacionesSet().length === 0) {
         <p class="empty-state">{{ 'skillForge.setBonuses.empty' | translate }}</p>
       } @else {
-        <div class="stat-group resistances-grid">
+        <div class="stat-group resistances-grid bonus-grid">
           @for (bono of bonificacionesSet(); track bono.setId) {
             <div class="res-item">
               <span class="res-label">🎖️ {{ bono.nombreSet }} ({{ bono.piezasEquipadas }}/{{ bono.piezasRequeridas }})</span>
