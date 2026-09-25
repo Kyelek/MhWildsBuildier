@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { WritableSignal, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
@@ -6,6 +7,7 @@ import { of } from 'rxjs';
 import { DialogoArmasComponent } from './dialogo-armas.component';
 import { Weapon } from '../../../../core/models/wilds.models';
 import { DatosDialogoArmas } from '../../../models/tipos-arma.models';
+import { ApiLocale, WildsApiService } from '../../../../core/services/wilds-api.service';
 
 function arma(id: number, name: string, kind: string): Weapon {
   return { id, name, kind, rarity: 1, affinity: 0, damage: { raw: 100, display: 100 }, slots: [], specials: [] };
@@ -22,18 +24,26 @@ describe('DialogoArmasComponent', () => {
   let fixture: ComponentFixture<DialogoArmasComponent>;
   let component: DialogoArmasComponent;
   let dialogRef: jasmine.SpyObj<MatDialogRef<DialogoArmasComponent, Weapon>>;
+  let wildsApi: { locale: WritableSignal<ApiLocale>; getWeaponsPorTipo: jasmine.Spy };
 
   function crear(seleccionada: Weapon | null = null): void {
     dialogRef = jasmine.createSpyObj('MatDialogRef', ['close', 'afterOpened']);
     dialogRef.afterOpened.and.returnValue(of(undefined));
-    const datos: DatosDialogoArmas = { armas: CATALOGO, seleccionada };
+    const datos: DatosDialogoArmas = { seleccionada };
+    // La API devuelve solo las armas del tipo pedido
+    wildsApi = {
+      locale: signal<ApiLocale>('es'),
+      getWeaponsPorTipo: jasmine.createSpy('getWeaponsPorTipo')
+        .and.callFake((tipo: string) => of(CATALOGO.filter(arma => arma.kind === tipo)))
+    };
 
     TestBed.configureTestingModule({
       imports: [DialogoArmasComponent],
       providers: [
         provideTranslateService(),
         { provide: MAT_DIALOG_DATA, useValue: datos },
-        { provide: MatDialogRef, useValue: dialogRef }
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: WildsApiService, useValue: wildsApi }
       ]
     });
 
@@ -81,9 +91,14 @@ describe('DialogoArmasComponent', () => {
     expect(component.especialDe(CATALOGO[0])).toBeNull();
   });
 
-  it('al elegir un tipo lista solo sus armas y el buscador filtra dentro de ese tipo (sin tildes)', () => {
+  it('al elegir un tipo pide a la API solo sus armas y el buscador filtra dentro de ellas (sin tildes)', async () => {
     crear();
+    expect(wildsApi.getWeaponsPorTipo).not.toHaveBeenCalled(); // en la pantalla de tipos no se pide nada
+
     component.elegirTipo('bow');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(wildsApi.getWeaponsPorTipo).toHaveBeenCalledOnceWith('bow', 'es');
     expect(component.armasFiltradas().map(a => a.id)).toEqual([1, 2]);
 
     component.onBusquedaInput('HIÉRRO');

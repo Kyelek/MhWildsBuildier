@@ -20,7 +20,6 @@
 
       <!-- 🗡️ El arma se elige en un popup (tipo de arma → arma concreta), ver shared/components/selector-arma -->
       <app-selector-arma
-        [armas]="armas()"
         [(valor)]="armaSeleccionada"
         [etiqueta]="'builder.weapon.label' | translate"
         [permitirQuitar]="true" />

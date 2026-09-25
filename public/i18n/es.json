@@ -45,7 +45,9 @@
       "paralysis": "Parálisis",
       "sleep": "Sueño",
       "blastblight": "Nitro"
-    }
+    },
+    "loading": "Cargando armas...",
+    "loadError": "No se pudieron cargar las armas. Comprueba tu conexión."
   },
   "underDevelopment": {
     "title": "En desarrollo",

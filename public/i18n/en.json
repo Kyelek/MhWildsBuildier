@@ -45,7 +45,9 @@
       "paralysis": "Paralysis",
       "sleep": "Sleep",
       "blastblight": "Blast"
-    }
+    },
+    "loading": "Loading weapons...",
+    "loadError": "Could not load the weapons. Check your connection."
   },
   "underDevelopment": {
     "title": "Under development",

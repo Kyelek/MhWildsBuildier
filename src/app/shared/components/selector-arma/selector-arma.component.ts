@@ -19,7 +19,6 @@ import { DialogoArmasComponent } from './dialogo-armas/dialogo-armas.component';
 export class SelectorArmaComponent {
   private readonly dialog = inject(MatDialog);
 
-  readonly armas = input.required<Weapon[]>();
   readonly etiqueta = input('');
   // Muestra una X junto al botón para quitar el arma sin abrir el popup
   readonly permitirQuitar = input(false);
@@ -29,7 +28,7 @@ export class SelectorArmaComponent {
   readonly iconoTipo = iconoTipoArma;
 
   abrir(): void {
-    const datos: DatosDialogoArmas = { armas: this.armas(), seleccionada: this.valor() };
+    const datos: DatosDialogoArmas = { seleccionada: this.valor() };
 
     this.dialog
       .open<DialogoArmasComponent, DatosDialogoArmas, Weapon>(DialogoArmasComponent, {

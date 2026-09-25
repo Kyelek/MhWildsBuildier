@@ -63,9 +63,17 @@
         (input)="onBusquedaInput($any($event.target).value)" />
     </div>
 
-    <!-- El scroll virtual solo pinta las filas visibles (hay ~90 armas por tipo). No existe
-         equivalente en la sintaxis @for, por eso se usa la directiva *cdkVirtualFor. -->
-    @if (armasFiltradas().length > 0) {
+    <!-- Mientras llegan de la API las armas del tipo se avisa de la carga (o del error, con
+         opción de reintentar). El scroll virtual solo pinta las filas visibles (hay ~90 armas
+         por tipo); no tiene equivalente en la sintaxis @for, por eso se usa *cdkVirtualFor. -->
+    @if (armasDelTipo.isLoading()) {
+      <p class="lista-estado">{{ 'weaponPicker.loading' | translate }}</p>
+    } @else if (armasDelTipo.error()) {
+      <div class="lista-estado">
+        <p>{{ 'weaponPicker.loadError' | translate }}</p>
+        <button type="button" class="btn-reintentar" (click)="reintentarCarga()">{{ 'common.errors.retry' | translate }}</button>
+      </div>
+    } @else if (armasFiltradas().length > 0) {
       <cdk-virtual-scroll-viewport class="lista-armas" [itemSize]="altoFila">
         <button
           *cdkVirtualFor="let arma of armasFiltradas(); trackBy: porId"
@@ -93,7 +101,7 @@
         </button>
       </cdk-virtual-scroll-viewport>
     } @else {
-      <p class="lista-vacia">{{ 'weaponPicker.empty' | translate }}</p>
+      <p class="lista-estado">{{ 'weaponPicker.empty' | translate }}</p>
     }
   }
 </div>

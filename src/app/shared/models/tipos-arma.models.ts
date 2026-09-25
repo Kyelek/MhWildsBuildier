@@ -49,8 +49,8 @@ export interface EspecialArma {
   oculto: boolean;     // Elemento oculto: se muestra entre paréntesis, como en el juego
 }
 
-// Datos que recibe el popup de selección de armas al abrirse
+// Datos que recibe el popup de selección de armas al abrirse (las armas las pide él mismo
+// a la API, solo las del tipo que se elija)
 export interface DatosDialogoArmas {
-  armas: Weapon[];
   seleccionada: Weapon | null;
 }

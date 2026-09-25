@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { WildsApiService } from '../../core/services/wilds-api.service';
+import { ApiLocale, WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 import { SelectorArmaComponent } from '../../shared/components/selector-arma/selector-arma.component';
@@ -74,22 +74,15 @@ export class SkillForgeComponent {
     loader: ({ request }) => this.wildsApi.getSkills(request)
   });
 
-  // 🗡️ Catálogo de armas: solo lo necesita la pestaña "Estadísticas Totales" (ataque/afinidad),
-  // pero se pide junto al resto para que esa pestaña ya tenga el dato listo al cambiar a ella.
-  readonly weaponsResource = rxResource({
-    request: () => this.wildsApi.locale(),
-    loader: ({ request }) => this.wildsApi.getWeapons(request)
-  });
-
   readonly cargando = computed(() =>
     this.armorResource.isLoading() || this.armorSetsResource.isLoading() ||
-    this.skillsResource.isLoading() || this.weaponsResource.isLoading()
+    this.skillsResource.isLoading()
   );
 
   // 🚨 Si cualquiera de los catálogos falló al cargar, mostramos el primer error
   readonly error = computed(() =>
     this.armorResource.error() ?? this.armorSetsResource.error() ??
-    this.skillsResource.error() ?? this.weaponsResource.error()
+    this.skillsResource.error()
   );
 
   // Vuelve a pedir los catálogos (usado por el botón "Reintentar")
@@ -97,7 +90,6 @@ export class SkillForgeComponent {
     this.armorResource.reload();
     this.armorSetsResource.reload();
     this.skillsResource.reload();
-    this.weaponsResource.reload();
   }
 
   // 2. Estado de las piezas y el arma seleccionadas para construir el conjunto personalizado
@@ -136,9 +128,24 @@ export class SkillForgeComponent {
       this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
     }
 
-    const armas = this.weaponsResource.value();
-    if (armas) {
-      this.armaSeleccionada.update(actual => this.buscarPorId(actual, armas));
+    const armasDelTipo = this.armasDelTipoSeleccionado.value();
+    if (armasDelTipo) {
+      this.armaSeleccionada.update(actual => this.buscarPorId(actual, armasDelTipo));
+    }
+  });
+
+  // 🗡️ El arma ya no sale de un catálogo completo (el popup pide solo las del tipo elegido):
+  // para traducirla al cambiar de idioma se piden las armas de SU tipo en el idioma nuevo.
+  // La petición es un texto "tipo|idioma" para que solo se repita si cambia alguno de los
+  // dos (al elegir otra arma del mismo tipo no hace falta volver a pedir nada).
+  private readonly armasDelTipoSeleccionado = rxResource({
+    request: () => {
+      const tipo = this.armaSeleccionada()?.kind;
+      return tipo ? `${tipo}|${this.wildsApi.locale()}` : undefined;
+    },
+    loader: ({ request }) => {
+      const [tipo, locale] = request.split('|') as [string, ApiLocale];
+      return this.wildsApi.getWeaponsPorTipo(tipo, locale);
     }
   });
 
@@ -157,8 +164,6 @@ export class SkillForgeComponent {
   readonly brazos = computed(() => this.armorPorRanura('arms'));
   readonly cinturas = computed(() => this.armorPorRanura('waist'));
   readonly piernas = computed(() => this.armorPorRanura('legs'));
-
-  readonly armas = computed(() => this.weaponsResource.value() ?? []);
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {

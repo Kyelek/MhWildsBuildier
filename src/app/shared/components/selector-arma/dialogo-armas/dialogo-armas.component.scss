@@ -273,8 +273,33 @@ $color-text: #f5f5e9;
   }
 }
 
-.lista-vacia {
+// Cargando, error al cargar o sin resultados
+.lista-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   margin: 24px 0 0;
   text-align: center;
   color: #9e9e93;
+
+  p {
+    margin: 0;
+  }
+}
+
+.btn-reintentar {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid $color-gold;
+  border-radius: 4px;
+  color: $color-gold;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(197, 160, 89, 0.15);
+    outline: none;
+  }
 }
