@@ -47,7 +47,28 @@
       "blastblight": "Nitro"
     },
     "loading": "Cargando armas...",
-    "loadError": "No se pudieron cargar las armas. Comprueba tu conexión."
+    "loadError": "No se pudieron cargar las armas. Comprueba tu conexión.",
+    "filters": {
+      "elementStatus": "Elemento / Estado",
+      "noElement": "Sin elemento",
+      "sortBy": "Ordenar por",
+      "descending": "De mayor a menor",
+      "ascending": "De menor a mayor",
+      "sort": {
+        "default": "Por defecto",
+        "rarity": "Rareza",
+        "attack": "Ataque",
+        "affinity": "Afinidad",
+        "special": "Elemento / Estado"
+      }
+    }
+  },
+  "searchFilters": {
+    "open": "Filtros",
+    "title": "Filtros",
+    "close": "Cerrar filtros",
+    "clear": "Borrar filtros",
+    "showResults": "Ver resultados ({{count}})"
   },
   "underDevelopment": {
     "title": "En desarrollo",

@@ -172,30 +172,193 @@ $color-text: #f5f5e9;
   margin-bottom: 16px;
 }
 
-.campo-busqueda {
-  width: 100%;
-  max-width: 420px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+// ==========================================
+// 🔍 Contenido del panel de filtros (se proyecta dentro de <app-buscador-filtros>)
+// ==========================================
+.filtro-seccion {
+  & + & {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+.filtro-titulo {
+  margin: 0 0 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #9e9e93;
+}
+
+// Casillas de elemento / estado
+.filtro-casillas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 12px;
+
+  @include movil {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+  }
+}
+
+.filtro-casilla {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 6px;
   border-radius: 4px;
-  color: $color-text;
-  font-size: 1rem;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 
-  &::placeholder {
-    color: #9e9e93;
+  &:hover:not(.desactivada) {
+    background: rgba(197, 160, 89, 0.08);
   }
 
-  &:hover {
-    border-color: rgba(197, 160, 89, 0.6);
+  // La casilla nativa queda oculta (pero accesible): se dibuja ".filtro-caja" en su lugar
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
   }
 
-  &:focus {
-    outline: none;
+  &.desactivada {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  // "Sin elemento" (la última opción) tiene el nombre más largo: ocupa dos columnas
+  &:last-child {
+    grid-column: span 2;
+  }
+}
+
+.filtro-caja {
+  flex-shrink: 0;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(197, 160, 89, 0.6);
+  border-radius: 3px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  // Marca de verificación
+  &::after {
+    content: '';
+    position: absolute;
+    left: 4.5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid #14120f;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+  }
+
+  input:checked + & {
+    background: $color-gold;
     border-color: $color-gold;
-    box-shadow: 0 0 0 1px $color-gold;
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  input:focus-visible + & {
+    box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.5);
+  }
+}
+
+.filtro-icono {
+  width: 20px;
+  text-align: center;
+}
+
+.filtro-nombre {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Nº de armas del tipo con esa opción
+.filtro-total {
+  font-size: 0.75rem;
+  color: #9e9e93;
+}
+
+// Chips de "Ordenar por" y botones de rareza comparten aspecto
+.filtro-chips,
+.filtro-rarezas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filtro-chip,
+.filtro-rareza,
+.filtro-sentido {
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: $color-gold;
+    color: #ffffff;
+    outline: none;
+  }
+
+  &.activo {
+    background: rgba(197, 160, 89, 0.2);
+    border-color: $color-gold;
+    color: $color-gold;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+// Sentido del orden, debajo de los criterios
+.filtro-sentido {
+  margin-top: 8px;
+  border-radius: 4px;
+
+  span {
+    margin-right: 4px;
+    color: $color-gold;
+  }
+}
+
+// Rarezas 1-8: botones cuadrados del mismo ancho
+.filtro-rareza {
+  width: 40px;
+  padding: 7px 0;
+  border-radius: 4px;
+  text-align: center;
+
+  @include movil {
+    width: calc((100% - 3 * 6px) / 4); // 2 filas de 4 en móvil
   }
 }
 
