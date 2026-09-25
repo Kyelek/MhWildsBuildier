@@ -39,6 +39,12 @@
       "thunder": "雷",
       "ice": "氷",
       "dragon": "龍"
+    },
+    "statuses": {
+      "poison": "毒",
+      "paralysis": "麻痺",
+      "sleep": "睡眠",
+      "blastblight": "爆破"
     }
   },
   "underDevelopment": {

@@ -1,4 +1,4 @@
-import { ElementoArma, Weapon } from '../../core/models/wilds.models';
+import { ElementoArma, EstadoArma, Weapon } from '../../core/models/wilds.models';
 
 // 🗡️ Tipos de arma (campo "kind" de la API) en el mismo orden en que los presenta el juego.
 // Cada uno tiene su icono en public/images/arms/<tipo>.png y su nombre traducido en
@@ -32,6 +32,22 @@ export const ICONOS_ELEMENTO: Record<ElementoArma, string> = {
   ice: '❄️',
   dragon: '🐉'
 };
+
+// ☠️ Iconos de estado (no aparecen en "Estadísticas Totales", son propios de la lista de armas)
+export const ICONOS_ESTADO: Record<EstadoArma, string> = {
+  poison: '☠️',
+  paralysis: '💫',
+  sleep: '💤',
+  blastblight: '💥'
+};
+
+// Elemento o estado de un arma ya preparado para mostrarse en la lista del popup
+export interface EspecialArma {
+  icono: string;
+  claveNombre: string; // Clave de traducción del nombre (p. ej. "weaponPicker.elements.fire")
+  valor: number;       // Valor que muestra el juego (p. ej. 110)
+  oculto: boolean;     // Elemento oculto: se muestra entre paréntesis, como en el juego
+}
 
 // Datos que recibe el popup de selección de armas al abrirse
 export interface DatosDialogoArmas {
