@@ -47,7 +47,28 @@
       "blastblight": "爆破"
     },
     "loading": "武器を読み込み中...",
-    "loadError": "武器を読み込めませんでした。接続を確認してください。"
+    "loadError": "武器を読み込めませんでした。接続を確認してください。",
+    "filters": {
+      "elementStatus": "属性 / 状態異常",
+      "noElement": "無属性",
+      "sortBy": "並び替え",
+      "descending": "高い順",
+      "ascending": "低い順",
+      "sort": {
+        "default": "標準",
+        "rarity": "レア度",
+        "attack": "攻撃力",
+        "affinity": "会心率",
+        "special": "属性 / 状態異常"
+      }
+    }
+  },
+  "searchFilters": {
+    "open": "絞り込み",
+    "title": "絞り込み",
+    "close": "絞り込みを閉じる",
+    "clear": "絞り込みを解除",
+    "showResults": "結果を表示 ({{count}})"
   },
   "underDevelopment": {
     "title": "開発中",

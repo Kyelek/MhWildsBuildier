@@ -115,6 +115,91 @@ describe('DialogoArmasComponent', () => {
     expect(component.tipoElegido()).toBeNull();
   });
 
+  describe('filtros', () => {
+    // Arcos de prueba: [id, rareza, ataque, afinidad, elemento/estado]
+    const ARCOS: Weapon[] = ([
+      [10, 3, 120, 0, 'fire'],
+      [11, 8, 220, 10, 'water'],
+      [12, 8, 200, 20, 'poison'],
+      [13, 5, 180, -10, null]
+    ] as const).map(([id, rarity, raw, affinity, especial]) => ({
+      ...arma(id, `Arco ${id}`, 'bow'),
+      rarity,
+      affinity,
+      damage: { raw, display: raw },
+      specials: especial === null ? [] : [{
+        id,
+        kind: especial === 'poison' ? 'status' as const : 'element' as const,
+        ...(especial === 'poison' ? { status: especial } : { element: especial }),
+        damage: { raw: 10, display: 100 + id },
+        hidden: false
+      }]
+    }));
+
+    async function listaDeArcos(): Promise<void> {
+      crear();
+      wildsApi.getWeaponsPorTipo.and.returnValue(of(ARCOS));
+      component.elegirTipo('bow');
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    const ids = () => component.armasFiltradas().map(a => a.id);
+
+    it('filtra por varios elementos/estados a la vez (cualquiera de ellos) y por "Sin elemento"', async () => {
+      await listaDeArcos();
+      component.alternarEspecial('fire');
+      component.alternarEspecial('poison');
+      expect(ids()).toEqual([10, 12]);
+
+      component.alternarEspecial('fire');
+      component.alternarEspecial('poison');
+      component.alternarEspecial('none');
+      expect(ids()).toEqual([13]);
+    });
+
+    it('filtra por rareza y cuenta cuántas armas tiene cada opción', async () => {
+      await listaDeArcos();
+      component.alternarRareza(8);
+      expect(ids()).toEqual([11, 12]);
+      expect(component.conteoRarezas().get(8)).toEqual(2);
+      expect(component.conteoEspeciales().get('none')).toEqual(1);
+      expect(component.conteoEspeciales().get('thunder')).toBeUndefined();
+    });
+
+    it('ordena por el criterio elegido en ambos sentidos, empezando de mayor a menor', async () => {
+      await listaDeArcos();
+      component.elegirOrden('attack');
+      expect(ids()).toEqual([11, 12, 13, 10]);
+      component.alternarSentido();
+      expect(ids()).toEqual([10, 13, 12, 11]);
+
+      component.elegirOrden('affinity');
+      expect(component.filtros().descendente).toBeTrue();
+      expect(ids()).toEqual([12, 11, 10, 13]);
+    });
+
+    it('cuenta los filtros activos y "Borrar filtros" los quita todos', async () => {
+      await listaDeArcos();
+      component.alternarEspecial('fire');
+      component.alternarRareza(3);
+      component.elegirOrden('rarity');
+      expect(component.filtrosActivos()).toEqual(3);
+
+      component.borrarFiltros();
+      expect(component.filtrosActivos()).toEqual(0);
+      expect(ids()).toEqual([10, 11, 12, 13]);
+    });
+
+    it('mantiene los filtros al volver a los tipos y elegir otro', async () => {
+      await listaDeArcos();
+      component.alternarEspecial('fire');
+      component.volverATipos();
+      component.elegirTipo('great-sword');
+      expect(component.filtros().especiales).toEqual(['fire']);
+    });
+  });
+
   it('cierra devolviendo el arma elegida, o sin nada al pulsar la X', () => {
     crear();
     component.elegirArma(CATALOGO[2]);

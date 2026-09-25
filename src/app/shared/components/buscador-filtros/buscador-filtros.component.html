@@ -1,0 +1,58 @@
+<div class="buscador" [class.con-filtros]="filtrosActivos() > 0">
+  <input
+    #campo
+    type="search"
+    class="buscador-campo"
+    autocomplete="off"
+    spellcheck="false"
+    [placeholder]="placeholder()"
+    (input)="onInput($any($event.target).value)" />
+
+  <!-- Botón de filtro: tres líneas de mayor a menor -->
+  <button
+    type="button"
+    class="buscador-boton-filtros"
+    [class.abierto]="abierto()"
+    [attr.aria-expanded]="abierto()"
+    [attr.aria-label]="'searchFilters.open' | translate"
+    [title]="'searchFilters.open' | translate"
+    (click)="alternarPanel()">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M3 6h18M6.5 12h11M10 18h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+    </svg>
+    @if (filtrosActivos() > 0) {
+      <span class="buscador-contador">{{ filtrosActivos() }}</span>
+    }
+  </button>
+</div>
+
+@if (abierto()) {
+  <div class="panel-filtros" role="dialog" [attr.aria-label]="'searchFilters.title' | translate">
+    <header class="panel-cabecera">
+      <span class="panel-titulo">{{ 'searchFilters.title' | translate }}</span>
+      <button
+        type="button"
+        class="panel-cerrar"
+        [attr.aria-label]="'searchFilters.close' | translate"
+        [title]="'searchFilters.close' | translate"
+        (click)="cerrarPanel()">×</button>
+    </header>
+
+    <div class="panel-cuerpo">
+      <ng-content />
+    </div>
+
+    <footer class="panel-pie">
+      <button type="button" class="panel-limpiar" [disabled]="filtrosActivos() === 0" (click)="limpiar.emit()">
+        {{ 'searchFilters.clear' | translate }}
+      </button>
+      <button type="button" class="panel-ver" (click)="cerrarPanel()">
+        @if (resultados() !== null) {
+          {{ 'searchFilters.showResults' | translate: { count: resultados() } }}
+        } @else {
+          {{ 'searchFilters.close' | translate }}
+        }
+      </button>
+    </footer>
+  </div>
+}

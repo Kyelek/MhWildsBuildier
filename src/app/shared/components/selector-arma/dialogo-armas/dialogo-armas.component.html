@@ -53,14 +53,77 @@
   } @else {
     <!-- 🔍 Pantalla 2: buscador centrado (acotado al tipo elegido) + lista con scroll virtual -->
     <div class="zona-busqueda">
-      <input
-        #campoBusqueda
-        type="search"
-        class="campo-busqueda"
-        autocomplete="off"
-        spellcheck="false"
+      <app-buscador-filtros
         [placeholder]="'weaponPicker.search' | translate"
-        (input)="onBusquedaInput($any($event.target).value)" />
+        [filtrosActivos]="filtrosActivos()"
+        [resultados]="armasFiltradas().length"
+        (textoChange)="onBusquedaInput($event)"
+        (limpiar)="borrarFiltros()">
+
+        <!-- Elemento / Estado: se muestran las armas con CUALQUIERA de los marcados -->
+        <section class="filtro-seccion">
+          <h3 class="filtro-titulo">{{ 'weaponPicker.filters.elementStatus' | translate }}</h3>
+          <div class="filtro-casillas">
+            @for (opcion of opcionesEspecial; track opcion.clave) {
+              @let total = conteoEspeciales().get(opcion.clave) ?? 0;
+              <label class="filtro-casilla" [class.desactivada]="total === 0">
+                <input
+                  type="checkbox"
+                  [checked]="filtros().especiales.includes(opcion.clave)"
+                  [disabled]="total === 0 && !filtros().especiales.includes(opcion.clave)"
+                  (change)="alternarEspecial(opcion.clave)" />
+                <span class="filtro-caja" aria-hidden="true"></span>
+                <span class="filtro-icono" aria-hidden="true">{{ opcion.icono }}</span>
+                <span class="filtro-nombre">{{ opcion.claveNombre | translate }}</span>
+                <span class="filtro-total">{{ total }}</span>
+              </label>
+            }
+          </div>
+        </section>
+
+        <!-- Ordenar por: criterio + sentido (de mayor a menor o al revés) -->
+        <section class="filtro-seccion">
+          <h3 class="filtro-titulo">{{ 'weaponPicker.filters.sortBy' | translate }}</h3>
+          <div class="filtro-chips">
+            @for (criterio of criteriosOrden; track criterio) {
+              <button
+                type="button"
+                class="filtro-chip"
+                [class.activo]="filtros().orden === criterio"
+                [attr.aria-pressed]="filtros().orden === criterio"
+                (click)="elegirOrden(criterio)">
+                {{ 'weaponPicker.filters.sort.' + criterio | translate }}
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="filtro-sentido"
+            [disabled]="filtros().orden === 'default'"
+            (click)="alternarSentido()">
+            <span aria-hidden="true">{{ filtros().descendente ? '↓' : '↑' }}</span>
+            {{ (filtros().descendente ? 'weaponPicker.filters.descending' : 'weaponPicker.filters.ascending') | translate }}
+          </button>
+        </section>
+
+        <!-- Rareza: solo las marcadas (ninguna marcada = todas) -->
+        <section class="filtro-seccion">
+          <h3 class="filtro-titulo">{{ 'weaponPicker.rarity' | translate }}</h3>
+          <div class="filtro-rarezas">
+            @for (rareza of rarezas; track rareza) {
+              @let total = conteoRarezas().get(rareza) ?? 0;
+              <button
+                type="button"
+                class="filtro-rareza"
+                [class.activo]="filtros().rarezas.includes(rareza)"
+                [attr.aria-pressed]="filtros().rarezas.includes(rareza)"
+                [disabled]="total === 0 && !filtros().rarezas.includes(rareza)"
+                [title]="total"
+                (click)="alternarRareza(rareza)">{{ rareza }}</button>
+            }
+          </div>
+        </section>
+      </app-buscador-filtros>
     </div>
 
     <!-- Mientras llegan de la API las armas del tipo se avisa de la carga (o del error, con
@@ -101,7 +164,12 @@
         </button>
       </cdk-virtual-scroll-viewport>
     } @else {
-      <p class="lista-estado">{{ 'weaponPicker.empty' | translate }}</p>
+      <div class="lista-estado">
+        <p>{{ 'weaponPicker.empty' | translate }}</p>
+        @if (filtrosActivos() > 0) {
+          <button type="button" class="btn-reintentar" (click)="borrarFiltros()">{{ 'searchFilters.clear' | translate }}</button>
+        }
+      </div>
     }
   }
 </div>
