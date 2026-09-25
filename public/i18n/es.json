@@ -22,7 +22,6 @@
     "sword-shield": "Espada y escudo"
   },
   "weaponPicker": {
-    "placeholder": "Elegir arma...",
     "chooseType": "Elige el tipo de arma",
     "back": "Tipos de arma",
     "close": "Cerrar",
@@ -31,7 +30,20 @@
     "empty": "No se encontraron armas",
     "rarity": "Rareza",
     "attack": "Ataque",
-    "affinity": "Afinidad"
+    "affinity": "Afinidad",
+    "gogma": "Arma Gogma",
+    "hiddenElement": "Elemento oculto",
+    "elements": {
+      "fire": "Fuego",
+      "water": "Agua",
+      "thunder": "Rayo",
+      "ice": "Hielo",
+      "dragon": "Draco"
+    }
+  },
+  "underDevelopment": {
+    "title": "En desarrollo",
+    "message": "Estamos trabajando en esta sección. Estará disponible próximamente."
   },
   "nav": {
     "home": "Home",

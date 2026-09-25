@@ -8,7 +8,7 @@ import { Weapon } from '../../../../core/models/wilds.models';
 import { DatosDialogoArmas } from '../../../models/tipos-arma.models';
 
 function arma(id: number, name: string, kind: string): Weapon {
-  return { id, name, kind, rarity: 1, affinity: 0, damage: { raw: 100, display: 100 }, slots: [] };
+  return { id, name, kind, rarity: 1, affinity: 0, damage: { raw: 100, display: 100 }, slots: [], specials: [] };
 }
 
 const CATALOGO: Weapon[] = [
@@ -42,11 +42,36 @@ describe('DialogoArmasComponent', () => {
     fixture.detectChanges();
   }
 
-  it('empieza en la pantalla de tipos si no hay arma elegida, mostrando los 14 tipos', () => {
+  it('empieza en la pantalla de tipos si no hay arma elegida: 14 tipos + Arma Gogma, sin flecha de volver', () => {
     crear();
     expect(component.tipoElegido()).toBeNull();
-    expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(14);
-    expect(fixture.nativeElement.querySelector('.btn-volver')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(15);
+    expect(fixture.nativeElement.querySelector('.tarjeta-gogma')).not.toBeNull();
+    // Solo la X de cerrar
+    expect(fixture.nativeElement.querySelectorAll('.btn-cabecera').length).toEqual(1);
+  });
+
+  it('"Arma Gogma" lleva al aviso de en desarrollo y la flecha vuelve a los tipos', () => {
+    crear();
+    fixture.nativeElement.querySelector('.tarjeta-gogma').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-en-desarrollo')).not.toBeNull();
+    expect(dialogRef.close).not.toHaveBeenCalled();
+
+    fixture.nativeElement.querySelectorAll('.btn-cabecera')[0].click();
+    fixture.detectChanges();
+    expect(component.viendoGogma()).toBeFalse();
+    expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(15);
+  });
+
+  it('muestra el elemento del arma con su icono, y null si no tiene', () => {
+    crear();
+    const conFuego: Weapon = {
+      ...CATALOGO[0],
+      specials: [{ id: 1, kind: 'element', element: 'fire', damage: { raw: 11, display: 110 }, hidden: false }]
+    };
+    expect(component.elementoDe(conFuego)).toEqual(jasmine.objectContaining({ icono: '🔥', element: 'fire' }));
+    expect(component.elementoDe(CATALOGO[0])).toBeNull();
   });
 
   it('al elegir un tipo lista solo sus armas y el buscador filtra dentro de ese tipo (sin tildes)', () => {
@@ -61,7 +86,8 @@ describe('DialogoArmasComponent', () => {
   it('abre directamente en la lista del tipo del arma ya elegida, con el botón de volver', () => {
     crear(CATALOGO[3]);
     expect(component.tipoElegido()).toEqual('insect-glaive');
-    expect(fixture.nativeElement.querySelector('.btn-volver')).not.toBeNull();
+    // Flecha de volver + X de cerrar
+    expect(fixture.nativeElement.querySelectorAll('.btn-cabecera').length).toEqual(2);
 
     component.volverATipos();
     expect(component.tipoElegido()).toBeNull();

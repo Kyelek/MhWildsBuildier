@@ -91,4 +91,22 @@ export interface Weapon {
     display: number;
   };
   slots: number[]; // Niveles de hueco para decoraciones, igual que en ArmorPiece
+  specials: WeaponSpecial[]; // Elemento o estado del arma (vacío si no tiene)
+}
+
+// ⚡ Elemento (fuego, agua...) o estado (veneno, parálisis...) que aplica un arma.
+// "display" es el valor que muestra el juego (p. ej. 110); "hidden" indica elemento oculto.
+export type ElementoArma = 'fire' | 'water' | 'thunder' | 'ice' | 'dragon';
+export type EstadoArma = 'poison' | 'paralysis' | 'sleep' | 'blastblight';
+
+export interface WeaponSpecial {
+  id: number;
+  kind: 'element' | 'status';
+  element?: ElementoArma;
+  status?: EstadoArma;
+  damage: {
+    raw: number;
+    display: number;
+  };
+  hidden: boolean;
 }

@@ -1,4 +1,4 @@
-import { Weapon } from '../../core/models/wilds.models';
+import { ElementoArma, Weapon } from '../../core/models/wilds.models';
 
 // 🗡️ Tipos de arma (campo "kind" de la API) en el mismo orden en que los presenta el juego.
 // Cada uno tiene su icono en public/images/arms/<tipo>.png y su nombre traducido en
@@ -23,6 +23,15 @@ export const TIPOS_ARMA = [
 export function iconoTipoArma(tipo: string): string {
   return `images/arms/${tipo}.png`;
 }
+
+// ⚡ Iconos de elemento: los mismos que usa el bloque de Resistencias de "Estadísticas Totales"
+export const ICONOS_ELEMENTO: Record<ElementoArma, string> = {
+  fire: '🔥',
+  water: '💧',
+  thunder: '⚡',
+  ice: '❄️',
+  dragon: '🐉'
+};
 
 // Datos que recibe el popup de selección de armas al abrirse
 export interface DatosDialogoArmas {

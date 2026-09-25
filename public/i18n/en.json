@@ -22,7 +22,6 @@
     "sword-shield": "Sword & Shield"
   },
   "weaponPicker": {
-    "placeholder": "Choose weapon...",
     "chooseType": "Choose a weapon type",
     "back": "Weapon types",
     "close": "Close",
@@ -31,7 +30,20 @@
     "empty": "No weapons found",
     "rarity": "Rarity",
     "attack": "Attack",
-    "affinity": "Affinity"
+    "affinity": "Affinity",
+    "gogma": "Gogma Weapon",
+    "hiddenElement": "Hidden element",
+    "elements": {
+      "fire": "Fire",
+      "water": "Water",
+      "thunder": "Thunder",
+      "ice": "Ice",
+      "dragon": "Dragon"
+    }
+  },
+  "underDevelopment": {
+    "title": "Under development",
+    "message": "We are working on this section. It will be available soon."
   },
   "nav": {
     "home": "Home",
