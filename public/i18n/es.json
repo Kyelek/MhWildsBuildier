@@ -21,6 +21,18 @@
     "switch-axe": "Hacha espada",
     "sword-shield": "Espada y escudo"
   },
+  "weaponPicker": {
+    "placeholder": "Elegir arma...",
+    "chooseType": "Elige el tipo de arma",
+    "back": "Tipos de arma",
+    "close": "Cerrar",
+    "remove": "Quitar arma",
+    "search": "Buscar arma...",
+    "empty": "No se encontraron armas",
+    "rarity": "Rareza",
+    "attack": "Ataque",
+    "affinity": "Afinidad"
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",

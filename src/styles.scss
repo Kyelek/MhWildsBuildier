@@ -315,3 +315,36 @@ h1, h2, h3, h4 {
     font-weight: 600;
   }
 }
+// ==========================================
+// 🗡️ POPUP DE SELECCIÓN DE ARMAS (ver shared/components/selector-arma)
+//
+// Material inserta el popup en un overlay fuera del componente, así que su fondo y
+// su tamaño en móvil se ajustan aquí mediante el "panelClass" con que se abre.
+// ==========================================
+.dialogo-armas-panel {
+  --mdc-dialog-container-color: #14120f;
+  --mdc-dialog-container-shape: 8px;
+
+  .mat-mdc-dialog-surface {
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+  }
+
+  // 📱 En móvil ocupa toda la pantalla: no hay hueco útil alrededor para pulsar fuera
+  @include movil {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+
+    .mat-mdc-dialog-surface {
+      border: none;
+      border-radius: 0;
+    }
+  }
+}
+
+// Fondo oscurecido detrás del popup
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}

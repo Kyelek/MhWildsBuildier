@@ -1,0 +1,73 @@
+<div class="dialogo-armas">
+  <!-- Cabecera: volver (solo en la pantalla 2), título y X para cerrar (cómoda en móvil,
+       donde apenas queda hueco fuera del popup para cerrarlo pulsando fuera) -->
+  <header class="dialogo-cabecera">
+    @if (tipoElegido(); as tipo) {
+      <button type="button" class="btn-volver" (click)="volverATipos()">
+        <span aria-hidden="true">←</span> {{ 'weaponPicker.back' | translate }}
+      </button>
+      <h2 class="dialogo-titulo">
+        <img [src]="iconoTipo(tipo)" alt="" width="28" height="28" />
+        {{ 'weaponTypes.' + tipo | translate }}
+      </h2>
+    } @else {
+      <h2 class="dialogo-titulo">{{ 'weaponPicker.chooseType' | translate }}</h2>
+    }
+    <button
+      type="button"
+      class="btn-cerrar"
+      [attr.aria-label]="'weaponPicker.close' | translate"
+      [title]="'weaponPicker.close' | translate"
+      (click)="cerrar()">×</button>
+  </header>
+
+  @if (!tipoElegido()) {
+    <!-- 🗂️ Pantalla 1: un botón con la imagen de cada tipo de arma -->
+    <div class="rejilla-tipos">
+      @for (tipo of tipos; track tipo) {
+        <button
+          type="button"
+          class="tarjeta-tipo"
+          [class.actual]="seleccionada?.kind === tipo"
+          (click)="elegirTipo(tipo)">
+          <img [src]="iconoTipo(tipo)" alt="" width="56" height="56" />
+          <span>{{ 'weaponTypes.' + tipo | translate }}</span>
+        </button>
+      }
+    </div>
+  } @else {
+    <!-- 🔍 Pantalla 2: buscador centrado (acotado al tipo elegido) + lista con scroll virtual -->
+    <div class="zona-busqueda">
+      <input
+        #campoBusqueda
+        type="search"
+        class="campo-busqueda"
+        autocomplete="off"
+        spellcheck="false"
+        [placeholder]="'weaponPicker.search' | translate"
+        (input)="onBusquedaInput($any($event.target).value)" />
+    </div>
+
+    <!-- El scroll virtual solo pinta las filas visibles (hay ~90 armas por tipo). No existe
+         equivalente en la sintaxis @for, por eso se usa la directiva *cdkVirtualFor. -->
+    @if (armasFiltradas().length > 0) {
+      <cdk-virtual-scroll-viewport class="lista-armas" [itemSize]="altoFila">
+        <button
+          *cdkVirtualFor="let arma of armasFiltradas(); trackBy: porId"
+          type="button"
+          class="fila-arma"
+          [class.seleccionada]="arma.id === seleccionada?.id"
+          (click)="elegirArma(arma)">
+          <span class="fila-nombre">{{ arma.name }}</span>
+          <span class="fila-datos">
+            <span>{{ 'weaponPicker.rarity' | translate }} <strong>{{ arma.rarity }}</strong></span>
+            <span>{{ 'weaponPicker.attack' | translate }} <strong>{{ arma.damage.raw }}</strong></span>
+            <span>{{ 'weaponPicker.affinity' | translate }} <strong>{{ arma.affinity }}%</strong></span>
+          </span>
+        </button>
+      </cdk-virtual-scroll-viewport>
+    } @else {
+      <p class="lista-vacia">{{ 'weaponPicker.empty' | translate }}</p>
+    }
+  }
+</div>
