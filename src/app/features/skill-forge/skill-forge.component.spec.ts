@@ -130,8 +130,25 @@ describe('SkillForgeComponent', () => {
     fixture.detectChanges();
 
     expect(component.habilidadesActivas()).toEqual([
-      { skillId: 500, nombre: 'Aguante', kind: 'armor', nivel: 2, descripcion: 'Descripción de respaldo (pieza)' }
+      jasmine.objectContaining({ skillId: 500, nombre: 'Aguante', kind: 'armor', nivel: 2, descripcion: 'Descripción de respaldo (pieza)' })
     ]);
+  });
+
+  it('indica qué pieza aporta cada habilidad y cuántos niveles da cada una', () => {
+    flushCatalogos();
+
+    const aguanteNv2 = { ...habilidadDePrueba(), level: 2 };
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 10, name: 'Casco X', kind: 'head', skills: [aguanteNv2] }));
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 12, name: 'Guantes X', kind: 'arms', skills: [habilidadDePrueba()] }));
+    fixture.detectChanges();
+
+    const [aguante] = component.habilidadesActivas();
+    expect(aguante.nivel).toEqual(3);
+    expect(aguante.aportes).toEqual([
+      { ranura: 'head', nombrePieza: 'Casco X', nivel: 2, icono: 'images/armor/48px-MHWilds-Helmet.png' },
+      { ranura: 'arms', nombrePieza: 'Guantes X', nivel: 1, icono: 'images/armor/48px-MHWilds-Armguards.png' }
+    ]);
+    expect(component.descripcionesDetalladas()[0].aportes.map(a => a.ranura)).toEqual(['head', 'arms']);
   });
 
   it('activa dos bonificaciones de set distintas a la vez, cada una con su rango más alto alcanzado', async () => {
@@ -246,6 +263,9 @@ describe('SkillForgeComponent', () => {
     ]);
     // ...y la habilidad que otorga (su rango activado) va a las descripciones detalladas
     expect(component.descripcionesDetalladas().map(d => d.nombre)).toEqual(['Aguante', 'Alma del amo 1']);
+    // Las piezas con "Alma del amo" aparecen como origen de la bonificación y de lo que otorga
+    expect(component.bonificacionesSet()[0].aportes.map(a => a.ranura)).toEqual(['head', 'chest', 'arms']);
+    expect(component.descripcionesDetalladas()[1].aportes.map(a => a.ranura)).toEqual(['head', 'chest', 'arms']);
   });
 
   // ==========================================

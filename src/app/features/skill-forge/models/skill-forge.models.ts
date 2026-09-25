@@ -1,3 +1,14 @@
+import { ArmorPiece } from '../../../core/models/wilds.models';
+
+// 🛡️ Pieza equipada que aporta una habilidad, con su icono de ranura (casco, pecho...).
+// "nivel" es lo que aporta ESA pieza (solo se muestra como "xN" en Habilidades del Conjunto).
+export interface AportePieza {
+  ranura: ArmorPiece['kind'];
+  nombrePieza: string;
+  nivel: number;
+  icono: string;
+}
+
 // 📊 Habilidad ya acumulada entre todas las piezas equipadas (nivel total + descripción del nivel alcanzado)
 export interface HabilidadAcumulada {
   skillId: number;
@@ -5,6 +16,7 @@ export interface HabilidadAcumulada {
   kind: string;
   nivel: number;
   descripcion: string;
+  aportes: AportePieza[];  // Piezas que la aportan, en orden de ranura (casco → piernas)
 }
 
 // 🎖️ Bonificación de conjunto actualmente activada (puede haber varias a la vez, una por cada
@@ -22,6 +34,7 @@ export interface BonificacionSetActiva {
   descripcion: string | null;
   // Habilidad que otorga una bonificación de grupo (p. ej. "Agallas (tenacidad)"); null en conjuntos
   efectoOtorgado: DescripcionHabilidad | null;
+  aportes: AportePieza[];  // Piezas equipadas que cuentan para la bonificación
 }
 
 // 🔢 Conteo interno de cuántas piezas seleccionadas pertenecen a un mismo conjunto de armadura
@@ -37,4 +50,5 @@ export interface DescripcionHabilidad {
   nombre: string;
   nivel: number;
   descripcion: string;
+  aportes: AportePieza[];  // Piezas que aportan la habilidad
 }

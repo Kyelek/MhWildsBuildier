@@ -6,6 +6,7 @@ import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 import {
+  AportePieza,
   BonificacionSetActiva,
   ConteoPorSet,
   DescripcionHabilidad,
@@ -25,6 +26,16 @@ type TipoPieza = 'head' | 'chest' | 'arms' | 'waist' | 'legs';
 // el mismo en todos los idiomas: "Lord's Soul" / "ヌシの魂"); el resto de habilidades de
 // grupo siguen mostrándose como habilidades normales.
 const HABILIDADES_GRUPO_COMO_BONIFICACION: readonly number[] = [131];
+
+// 🛡️ Icono de cada ranura de armadura (public/images/armor). Hay uno por tipo de pieza,
+// no uno por armadura: sirve para ver de qué parte del equipo viene cada habilidad.
+const ICONOS_RANURA: Record<TipoPieza, string> = {
+  head: 'images/armor/48px-MHWilds-Helmet.png',
+  chest: 'images/armor/48px-MHWilds-Chestplate.png',
+  arms: 'images/armor/48px-MHWilds-Armguards.png',
+  waist: 'images/armor/48px-MHWilds-Waist.png',
+  legs: 'images/armor/48px-MHWilds-Leggings.png'
+};
 
 @Component({
   selector: 'app-skill-forge',
@@ -180,7 +191,9 @@ export class SkillForgeComponent {
           nombre: habilidad.skill.name,
           kind: habilidad.skill.kind,
           nivel: nivelTotal,
-          descripcion: this.obtenerDescripcionPorNivel(habilidad.skill.id, nivelTotal, habilidad.description)
+          descripcion: this.obtenerDescripcionPorNivel(habilidad.skill.id, nivelTotal, habilidad.description),
+          // Las piezas se recorren en orden de ranura, así los iconos salen casco → piernas
+          aportes: [...(existente?.aportes ?? []), this.crearAporte(pieza, habilidad.level)]
         });
       }
     }
@@ -226,7 +239,8 @@ export class SkillForgeComponent {
       const bonus = todosLosSets.find(set => set.id === setId)?.bonus;
       if (!bonus) continue;
 
-      const bonificacion = this.construirBonificacion(`set-${setId}`, info.nombre, info.cantidad, bonus);
+      const piezasDelSet = this.piezasSeleccionadas().filter(pieza => pieza.armorSet?.id === setId);
+      const bonificacion = this.construirBonificacion(`set-${setId}`, info.nombre, piezasDelSet, bonus);
       if (bonificacion) bonificaciones.push(bonificacion);
     }
 
@@ -237,8 +251,7 @@ export class SkillForgeComponent {
 
       // Cuenta las piezas equipadas que aportan la habilidad, sean del conjunto que sean
       const piezas = this.piezasSeleccionadas()
-        .filter(pieza => pieza.skills.some(habilidad => habilidad.skill.id === skillId))
-        .length;
+        .filter(pieza => pieza.skills.some(habilidad => habilidad.skill.id === skillId));
 
       const bonificacion = this.construirBonificacion(`grupo-${skillId}`, grupo.skill.name, piezas, grupo);
       if (!bonificacion) continue;
@@ -254,7 +267,8 @@ export class SkillForgeComponent {
           clave: `efecto-grupo-${skillId}`,
           nombre: bonificacion.nombreHabilidad,
           nivel: bonificacion.nivel,
-          descripcion: bonificacion.descripcion ?? ''
+          descripcion: bonificacion.descripcion ?? '',
+          aportes: bonificacion.aportes
         }
       });
     }
@@ -269,9 +283,10 @@ export class SkillForgeComponent {
   private construirBonificacion(
     clave: string,
     nombreOrigen: string,
-    piezasEquipadas: number,
+    piezas: ArmorPiece[],
     bonus: ArmorSetBonus
   ): BonificacionSetActiva | null {
+    const piezasEquipadas = piezas.length;
     const rangoActivo = bonus.ranks
       .filter(rango => rango.pieces <= piezasEquipadas)
       .sort((a, b) => b.pieces - a.pieces)[0];
@@ -287,7 +302,8 @@ export class SkillForgeComponent {
       nombreHabilidad: rangoActivo.skill.name ?? bonus.skill.name,
       nivel: rangoActivo.skill.level,
       descripcion: rangoActivo.skill.description,
-      efectoOtorgado: null
+      efectoOtorgado: null,
+      aportes: piezas.map(pieza => this.crearAporte(pieza, 1))
     };
   }
 
@@ -305,7 +321,8 @@ export class SkillForgeComponent {
         clave: `pieza-${habilidad.skillId}`,
         nombre: habilidad.nombre,
         nivel: habilidad.nivel,
-        descripcion: habilidad.descripcion
+        descripcion: habilidad.descripcion,
+        aportes: habilidad.aportes
       }));
 
     // Más las habilidades que otorgan las bonificaciones de grupo activas ("Agallas (tenacidad)")
@@ -357,6 +374,10 @@ export class SkillForgeComponent {
   // ==========================================
   // ⚙️ MÉTODOS INTERNOS
   // ==========================================
+
+  private crearAporte(pieza: ArmorPiece, nivel: number): AportePieza {
+    return { ranura: pieza.kind, nombrePieza: pieza.name, nivel, icono: ICONOS_RANURA[pieza.kind] };
+  }
 
   private armorPorRanura(ranura: TipoPieza): ArmorPiece[] {
     return (this.armorResource.value() ?? []).filter(piece => piece.kind === ranura);
