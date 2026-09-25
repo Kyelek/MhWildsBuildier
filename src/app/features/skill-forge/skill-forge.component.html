@@ -246,7 +246,7 @@
 <ng-template #iconosPiezas let-aportes let-conNivel="conNivel">
   <span class="piezas-origen">
     @for (aporte of aportes; track aporte.ranura) {
-      <span class="pieza-origen" [title]="aporte.nombrePieza">
+      <span class="pieza-origen" [matTooltip]="aporte.nombrePieza" matTooltipClass="tooltips">
         <img [src]="aporte.icono" [alt]="aporte.nombrePieza" width="22" height="22" />
         @if (conNivel) {
           <span class="pieza-nivel">x{{ aporte.nivel }}</span>

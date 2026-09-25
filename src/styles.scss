@@ -348,3 +348,18 @@ h1, h2, h3, h4 {
 .cdk-overlay-dark-backdrop {
   background: rgba(0, 0, 0, 0.7);
 }
+
+// Tooltips
+
+.tooltips {
+  --mdc-plain-tooltip-container-color:#191714;
+   .mat-mdc-tooltip-surface {
+     border: 1px solid #c5a059;
+       border-radius: 5px;
+       font-family: $color-text;
+       color: $font-body;
+       font-size: .75rem;
+       padding: 8px;
+    }
+
+}
