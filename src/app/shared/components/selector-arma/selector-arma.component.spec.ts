@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { SelectorArmaComponent } from './selector-arma.component';
 import { Weapon } from '../../../core/models/wilds.models';
 
-const ARCO: Weapon = { id: 1, name: 'Arco de hierro', kind: 'bow', rarity: 1, affinity: 0, damage: { raw: 100, display: 100 }, slots: [] };
+const ARCO: Weapon = { id: 1, name: 'Arco de hierro', kind: 'bow', rarity: 1, affinity: 0, damage: { raw: 100, display: 100 }, slots: [], specials: [] };
 
 describe('SelectorArmaComponent', () => {
   let fixture: ComponentFixture<SelectorArmaComponent>;

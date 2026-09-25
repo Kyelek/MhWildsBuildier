@@ -39,12 +39,22 @@ $color-text: #f5f5e9;
   }
 }
 
-// Etiqueta siempre "flotando" sobre el borde superior (como un campo outline relleno)
+// Etiqueta "flotando" sobre el borde superior cuando hay un arma elegida
 .campo-etiqueta {
   padding: 0 4px;
   font-size: 0.75rem;
   color: rgba(197, 160, 89, 0.7);
   letter-spacing: 0.4px;
+}
+
+// Sin arma elegida la etiqueta va dentro del campo: la <legend> se encoge a ancho 0 (el
+// borde superior queda entero) pero conserva su alto, para que el campo no cambie de tamaño.
+.campo-arma:not(.con-valor) .campo-etiqueta {
+  max-width: 0;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  visibility: hidden;
 }
 
 .campo-arma {
@@ -88,8 +98,9 @@ $color-text: #f5f5e9;
   text-overflow: ellipsis;
 }
 
+// Etiqueta dentro del campo vacío: mismo dorado que las de los selectores de armadura
 .campo-placeholder {
-  color: #9e9e93;
+  color: rgba(197, 160, 89, 0.7);
 }
 
 // Misma flecha decorativa que <app-selector-buscable>

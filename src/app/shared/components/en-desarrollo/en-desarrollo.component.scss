@@ -1,0 +1,53 @@
+@use 'responsive' as *;
+
+:host {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.en-desarrollo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 420px;
+  padding: 32px 24px;
+  text-align: center;
+  border: 1px dashed rgba(197, 160, 89, 0.35);
+  border-radius: 8px;
+  background: rgba(197, 160, 89, 0.04);
+
+  @include movil {
+    padding: 24px 16px;
+  }
+}
+
+.en-desarrollo-icono {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+// Función a la que se refiere el aviso (p. ej. "Arma Gogma")
+.en-desarrollo-funcion {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #9e9e93;
+}
+
+.en-desarrollo-titulo {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.en-desarrollo-mensaje {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}

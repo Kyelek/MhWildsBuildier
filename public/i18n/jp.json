@@ -22,7 +22,6 @@
     "sword-shield": "片手剣"
   },
   "weaponPicker": {
-    "placeholder": "武器を選択...",
     "chooseType": "武器種を選択",
     "back": "武器種",
     "close": "閉じる",
@@ -31,7 +30,20 @@
     "empty": "武器が見つかりません",
     "rarity": "レア度",
     "attack": "攻撃力",
-    "affinity": "会心率"
+    "affinity": "会心率",
+    "gogma": "ゴグマ武器",
+    "hiddenElement": "隠し属性",
+    "elements": {
+      "fire": "火",
+      "water": "水",
+      "thunder": "雷",
+      "ice": "氷",
+      "dragon": "龍"
+    }
+  },
+  "underDevelopment": {
+    "title": "開発中",
+    "message": "このセクションは現在開発中です。近日公開予定です。"
   },
   "nav": {
     "home": "ホーム",

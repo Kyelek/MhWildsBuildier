@@ -1,27 +1,39 @@
 <div class="dialogo-armas">
-  <!-- Cabecera: volver (solo en la pantalla 2), título y X para cerrar (cómoda en móvil,
-       donde apenas queda hueco fuera del popup para cerrarlo pulsando fuera) -->
+  <!-- Cabecera: título a la izquierda y, a la derecha, la flecha para volver a los tipos
+       (solo fuera de la pantalla de tipos) junto a la X de cerrar (cómoda en móvil, donde
+       apenas queda hueco fuera del popup para cerrarlo pulsando fuera) -->
   <header class="dialogo-cabecera">
-    @if (tipoElegido(); as tipo) {
-      <button type="button" class="btn-volver" (click)="volverATipos()">
-        <span aria-hidden="true">←</span> {{ 'weaponPicker.back' | translate }}
-      </button>
+    @if (viendoGogma()) {
+      <h2 class="dialogo-titulo">{{ 'weaponPicker.gogma' | translate }}</h2>
+    } @else if (tipoElegido()) {
       <h2 class="dialogo-titulo">
-        <img [src]="iconoTipo(tipo)" alt="" width="28" height="28" />
-        {{ 'weaponTypes.' + tipo | translate }}
+        <img [src]="iconoTipo(tipoElegido()!)" alt="" width="28" height="28" />
+        {{ 'weaponTypes.' + tipoElegido() | translate }}
       </h2>
     } @else {
       <h2 class="dialogo-titulo">{{ 'weaponPicker.chooseType' | translate }}</h2>
     }
+
+    @if (viendoGogma() || tipoElegido()) {
+      <button
+        type="button"
+        class="btn-cabecera"
+        [attr.aria-label]="'weaponPicker.back' | translate"
+        [title]="'weaponPicker.back' | translate"
+        (click)="volverATipos()">←</button>
+    }
     <button
       type="button"
-      class="btn-cerrar"
+      class="btn-cabecera"
       [attr.aria-label]="'weaponPicker.close' | translate"
       [title]="'weaponPicker.close' | translate"
       (click)="cerrar()">×</button>
   </header>
 
-  @if (!tipoElegido()) {
+  @if (viendoGogma()) {
+    <!-- 🚧 Armas Gogma: pendiente de un desarrollo futuro -->
+    <app-en-desarrollo [titulo]="'weaponPicker.gogma' | translate" />
+  } @else if (!tipoElegido()) {
     <!-- 🗂️ Pantalla 1: un botón con la imagen de cada tipo de arma -->
     <div class="rejilla-tipos">
       @for (tipo of tipos; track tipo) {
@@ -34,6 +46,9 @@
           <span>{{ 'weaponTypes.' + tipo | translate }}</span>
         </button>
       }
+      <button type="button" class="tarjeta-tipo tarjeta-gogma" (click)="verGogma()">
+        <span>{{ 'weaponPicker.gogma' | translate }}</span>
+      </button>
     </div>
   } @else {
     <!-- 🔍 Pantalla 2: buscador centrado (acotado al tipo elegido) + lista con scroll virtual -->
@@ -63,6 +78,17 @@
             <span>{{ 'weaponPicker.rarity' | translate }} <strong>{{ arma.rarity }}</strong></span>
             <span>{{ 'weaponPicker.attack' | translate }} <strong>{{ arma.damage.raw }}</strong></span>
             <span>{{ 'weaponPicker.affinity' | translate }} <strong>{{ arma.affinity }}%</strong></span>
+            @if (elementoDe(arma); as elemento) {
+              <!-- Elemento oculto entre paréntesis, como en el juego -->
+              <span
+                class="fila-elemento"
+                [title]="elemento.hidden
+                  ? ('weaponPicker.hiddenElement' | translate) + ': ' + ('weaponPicker.elements.' + elemento.element | translate)
+                  : ('weaponPicker.elements.' + elemento.element | translate)">
+                {{ elemento.icono }}
+                <strong>{{ elemento.hidden ? '(' + elemento.damage.display + ')' : elemento.damage.display }}</strong>
+              </span>
+            }
           </span>
         </button>
       </cdk-virtual-scroll-viewport>
