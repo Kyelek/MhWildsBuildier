@@ -18,6 +18,7 @@ import {
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 type TipoPieza = 'head' | 'chest' | 'arms' | 'waist' | 'legs';
 
@@ -48,7 +49,8 @@ const ICONOS_RANURA: Record<TipoPieza, string> = {
     MatDividerModule,
     TranslatePipe,
     SelectorBuscableComponent,
-    SelectorArmaComponent
+    SelectorArmaComponent,
+    MatTooltipModule
   ],
   templateUrl: './skill-forge.component.html',
   styleUrl: './skill-forge.component.scss'
