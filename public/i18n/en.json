@@ -47,7 +47,28 @@
       "blastblight": "Blast"
     },
     "loading": "Loading weapons...",
-    "loadError": "Could not load the weapons. Check your connection."
+    "loadError": "Could not load the weapons. Check your connection.",
+    "filters": {
+      "elementStatus": "Element / Status",
+      "noElement": "No element",
+      "sortBy": "Sort by",
+      "descending": "Highest to lowest",
+      "ascending": "Lowest to highest",
+      "sort": {
+        "default": "Default",
+        "rarity": "Rarity",
+        "attack": "Attack",
+        "affinity": "Affinity",
+        "special": "Element / Status"
+      }
+    }
+  },
+  "searchFilters": {
+    "open": "Filters",
+    "title": "Filters",
+    "close": "Close filters",
+    "clear": "Clear filters",
+    "showResults": "Show results ({{count}})"
   },
   "underDevelopment": {
     "title": "Under development",

@@ -1,0 +1,242 @@
+@use 'responsive' as *;
+
+$color-gold: #c5a059;
+$color-text: #f5f5e9;
+
+// El panel se posiciona respecto al propio buscador y se superpone a lo que haya debajo
+:host {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+
+  @include movil {
+    max-width: none;
+  }
+}
+
+// ==========================================
+// Campo de texto + botón de filtros
+// ==========================================
+.buscador {
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba(197, 160, 89, 0.6);
+  }
+
+  &:focus-within {
+    border-color: $color-gold;
+    box-shadow: 0 0 0 1px $color-gold;
+  }
+}
+
+.buscador-campo {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: $color-text;
+  font-size: 1rem;
+
+  &::placeholder {
+    color: #9e9e93;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.buscador-boton-filtros {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9e9e93;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover,
+  &:focus-visible,
+  &.abierto {
+    color: $color-gold;
+    background: rgba(197, 160, 89, 0.1);
+    outline: none;
+  }
+
+  // Con filtros aplicados el botón queda siempre en dorado
+  .con-filtros & {
+    color: $color-gold;
+  }
+}
+
+// Número de filtros activos
+.buscador-contador {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: $color-gold;
+  color: #14120f;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+// ==========================================
+// Panel desplegable
+// ==========================================
+.panel-filtros {
+  position: absolute;
+  top: calc(100% + 6px);
+  // Algo más ancho que el buscador (480px), centrado bajo él, para que quepan las opciones
+  left: -60px;
+  right: -60px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 560px);
+  background: #14120f;
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  animation: desplegarPanel 0.15s ease-out;
+
+  @include movil {
+    left: 0;
+    right: 0;
+    // Deja ver la cabecera del popup y el buscador; el resto de la pantalla es del panel
+    max-height: calc(100dvh - 160px);
+  }
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 6px 6px 16px;
+  border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+}
+
+.panel-titulo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $color-gold;
+}
+
+// Área táctil de 40px para cerrar el panel con el dedo
+.panel-cerrar {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #9e9e93;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover,
+  &:focus-visible {
+    color: $color-gold;
+    background: rgba(197, 160, 89, 0.1);
+    outline: none;
+  }
+}
+
+.panel-cuerpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 16px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gold;
+    border-radius: 10px;
+  }
+}
+
+.panel-pie {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(197, 160, 89, 0.15);
+
+  button {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.panel-limpiar {
+  background: transparent;
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  color: $color-gold;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: rgba(197, 160, 89, 0.12);
+    outline: none;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+.panel-ver {
+  background: $color-gold;
+  border: 1px solid $color-gold;
+  color: #14120f;
+
+  &:hover,
+  &:focus-visible {
+    background: #d4b06a;
+    outline: none;
+  }
+}
+
+@keyframes desplegarPanel {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

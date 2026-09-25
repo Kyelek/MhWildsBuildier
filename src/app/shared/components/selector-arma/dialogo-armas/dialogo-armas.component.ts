@@ -1,4 +1,4 @@
-import { Component, ElementRef, Injector, afterNextRender, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, Injector, afterNextRender, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
@@ -6,14 +6,22 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Weapon } from '../../../../core/models/wilds.models';
 import { WildsApiService } from '../../../../core/services/wilds-api.service';
 import {
+  CRITERIOS_ORDEN,
+  ClaveEspecial,
+  CriterioOrden,
   DatosDialogoArmas,
   EspecialArma,
+  FILTROS_VACIOS,
+  FiltrosArmas,
   ICONOS_ELEMENTO,
   ICONOS_ESTADO,
+  OPCIONES_ESPECIAL,
+  RAREZAS,
   TIPOS_ARMA,
   iconoTipoArma
 } from '../../../models/tipos-arma.models';
 import { EnDesarrolloComponent } from '../../en-desarrollo/en-desarrollo.component';
+import { BuscadorFiltrosComponent } from '../../buscador-filtros/buscador-filtros.component';
 
 // Alto fijo (px) de cada fila de la lista: el scroll virtual lo necesita para calcular
 // qué filas pintar. Debe coincidir con la altura de ".fila-arma" en el SCSS.
@@ -29,7 +37,7 @@ export const ALTO_FILA_ARMA = 64;
 @Component({
   selector: 'app-dialogo-armas',
   standalone: true,
-  imports: [ScrollingModule, TranslatePipe, EnDesarrolloComponent],
+  imports: [ScrollingModule, TranslatePipe, EnDesarrolloComponent, BuscadorFiltrosComponent],
   templateUrl: './dialogo-armas.component.html',
   styleUrl: './dialogo-armas.component.scss'
 })
@@ -42,6 +50,9 @@ export class DialogoArmasComponent {
   readonly tipos = TIPOS_ARMA;
   readonly iconoTipo = iconoTipoArma;
   readonly altoFila = ALTO_FILA_ARMA;
+  readonly opcionesEspecial = OPCIONES_ESPECIAL;
+  readonly criteriosOrden = CRITERIOS_ORDEN;
+  readonly rarezas = RAREZAS;
   readonly seleccionada = this.datos.seleccionada;
 
   // null = pantalla 1 (tipos). Si ya había un arma elegida, se abre directamente en la
@@ -53,7 +64,17 @@ export class DialogoArmasComponent {
   readonly viendoGogma = signal(false);
 
   private readonly viewport = viewChild(CdkVirtualScrollViewport);
-  private readonly campoBusqueda = viewChild<ElementRef<HTMLInputElement>>('campoBusqueda');
+  private readonly buscador = viewChild(BuscadorFiltrosComponent);
+
+  // 🔍 Filtros del panel del buscador. Viven mientras el popup esté abierto: se mantienen
+  // al cambiar de tipo de arma (para comparar, p. ej., armas de fuego de varios tipos) y
+  // desaparecen al cerrarlo.
+  readonly filtros = signal<FiltrosArmas>(FILTROS_VACIOS);
+
+  readonly filtrosActivos = computed(() => {
+    const { especiales, rarezas, orden } = this.filtros();
+    return especiales.length + rarezas.length + (orden === 'default' ? 0 : 1);
+  });
 
   // ⚔️ Armas del tipo elegido, pedidas a la API al entrar en la pantalla 2 (y de nuevo si
   // cambia el idioma). Sin tipo elegido no se pide nada.
@@ -66,11 +87,27 @@ export class DialogoArmasComponent {
     loader: ({ request }) => this.wildsApi.getWeaponsPorTipo(request!.tipo, request!.locale)
   });
 
-  // Armas del tipo elegido que coinciden con el buscador (sin distinguir mayúsculas ni tildes)
+  // Armas del tipo elegido que pasan el buscador (sin distinguir mayúsculas ni tildes) y los
+  // filtros del panel, ordenadas según "Ordenar por"
   readonly armasFiltradas = computed<Weapon[]>(() => {
     const texto = normalizar(this.textoBusqueda().trim());
-    return (this.armasDelTipo.value() ?? []).filter(arma => !texto || normalizar(arma.name).includes(texto));
+    const { especiales, rarezas, orden, descendente } = this.filtros();
+
+    const filtradas = (this.armasDelTipo.value() ?? []).filter(arma =>
+      (!texto || normalizar(arma.name).includes(texto)) &&
+      (especiales.length === 0 || especiales.includes(claveEspecialDe(arma))) &&
+      (rarezas.length === 0 || rarezas.includes(arma.rarity)));
+
+    if (orden === 'default') return filtradas;
+
+    // sort() es estable: a igualdad de valor se conserva el orden del juego
+    const signo = descendente ? -1 : 1;
+    return [...filtradas].sort((a, b) => signo * (valorOrden(a, orden) - valorOrden(b, orden)));
   });
+
+  // Cuántas armas del tipo tiene cada opción de filtro (las que tienen 0 se desactivan)
+  readonly conteoEspeciales = computed(() => contar(this.armasDelTipo.value() ?? [], claveEspecialDe));
+  readonly conteoRarezas = computed(() => contar(this.armasDelTipo.value() ?? [], arma => arma.rarity));
 
   // Si el popup se abre con un arma ya elegida, en cuanto llegue su lista se baja hasta ella
   private desplazamientoPendiente = this.seleccionada !== null;
@@ -132,6 +169,33 @@ export class DialogoArmasComponent {
     this.viewport()?.scrollToIndex(0);
   }
 
+  alternarEspecial(clave: ClaveEspecial): void {
+    this.actualizarFiltros(f => ({ ...f, especiales: alternar(f.especiales, clave) }));
+  }
+
+  alternarRareza(rareza: number): void {
+    this.actualizarFiltros(f => ({ ...f, rarezas: alternar(f.rarezas, rareza) }));
+  }
+
+  // Al elegir un criterio nuevo se empieza de mayor a menor
+  elegirOrden(orden: CriterioOrden): void {
+    this.actualizarFiltros(f => ({ ...f, orden, descendente: f.orden === orden ? f.descendente : true }));
+  }
+
+  alternarSentido(): void {
+    this.actualizarFiltros(f => ({ ...f, descendente: !f.descendente }));
+  }
+
+  borrarFiltros(): void {
+    this.actualizarFiltros(() => FILTROS_VACIOS);
+  }
+
+  // Cada cambio de filtros vuelve la lista al principio, como al escribir en el buscador
+  private actualizarFiltros(cambio: (filtros: FiltrosArmas) => FiltrosArmas): void {
+    this.filtros.update(cambio);
+    this.viewport()?.scrollToIndex(0);
+  }
+
   reintentarCarga(): void {
     this.armasDelTipo.reload();
   }
@@ -147,7 +211,7 @@ export class DialogoArmasComponent {
   // Solo con ratón: en móvil enfocar el buscador abriría el teclado tapando media lista
   private enfocarBuscador(): void {
     if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      this.campoBusqueda()?.nativeElement.focus();
+      this.buscador()?.enfocar();
     }
   }
 
@@ -161,6 +225,36 @@ export class DialogoArmasComponent {
       requestAnimationFrame(() => this.desplazarA(viewport, indice, intentos - 1));
     }
   }
+}
+
+// Elemento o estado del arma como clave de filtro ("none" si no tiene ninguno)
+function claveEspecialDe(arma: Weapon): ClaveEspecial {
+  const especial = arma.specials?.[0];
+  return especial?.element ?? especial?.status ?? 'none';
+}
+
+function valorOrden(arma: Weapon, orden: CriterioOrden): number {
+  switch (orden) {
+    case 'rarity': return arma.rarity;
+    case 'attack': return arma.damage.raw;
+    case 'affinity': return arma.affinity;
+    case 'special': return arma.specials?.[0]?.damage.display ?? 0;
+    default: return 0;
+  }
+}
+
+function contar<K>(armas: Weapon[], clave: (arma: Weapon) => K): Map<K, number> {
+  const conteo = new Map<K, number>();
+  for (const arma of armas) {
+    const k = clave(arma);
+    conteo.set(k, (conteo.get(k) ?? 0) + 1);
+  }
+  return conteo;
+}
+
+// Añade el valor a la lista si no estaba, o lo quita si ya estaba
+function alternar<T>(lista: T[], valor: T): T[] {
+  return lista.includes(valor) ? lista.filter(v => v !== valor) : [...lista, valor];
 }
 
 function normalizar(texto: string): string {
