@@ -146,7 +146,8 @@
     .stat-row {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
+      flex-wrap: wrap; // En móvil los iconos bajan a otra línea antes que aplastar el nombre
       gap: 12px; // Evita que un nombre de habilidad largo se pegue a su nivel
       padding: 14px 0;
       font-size: 1.15rem;
@@ -164,6 +165,49 @@
       .stat-value {
         font-weight: bold;
         white-space: nowrap;
+      }
+    }
+
+    // Iconos de las piezas que aportan la habilidad + nivel total, alineados a la derecha
+    .skill-meta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      margin-left: auto;
+    }
+
+    .piezas-origen {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .pieza-origen {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      cursor: help;
+
+      img {
+        display: block;
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        opacity: 0.9;
+
+        @include movil {
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      .pieza-nivel {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #9e9e93; // Mismo gris apagado que "res-label"
       }
     }
 
@@ -232,7 +276,7 @@
       .description-header {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
         flex-wrap: wrap;
         gap: 4px 12px;
         font-weight: 600;

@@ -110,7 +110,10 @@
             <div class="description-item is-set-bonus">
               <div class="description-header">
                 <span class="description-name">{{ bono.nombreHabilidad }}</span>
-                <span class="text-gold">{{ 'skillForge.level' | translate }} {{ bono.nivel }}</span>
+                <span class="skill-meta">
+                  <ng-container *ngTemplateOutlet="iconosPiezas; context: { $implicit: bono.aportes, conNivel: false }" />
+                  <span class="text-gold">{{ 'skillForge.level' | translate }} {{ bono.nivel }}</span>
+                </span>
               </div>
               <div class="bonus-origen">
                 🎖️ {{ bono.esGrupo ? ('skillForge.setBonuses.groupBonus' | translate) : bono.nombreSet }}
@@ -130,7 +133,10 @@
             <div class="description-item">
               <div class="description-header">
                 <span class="description-name">{{ item.nombre }}</span>
-                <span class="text-gold">{{ 'skillForge.level' | translate }} {{ item.nivel }}</span>
+                <span class="skill-meta">
+                  <ng-container *ngTemplateOutlet="iconosPiezas; context: { $implicit: item.aportes, conNivel: false }" />
+                  <span class="text-gold">{{ 'skillForge.level' | translate }} {{ item.nivel }}</span>
+                </span>
               </div>
               <p class="description-text">{{ item.descripcion }}</p>
             </div>
@@ -176,7 +182,10 @@
             @for (habilidad of habilidadesActivas(); track habilidad.skillId) {
               <div class="stat-row">
                 <span>{{ habilidad.nombre }}</span>
-                <span class="stat-value text-gold">{{ 'skillForge.level' | translate }} {{ habilidad.nivel }}</span>
+                <span class="skill-meta">
+                  <ng-container *ngTemplateOutlet="iconosPiezas; context: { $implicit: habilidad.aportes, conNivel: true }" />
+                  <span class="stat-value text-gold">{{ 'skillForge.level' | translate }} {{ habilidad.nivel }}</span>
+                </span>
               </div>
             }
           }
@@ -239,3 +248,18 @@
   </div>
 
 </div>
+
+<!-- 🛡️ Iconos de las piezas que aportan una habilidad (uno por pieza, en orden casco → piernas).
+     El "xN" (nivel que da cada pieza) solo se muestra en Habilidades del Conjunto. -->
+<ng-template #iconosPiezas let-aportes let-conNivel="conNivel">
+  <span class="piezas-origen">
+    @for (aporte of aportes; track aporte.ranura) {
+      <span class="pieza-origen" [title]="aporte.nombrePieza">
+        <img [src]="aporte.icono" [alt]="aporte.nombrePieza" width="22" height="22" />
+        @if (conNivel) {
+          <span class="pieza-nivel">x{{ aporte.nivel }}</span>
+        }
+      </span>
+    }
+  </span>
+</ng-template>
