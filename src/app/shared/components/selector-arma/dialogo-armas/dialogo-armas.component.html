@@ -78,15 +78,15 @@
             <span>{{ 'weaponPicker.rarity' | translate }} <strong>{{ arma.rarity }}</strong></span>
             <span>{{ 'weaponPicker.attack' | translate }} <strong>{{ arma.damage.raw }}</strong></span>
             <span>{{ 'weaponPicker.affinity' | translate }} <strong>{{ arma.affinity }}%</strong></span>
-            @if (elementoDe(arma); as elemento) {
-              <!-- Elemento oculto entre paréntesis, como en el juego -->
+            @if (especialDe(arma); as especial) {
+              <!-- Elemento o estado; si es oculto, entre paréntesis como en el juego -->
               <span
                 class="fila-elemento"
-                [title]="elemento.hidden
-                  ? ('weaponPicker.hiddenElement' | translate) + ': ' + ('weaponPicker.elements.' + elemento.element | translate)
-                  : ('weaponPicker.elements.' + elemento.element | translate)">
-                {{ elemento.icono }}
-                <strong>{{ elemento.hidden ? '(' + elemento.damage.display + ')' : elemento.damage.display }}</strong>
+                [title]="especial.oculto
+                  ? ('weaponPicker.hiddenElement' | translate) + ': ' + (especial.claveNombre | translate)
+                  : (especial.claveNombre | translate)">
+                {{ especial.icono }}
+                <strong>{{ especial.oculto ? '(' + especial.valor + ')' : especial.valor }}</strong>
               </span>
             }
           </span>

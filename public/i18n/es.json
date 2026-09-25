@@ -39,6 +39,12 @@
       "thunder": "Rayo",
       "ice": "Hielo",
       "dragon": "Draco"
+    },
+    "statuses": {
+      "poison": "Veneno",
+      "paralysis": "Parálisis",
+      "sleep": "Sueño",
+      "blastblight": "Nitro"
     }
   },
   "underDevelopment": {

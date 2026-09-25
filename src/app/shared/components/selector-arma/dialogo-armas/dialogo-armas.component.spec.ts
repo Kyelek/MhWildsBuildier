@@ -64,14 +64,21 @@ describe('DialogoArmasComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(15);
   });
 
-  it('muestra el elemento del arma con su icono, y null si no tiene', () => {
+  it('muestra el elemento o el estado del arma con su icono, y null si no tiene', () => {
     crear();
     const conFuego: Weapon = {
       ...CATALOGO[0],
-      specials: [{ id: 1, kind: 'element', element: 'fire', damage: { raw: 11, display: 110 }, hidden: false }]
+      specials: [{ id: 1, kind: 'element', element: 'fire', damage: { raw: 11, display: 110 }, hidden: true }]
     };
-    expect(component.elementoDe(conFuego)).toEqual(jasmine.objectContaining({ icono: '🔥', element: 'fire' }));
-    expect(component.elementoDe(CATALOGO[0])).toBeNull();
+    const conVeneno: Weapon = {
+      ...CATALOGO[0],
+      specials: [{ id: 2, kind: 'status', status: 'poison', damage: { raw: 20, display: 200 }, hidden: false }]
+    };
+    expect(component.especialDe(conFuego)).toEqual(
+      { icono: '🔥', claveNombre: 'weaponPicker.elements.fire', valor: 110, oculto: true });
+    expect(component.especialDe(conVeneno)).toEqual(
+      { icono: '☠️', claveNombre: 'weaponPicker.statuses.poison', valor: 200, oculto: false });
+    expect(component.especialDe(CATALOGO[0])).toBeNull();
   });
 
   it('al elegir un tipo lista solo sus armas y el buscador filtra dentro de ese tipo (sin tildes)', () => {

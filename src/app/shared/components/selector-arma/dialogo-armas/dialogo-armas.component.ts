@@ -2,8 +2,15 @@ import { Component, ElementRef, Injector, afterNextRender, computed, inject, sig
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Weapon, WeaponSpecial } from '../../../../core/models/wilds.models';
-import { DatosDialogoArmas, ICONOS_ELEMENTO, TIPOS_ARMA, iconoTipoArma } from '../../../models/tipos-arma.models';
+import { Weapon } from '../../../../core/models/wilds.models';
+import {
+  DatosDialogoArmas,
+  EspecialArma,
+  ICONOS_ELEMENTO,
+  ICONOS_ESTADO,
+  TIPOS_ARMA,
+  iconoTipoArma
+} from '../../../models/tipos-arma.models';
 import { EnDesarrolloComponent } from '../../en-desarrollo/en-desarrollo.component';
 
 // Alto fijo (px) de cada fila de la lista: el scroll virtual lo necesita para calcular
@@ -64,10 +71,19 @@ export class DialogoArmasComponent {
   // Identidad estable de cada fila para el scroll virtual
   readonly porId = (_indice: number, arma: Weapon) => arma.id;
 
-  // Elemento del arma (fuego, agua...) con su icono, o null si no tiene
-  elementoDe(arma: Weapon): (WeaponSpecial & { icono: string }) | null {
-    const elemento = arma.specials?.find(special => special.kind === 'element' && special.element);
-    return elemento?.element ? { ...elemento, icono: ICONOS_ELEMENTO[elemento.element] } : null;
+  // Elemento (fuego, agua...) o estado (veneno, parálisis...) del arma con su icono, o null
+  // si no tiene ninguno. En la API cada arma trae como mucho uno de los dos.
+  especialDe(arma: Weapon): EspecialArma | null {
+    for (const especial of arma.specials ?? []) {
+      const base = { valor: especial.damage.display, oculto: especial.hidden };
+      if (especial.kind === 'element' && especial.element) {
+        return { ...base, icono: ICONOS_ELEMENTO[especial.element], claveNombre: `weaponPicker.elements.${especial.element}` };
+      }
+      if (especial.kind === 'status' && especial.status) {
+        return { ...base, icono: ICONOS_ESTADO[especial.status], claveNombre: `weaponPicker.statuses.${especial.status}` };
+      }
+    }
+    return null;
   }
 
   verGogma(): void {

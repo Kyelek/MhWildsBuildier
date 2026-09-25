@@ -39,6 +39,12 @@
       "thunder": "Thunder",
       "ice": "Ice",
       "dragon": "Dragon"
+    },
+    "statuses": {
+      "poison": "Poison",
+      "paralysis": "Paralysis",
+      "sleep": "Sleep",
+      "blastblight": "Blast"
     }
   },
   "underDevelopment": {
