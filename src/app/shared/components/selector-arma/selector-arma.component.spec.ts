@@ -26,7 +26,6 @@ describe('SelectorArmaComponent', () => {
 
     fixture = TestBed.createComponent(SelectorArmaComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('armas', [ARCO]);
     fixture.detectChanges();
   });
 

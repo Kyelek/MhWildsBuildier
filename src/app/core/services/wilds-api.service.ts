@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, catchError, of, shareReplay, tap, throwError } from 'rxjs';
 import { SkillDetail, ArmorPiece, ArmorSet, Weapon } from '../models/wilds.models';
 import { environment } from '../../../environments/environment';
@@ -8,6 +8,16 @@ import { environment } from '../../../environments/environment';
 // (probado a mano: "ja" devuelve nombres/descripciones en japonés; "jp" existe pero
 // responde con los campos a null, así que NO es un código de idioma válido para esta API).
 export type ApiLocale = 'es' | 'en' | 'ja';
+
+// ⚔️ Campos de cada arma que usa la app. La API devuelve por defecto mucho más (materiales de
+// fabricación, árbol de mejoras, descripción...): pidiendo solo estos, con su parámetro de
+// proyección "p", el catálogo de armas pasa de ~2,7 MB a ~250 KB por idioma.
+const CAMPOS_ARMA: readonly (keyof Weapon)[] = ['id', 'name', 'kind', 'rarity', 'damage', 'affinity', 'slots', 'specials'];
+const PROYECCION_ARMA = JSON.stringify(Object.fromEntries(CAMPOS_ARMA.map(campo => [campo, true])));
+
+// 🧹 Entradas de caché de versiones anteriores que ya no se usan. "weapons" guardaba el
+// catálogo completo de armas (~2,7 MB por idioma) y llenaba casi toda la cuota de localStorage.
+const CACHES_OBSOLETAS: readonly string[] = ['weapons'];
 
 @Injectable({
   providedIn: 'root'
@@ -72,10 +82,28 @@ export class WildsApiService {
     );
   }
 
-  // ⚔️ Nuevo método: Trae el catálogo de armas (Gran Espada, Katana, etc.)
+  constructor() {
+    this.borrarCachesObsoletas();
+  }
+
+  // ⚔️ Catálogo completo de armas (solo los campos que usa la app, ver CAMPOS_ARMA)
   getWeapons(locale: ApiLocale = this.locale()): Observable<Weapon[]> {
-    return this.cachearEnLocalStorage('weapons', locale, () =>
-      this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`)
+    return this.cachearEnLocalStorage('weapons-resumen', locale, () =>
+      this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`, {
+        params: new HttpParams().set('p', PROYECCION_ARMA)
+      })
+    );
+  }
+
+  // 🗡️ Solo las armas de un tipo (p. ej. "long-sword"), filtradas en la propia API con su
+  // parámetro "q": las usa el popup de selección de armas al elegir un tipo (~20 KB por tipo).
+  getWeaponsPorTipo(tipo: string, locale: ApiLocale = this.locale()): Observable<Weapon[]> {
+    return this.cachearEnLocalStorage(`weapons-${tipo}`, locale, () =>
+      this.http.get<Weapon[]>(`${this.apiRoot}/${locale}/weapons`, {
+        params: new HttpParams()
+          .set('q', JSON.stringify({ kind: tipo }))
+          .set('p', PROYECCION_ARMA)
+      })
     );
   }
 
@@ -113,6 +141,21 @@ export class WildsApiService {
 
     this.cacheEnMemoria.set(clave, observable$);
     return observable$;
+  }
+
+  // Libera el espacio que ocupaban en localStorage las cachés que ya no se usan
+  private borrarCachesObsoletas(): void {
+    try {
+      const prefijos = CACHES_OBSOLETAS.map(nombre => `${WildsApiService.PREFIJO_CACHE}:${nombre}:`);
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const clave = localStorage.key(i);
+        if (clave && prefijos.some(prefijo => clave.startsWith(prefijo))) {
+          localStorage.removeItem(clave);
+        }
+      }
+    } catch {
+      // localStorage no disponible (modo privado...): no hay nada que borrar
+    }
   }
 
   // Lee y parsea una entrada de localStorage. Si no existe, está corrupta o localStorage no

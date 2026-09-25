@@ -45,7 +45,9 @@
       "paralysis": "麻痺",
       "sleep": "睡眠",
       "blastblight": "爆破"
-    }
+    },
+    "loading": "武器を読み込み中...",
+    "loadError": "武器を読み込めませんでした。接続を確認してください。"
   },
   "underDevelopment": {
     "title": "開発中",
