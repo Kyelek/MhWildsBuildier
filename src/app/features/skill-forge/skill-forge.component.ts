@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
+import { SelectorArmaComponent } from '../../shared/components/selector-arma/selector-arma.component';
 import {
   AportePieza,
   BonificacionSetActiva,
@@ -46,7 +47,8 @@ const ICONOS_RANURA: Record<TipoPieza, string> = {
     MatProgressSpinnerModule,
     MatDividerModule,
     TranslatePipe,
-    SelectorBuscableComponent
+    SelectorBuscableComponent,
+    SelectorArmaComponent
   ],
   templateUrl: './skill-forge.component.html',
   styleUrl: './skill-forge.component.scss'
@@ -157,11 +159,6 @@ export class SkillForgeComponent {
   readonly piernas = computed(() => this.armorPorRanura('legs'));
 
   readonly armas = computed(() => this.weaponsResource.value() ?? []);
-
-  // Referencia estable (no se recrea en cada ciclo) para agrupar el selector de armas
-  // por tipo ('kind') dentro de <app-selector-buscable>. Devuelve la CLAVE de traducción
-  // del tipo (p. ej. "weaponTypes.bow"): el selector la traduce al idioma activo.
-  readonly agruparArmaPorTipo = (arma: Weapon) => `weaponTypes.${arma.kind}`;
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {

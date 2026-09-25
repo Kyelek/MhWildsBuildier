@@ -21,6 +21,18 @@
     "switch-axe": "スラッシュアックス",
     "sword-shield": "片手剣"
   },
+  "weaponPicker": {
+    "placeholder": "武器を選択...",
+    "chooseType": "武器種を選択",
+    "back": "武器種",
+    "close": "閉じる",
+    "remove": "武器を外す",
+    "search": "武器を検索...",
+    "empty": "武器が見つかりません",
+    "rarity": "レア度",
+    "attack": "攻撃力",
+    "affinity": "会心率"
+  },
   "nav": {
     "home": "ホーム",
     "constructor": "ビルダー",

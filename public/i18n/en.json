@@ -21,6 +21,18 @@
     "switch-axe": "Switch Axe",
     "sword-shield": "Sword & Shield"
   },
+  "weaponPicker": {
+    "placeholder": "Choose weapon...",
+    "chooseType": "Choose a weapon type",
+    "back": "Weapon types",
+    "close": "Close",
+    "remove": "Remove weapon",
+    "search": "Search weapon...",
+    "empty": "No weapons found",
+    "rarity": "Rarity",
+    "attack": "Attack",
+    "affinity": "Affinity"
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
@@ -28,7 +40,7 @@
     "menu": "Open or close the menu"
   },
   "home": {
-    "header":  {
+    "header": {
       "title": "Forge Your Destiny in",
       "sub-title": "Plan your gear, work out your defences and optimise your affinity before heading out to hunt in the Forbidden Lands."
     },
