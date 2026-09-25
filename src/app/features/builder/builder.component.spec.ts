@@ -32,6 +32,7 @@ function crearArmaDePrueba(overrides: Partial<Weapon> = {}): Weapon {
     affinity: 0,
     damage: { raw: 100, display: 100 },
     slots: [],
+    specials: [],
     ...overrides
   };
 }

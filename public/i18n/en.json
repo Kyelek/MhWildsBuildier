@@ -21,6 +21,38 @@
     "switch-axe": "Switch Axe",
     "sword-shield": "Sword & Shield"
   },
+  "weaponPicker": {
+    "chooseType": "Choose a weapon type",
+    "back": "Weapon types",
+    "close": "Close",
+    "remove": "Remove weapon",
+    "search": "Search weapon...",
+    "empty": "No weapons found",
+    "rarity": "Rarity",
+    "attack": "Attack",
+    "affinity": "Affinity",
+    "gogma": "Gogma Weapon",
+    "hiddenElement": "Hidden element",
+    "elements": {
+      "fire": "Fire",
+      "water": "Water",
+      "thunder": "Thunder",
+      "ice": "Ice",
+      "dragon": "Dragon"
+    },
+    "statuses": {
+      "poison": "Poison",
+      "paralysis": "Paralysis",
+      "sleep": "Sleep",
+      "blastblight": "Blast"
+    },
+    "loading": "Loading weapons...",
+    "loadError": "Could not load the weapons. Check your connection."
+  },
+  "underDevelopment": {
+    "title": "Under development",
+    "message": "We are working on this section. It will be available soon."
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
@@ -28,7 +60,7 @@
     "menu": "Open or close the menu"
   },
   "home": {
-    "header":  {
+    "header": {
       "title": "Forge Your Destiny in",
       "sub-title": "Plan your gear, work out your defences and optimise your affinity before heading out to hunt in the Forbidden Lands."
     },

@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideTranslateService } from '@ngx-translate/core';
 
 import { SkillForgeComponent } from './skill-forge.component';
+import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, ArmorSet, ArmorSetBonus, ArmorSkill, Weapon } from '../../core/models/wilds.models';
 
 function crearPiezaDePrueba(overrides: Partial<ArmorPiece> = {}): ArmorPiece {
@@ -32,6 +33,7 @@ function crearArmaDePrueba(overrides: Partial<Weapon> = {}): Weapon {
     affinity: 0,
     damage: { raw: 100, display: 100 },
     slots: [],
+    specials: [],
     ...overrides
   };
 }
@@ -98,13 +100,13 @@ describe('SkillForgeComponent', () => {
     fixture.detectChanges();
   });
 
-  // Responde los 4 catálogos que pide el componente al crearse (rxResource).
+  // Responde los 3 catálogos que pide el componente al crearse (rxResource). Las armas ya no
+  // se piden al crearse: solo las del tipo del arma elegida (ver test de ataque/afinidad).
   // Por defecto, vacíos; cada test pasa los que necesite.
   function flushCatalogos(armorSets: ArmorSet[] = []): void {
     httpMock.expectOne(req => req.url.endsWith('/armor')).flush([]);
     httpMock.expectOne(req => req.url.endsWith('/armor/sets')).flush(armorSets);
     httpMock.expectOne(req => req.url.endsWith('/skills')).flush([]);
-    httpMock.expectOne(req => req.url.endsWith('/weapons')).flush([]);
   }
 
   afterEach(() => {
@@ -295,6 +297,30 @@ describe('SkillForgeComponent', () => {
 
     expect(component.ataqueTotal()).toEqual(150);
     expect(component.afinidadTotal()).toEqual(25);
+
+    // Para poder traducir el arma al cambiar de idioma se piden solo las de su tipo
+    const peticion = httpMock.expectOne(req => req.url.endsWith('/weapons'));
+    expect(peticion.request.params.get('q')).toEqual('{"kind":"great-sword"}');
+    peticion.flush([]);
+  });
+
+  it('al cambiar de idioma sustituye el arma elegida por su versión traducida (mismo id)', async () => {
+    flushCatalogos();
+    component.armaSeleccionada.set(crearArmaDePrueba({ id: 7, name: 'Gran espada' }));
+    fixture.detectChanges();
+    httpMock.expectOne(req => req.url.includes('/es/weapons')).flush([crearArmaDePrueba({ id: 7, name: 'Gran espada' })]);
+    await fixture.whenStable();
+
+    TestBed.inject(WildsApiService).setLocale('en');
+    fixture.detectChanges();
+    // Al cambiar de idioma se vuelven a pedir los catálogos de armadura...
+    httpMock.match(req => !req.url.endsWith('/weapons')).forEach(req => req.flush([]));
+    // ...y las armas del tipo del arma elegida, ya en inglés
+    httpMock.expectOne(req => req.url.includes('/en/weapons')).flush([crearArmaDePrueba({ id: 7, name: 'Great Sword' })]);
+    await fixture.whenStable();
+    fixture.detectChanges(); // Ejecuta el efecto que sustituye el arma por la traducida
+
+    expect(component.armaSeleccionada()?.name).toEqual('Great Sword');
   });
 
   it('suma las resistencias elementales (positivas y negativas) de todas las piezas', () => {

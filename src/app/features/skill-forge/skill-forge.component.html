@@ -18,19 +18,11 @@
         </div>
       }
 
-      <app-selector-buscable
-        [elementos]="armas()"
+      <!-- 🗡️ El arma se elige en un popup (tipo de arma → arma concreta), ver shared/components/selector-arma -->
+      <app-selector-arma
         [(valor)]="armaSeleccionada"
         [etiqueta]="'builder.weapon.label' | translate"
-        [textoBuscador]="'builder.weapon.search' | translate"
-        [textoVacio]="'builder.weapon.empty' | translate"
-        [agruparPor]="agruparArmaPorTipo"
-        [permitirVacio]="true"
-        [etiquetaVacio]="'armorSlots.unequipped' | translate">
-        <ng-template let-arma>
-          {{ arma.name }} ({{ 'builder.weapon.attack' | translate }}: {{ arma.damage.raw }})
-        </ng-template>
-      </app-selector-buscable>
+        [permitirQuitar]="true" />
 
       <app-selector-buscable
         [elementos]="cascos()"

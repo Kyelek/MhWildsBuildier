@@ -21,6 +21,38 @@
     "switch-axe": "Hacha espada",
     "sword-shield": "Espada y escudo"
   },
+  "weaponPicker": {
+    "chooseType": "Elige el tipo de arma",
+    "back": "Tipos de arma",
+    "close": "Cerrar",
+    "remove": "Quitar arma",
+    "search": "Buscar arma...",
+    "empty": "No se encontraron armas",
+    "rarity": "Rareza",
+    "attack": "Ataque",
+    "affinity": "Afinidad",
+    "gogma": "Arma Gogma",
+    "hiddenElement": "Elemento oculto",
+    "elements": {
+      "fire": "Fuego",
+      "water": "Agua",
+      "thunder": "Rayo",
+      "ice": "Hielo",
+      "dragon": "Draco"
+    },
+    "statuses": {
+      "poison": "Veneno",
+      "paralysis": "Parálisis",
+      "sleep": "Sueño",
+      "blastblight": "Nitro"
+    },
+    "loading": "Cargando armas...",
+    "loadError": "No se pudieron cargar las armas. Comprueba tu conexión."
+  },
+  "underDevelopment": {
+    "title": "En desarrollo",
+    "message": "Estamos trabajando en esta sección. Estará disponible próximamente."
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",

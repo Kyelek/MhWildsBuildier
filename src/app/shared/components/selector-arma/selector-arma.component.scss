@@ -1,0 +1,135 @@
+@use 'responsive' as *;
+
+$color-gold: #c5a059;
+$color-text: #f5f5e9;
+
+// Mismo hueco vertical que ocupa <app-selector-buscable>: su margen inferior más el
+// espacio que Material reserva bajo cada campo para mensajes de ayuda.
+:host {
+  display: block;
+  width: 100%;
+  margin-bottom: 40px;
+
+  @include movil {
+    margin-bottom: 24px;
+  }
+}
+
+.campo-arma {
+  position: relative;
+  margin: 0;
+  padding: 0 4px 0 12px;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(197, 160, 89, 0.6);
+  }
+
+  // Foco con teclado: borde dorado de 2px como el campo de Material enfocado
+  &:has(.campo-boton:focus-visible) {
+    border-color: $color-gold;
+    box-shadow: inset 0 0 0 1px $color-gold;
+
+    .campo-etiqueta {
+      color: $color-gold;
+    }
+  }
+}
+
+// Etiqueta "flotando" sobre el borde superior cuando hay un arma elegida
+.campo-etiqueta {
+  padding: 0 4px;
+  font-size: 0.75rem;
+  color: rgba(197, 160, 89, 0.7);
+  letter-spacing: 0.4px;
+}
+
+// Sin arma elegida la etiqueta va dentro del campo: la <legend> se encoge a ancho 0 (el
+// borde superior queda entero) pero conserva su alto, para que el campo no cambie de tamaño.
+.campo-arma:not(.con-valor) .campo-etiqueta {
+  max-width: 0;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.campo-arma {
+  display: flex;
+  align-items: center;
+}
+
+.campo-boton {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 55px; // + el alto de la etiqueta = el mismo alto que el campo de Material
+  margin-top: -8px;
+  padding: 0 0 0 4px;
+  background: transparent;
+  border: none;
+  color: $color-text;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.campo-icono {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.campo-texto {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Etiqueta dentro del campo vacío: mismo dorado que las de los selectores de armadura
+.campo-placeholder {
+  color: rgba(197, 160, 89, 0.7);
+}
+
+// Misma flecha decorativa que <app-selector-buscable>
+.campo-flecha {
+  margin-right: 8px;
+  color: rgba(197, 160, 89, 0.7);
+  user-select: none;
+}
+
+// X para quitar el arma sin abrir el popup (área táctil de 40px)
+.campo-quitar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-top: -8px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  color: #9e9e93;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover,
+  &:focus-visible {
+    color: $color-gold;
+    outline: none;
+  }
+}

@@ -1,0 +1,107 @@
+<div class="dialogo-armas">
+  <!-- Cabecera: título a la izquierda y, a la derecha, la flecha para volver a los tipos
+       (solo fuera de la pantalla de tipos) junto a la X de cerrar (cómoda en móvil, donde
+       apenas queda hueco fuera del popup para cerrarlo pulsando fuera) -->
+  <header class="dialogo-cabecera">
+    @if (viendoGogma()) {
+      <h2 class="dialogo-titulo">{{ 'weaponPicker.gogma' | translate }}</h2>
+    } @else if (tipoElegido()) {
+      <h2 class="dialogo-titulo">
+        <img [src]="iconoTipo(tipoElegido()!)" alt="" width="28" height="28" />
+        {{ 'weaponTypes.' + tipoElegido() | translate }}
+      </h2>
+    } @else {
+      <h2 class="dialogo-titulo">{{ 'weaponPicker.chooseType' | translate }}</h2>
+    }
+
+    @if (viendoGogma() || tipoElegido()) {
+      <button
+        type="button"
+        class="btn-cabecera"
+        [attr.aria-label]="'weaponPicker.back' | translate"
+        [title]="'weaponPicker.back' | translate"
+        (click)="volverATipos()">←</button>
+    }
+    <button
+      type="button"
+      class="btn-cabecera"
+      [attr.aria-label]="'weaponPicker.close' | translate"
+      [title]="'weaponPicker.close' | translate"
+      (click)="cerrar()">×</button>
+  </header>
+
+  @if (viendoGogma()) {
+    <!-- 🚧 Armas Gogma: pendiente de un desarrollo futuro -->
+    <app-en-desarrollo [titulo]="'weaponPicker.gogma' | translate" />
+  } @else if (!tipoElegido()) {
+    <!-- 🗂️ Pantalla 1: un botón con la imagen de cada tipo de arma -->
+    <div class="rejilla-tipos">
+      @for (tipo of tipos; track tipo) {
+        <button
+          type="button"
+          class="tarjeta-tipo"
+          [class.actual]="seleccionada?.kind === tipo"
+          (click)="elegirTipo(tipo)">
+          <img [src]="iconoTipo(tipo)" alt="" width="56" height="56" />
+          <span>{{ 'weaponTypes.' + tipo | translate }}</span>
+        </button>
+      }
+      <button type="button" class="tarjeta-tipo tarjeta-gogma" (click)="verGogma()">
+        <span>{{ 'weaponPicker.gogma' | translate }}</span>
+      </button>
+    </div>
+  } @else {
+    <!-- 🔍 Pantalla 2: buscador centrado (acotado al tipo elegido) + lista con scroll virtual -->
+    <div class="zona-busqueda">
+      <input
+        #campoBusqueda
+        type="search"
+        class="campo-busqueda"
+        autocomplete="off"
+        spellcheck="false"
+        [placeholder]="'weaponPicker.search' | translate"
+        (input)="onBusquedaInput($any($event.target).value)" />
+    </div>
+
+    <!-- Mientras llegan de la API las armas del tipo se avisa de la carga (o del error, con
+         opción de reintentar). El scroll virtual solo pinta las filas visibles (hay ~90 armas
+         por tipo); no tiene equivalente en la sintaxis @for, por eso se usa *cdkVirtualFor. -->
+    @if (armasDelTipo.isLoading()) {
+      <p class="lista-estado">{{ 'weaponPicker.loading' | translate }}</p>
+    } @else if (armasDelTipo.error()) {
+      <div class="lista-estado">
+        <p>{{ 'weaponPicker.loadError' | translate }}</p>
+        <button type="button" class="btn-reintentar" (click)="reintentarCarga()">{{ 'common.errors.retry' | translate }}</button>
+      </div>
+    } @else if (armasFiltradas().length > 0) {
+      <cdk-virtual-scroll-viewport class="lista-armas" [itemSize]="altoFila">
+        <button
+          *cdkVirtualFor="let arma of armasFiltradas(); trackBy: porId"
+          type="button"
+          class="fila-arma"
+          [class.seleccionada]="arma.id === seleccionada?.id"
+          (click)="elegirArma(arma)">
+          <span class="fila-nombre">{{ arma.name }}</span>
+          <span class="fila-datos">
+            <span>{{ 'weaponPicker.rarity' | translate }} <strong>{{ arma.rarity }}</strong></span>
+            <span>{{ 'weaponPicker.attack' | translate }} <strong>{{ arma.damage.raw }}</strong></span>
+            <span>{{ 'weaponPicker.affinity' | translate }} <strong>{{ arma.affinity }}%</strong></span>
+            @if (especialDe(arma); as especial) {
+              <!-- Elemento o estado; si es oculto, entre paréntesis como en el juego -->
+              <span
+                class="fila-elemento"
+                [title]="especial.oculto
+                  ? ('weaponPicker.hiddenElement' | translate) + ': ' + (especial.claveNombre | translate)
+                  : (especial.claveNombre | translate)">
+                {{ especial.icono }}
+                <strong>{{ especial.oculto ? '(' + especial.valor + ')' : especial.valor }}</strong>
+              </span>
+            }
+          </span>
+        </button>
+      </cdk-virtual-scroll-viewport>
+    } @else {
+      <p class="lista-estado">{{ 'weaponPicker.empty' | translate }}</p>
+    }
+  }
+</div>
