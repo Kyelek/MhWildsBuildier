@@ -1,0 +1,95 @@
+@use 'responsive' as *;
+
+$color-gold: #c5a059;
+$font-main: 'Montserrat', sans-serif;
+
+// 🦶 FOOTER AL FINAL DE LA PÁGINA (no fijo), mismo cristal oscuro y borde dorado que el navbar
+.main-footer {
+  width: 100%;
+  // Altura definida en src/styles.scss, más el hueco de la barra de gestos en móvil
+  height: calc(var(--altura-footer) + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 0 40px env(safe-area-inset-bottom);
+  box-sizing: border-box;
+  background: rgba(20, 18, 15, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(197, 160, 89, 0.2);
+  font-family: $font-main;
+
+  @include tablet {
+    padding: 0 max(24px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(24px, env(safe-area-inset-left));
+  }
+
+  @include movil {
+    gap: 12px;
+    padding: 0 max(16px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(16px, env(safe-area-inset-left));
+  }
+}
+
+.footer-legal {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .legal-corto { display: none; }
+
+  @include tablet {
+    .legal-completo { display: none; }
+    .legal-corto { display: inline; }
+  }
+
+  @include movil {
+    font-size: 0.7rem;
+    white-space: normal; // En teléfonos estrechos puede partirse en dos líneas
+  }
+}
+
+.footer-enlaces {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+
+  @include movil {
+    gap: 4px;
+  }
+}
+
+.footer-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  svg { flex-shrink: 0; }
+
+  @include con-hover {
+    &:hover { color: $color-gold; }
+  }
+
+  &:active,
+  &:focus-visible { color: $color-gold; }
+
+  // En tablet/móvil solo el icono, con zona táctil cómoda
+  @include tablet {
+    padding: 8px;
+
+    .footer-enlace-texto { display: none; }
+  }
+}

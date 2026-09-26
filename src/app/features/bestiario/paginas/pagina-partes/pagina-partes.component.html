@@ -1,0 +1,84 @@
+<h3 class="titulo-seccion">{{ 'bestiary.parts.breakableTitle' | translate }}</h3>
+<div class="tabla-envoltorio">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'bestiary.parts.title' | translate }}</th>
+        <th scope="col" class="centro">{{ 'bestiary.parts.breakable' | translate }}</th>
+        <th scope="col" class="centro">{{ 'bestiary.parts.severable' | translate }}</th>
+        <th scope="col" class="centro">{{ 'bestiary.parts.essence' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (fila of partes(); track fila.parte) {
+        <tr [class.destacada]="fila.rompible || fila.cortable">
+          <th scope="row">{{ claveParte(fila.parte) | translate }}</th>
+          <td class="centro">
+            @if (fila.rompible) { <span class="si" [attr.aria-label]="'bestiary.yes' | translate">✔</span> } @else { <span class="apagado">–</span> }
+          </td>
+          <td class="centro">
+            @if (fila.cortable) { <span class="si" [attr.aria-label]="'bestiary.yes' | translate">✔</span> } @else { <span class="apagado">–</span> }
+          </td>
+          <td class="centro">
+            @if (fila.esencia) {
+              <span [class]="'esencia esencia-' + fila.esencia" [title]="'bestiary.essence.' + fila.esencia | translate">
+                <span class="solo-lector">{{ 'bestiary.essence.' + fila.esencia | translate }}</span>
+              </span>
+            } @else { <span class="apagado">–</span> }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<h3 class="titulo-seccion">{{ 'bestiary.rewards.title' | translate }}</h3>
+<div class="interruptor-rango" role="radiogroup" [attr.aria-label]="'bestiary.rewards.rank' | translate">
+  @for (opcion of rangos; track opcion) {
+    <button type="button" role="radio" [attr.aria-checked]="rango() === opcion" [class.activo]="rango() === opcion"
+      (click)="rango.set(opcion)">{{ 'bestiary.rewards.' + opcion | translate }}</button>
+  }
+</div>
+
+<div class="tabla-envoltorio">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'bestiary.rewards.item' | translate }}</th>
+        <th scope="col">{{ 'bestiary.rewards.how' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (objeto of recompensas(); track objeto.id) {
+        <tr>
+          <th scope="row">
+            {{ objeto.nombre }}
+            <small class="rareza">{{ 'weaponPicker.rarity' | translate }} {{ objeto.rareza }}</small>
+          </th>
+          <td>
+            <ul class="formas">
+              @for (forma of objeto.formas; track $index) {
+                <li>
+                  <span>
+                    {{ 'bestiary.rewardKinds.' + forma.tipo | translate }}
+                    @if (forma.parte) { <span class="apagado">({{ claveParte(forma.parte) | translate }})</span> }
+                    @if (forma.cantidad > 1) { ×{{ forma.cantidad }} }
+                  </span>
+                  <span class="probabilidad">
+                    @if (forma.probabilidadMin === forma.probabilidadMax) {
+                      {{ forma.probabilidadMax }}%
+                    } @else {
+                      {{ forma.probabilidadMin }}–{{ forma.probabilidadMax }}%
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="2" class="centro apagado">{{ 'bestiary.rewards.empty' | translate }}</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

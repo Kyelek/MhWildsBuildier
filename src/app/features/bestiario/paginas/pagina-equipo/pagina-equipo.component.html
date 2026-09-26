@@ -1,0 +1,44 @@
+@if (error()) {
+  <div class="aviso aviso-error" role="alert">
+    <p>{{ 'bestiary.gear.loadError' | translate }}</p>
+    <button type="button" class="boton-dorado" (click)="reintentar.emit()">{{ 'common.errors.retry' | translate }}</button>
+  </div>
+} @else if (cargando()) {
+  <div class="aviso"><span class="pluma" aria-hidden="true">🪶</span> {{ 'bestiary.gear.loading' | translate }}</div>
+} @else {
+  <p class="leyenda">{{ 'bestiary.gear.legend' | translate }}</p>
+  <div class="columnas-equipo">
+    <div class="columna">
+      <h3 class="titulo-seccion">{{ 'bestiary.gear.weapons' | translate }} <span class="apagado">({{ armas().length }})</span></h3>
+      @for (grupo of armasPorTipo(); track grupo.clave) {
+        <h4 class="grupo-equipo">
+          <img [src]="iconoTipoArma(grupo.clave)" alt="" width="22" height="22" />
+          {{ 'weaponTypes.' + grupo.clave | translate }}
+        </h4>
+        <ul class="lista-equipo">
+          @for (arma of grupo.elementos; track arma.id) {
+            <li><span>{{ arma.name }}</span><small class="rareza">R{{ arma.rarity }}</small></li>
+          }
+        </ul>
+      } @empty {
+        <p class="apagado">{{ 'bestiary.gear.none' | translate }}</p>
+      }
+    </div>
+    <div class="columna">
+      <h3 class="titulo-seccion">{{ 'bestiary.gear.armor' | translate }} <span class="apagado">({{ armaduras().length }})</span></h3>
+      @for (grupo of armadurasPorConjunto(); track grupo.clave) {
+        <h4 class="grupo-equipo">{{ grupo.clave }}</h4>
+        <ul class="lista-equipo">
+          @for (pieza of grupo.elementos; track pieza.id) {
+            <li>
+              <span class="con-icono"><img [src]="iconosRanura[pieza.kind]" alt="" width="20" height="20" />{{ pieza.name }}</span>
+              <small class="rareza">R{{ pieza.rarity }}</small>
+            </li>
+          }
+        </ul>
+      } @empty {
+        <p class="apagado">{{ 'bestiary.gear.none' | translate }}</p>
+      }
+    </div>
+  </div>
+}

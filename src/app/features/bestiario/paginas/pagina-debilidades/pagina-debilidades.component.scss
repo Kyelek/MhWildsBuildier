@@ -1,0 +1,71 @@
+@use 'libro-bestiario' as *;
+
+:host {
+  display: block;
+}
+
+@include titulo-seccion;
+@include tabla;
+
+.fila-grupo th {
+  padding-top: 12px;
+  font-family: $font-titles;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: $tinta-apagada;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.icono {
+  display: inline-block;
+  width: 1.6em;
+  text-align: center;
+}
+
+.nota {
+  display: block;
+  margin: 2px 0 0 1.6em;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: $tinta-apagada;
+}
+
+.estrellas {
+  color: $oro-claro;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(226, 196, 127, 0.4);
+}
+
+.resiste {
+  color: #d67c6b;
+  font-size: 0.85rem;
+}
+
+// Zonas de daño: números compactos, resaltando las zonas débiles
+.tabla-zonas {
+  font-variant-numeric: tabular-nums;
+
+  th,
+  td {
+    padding: 6px 8px;
+  }
+
+  // La columna de partes se queda fija al desplazar la tabla en horizontal (móvil)
+  tbody th {
+    white-space: nowrap;
+    position: sticky;
+    left: 0;
+    background: #271f17;
+  }
+
+  td {
+    color: $tinta-apagada;
+  }
+
+  td.debil {
+    color: #fff1cf;
+    font-weight: 700;
+    background: rgba(197, 160, 89, 0.18);
+  }
+}

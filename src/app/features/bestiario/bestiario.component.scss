@@ -1,15 +1,291 @@
 @use 'responsive' as *;
+@use 'libro-bestiario' as *;
 
-// 🐉 ESTILOS DE LA SECCIÓN BESTIARIO
-.bestiario-container {
-  max-width: 1200px;
+// ==========================================
+// 📖 BESTIARIO DE BOLSILLO
+//
+// Sin monstruo elegido: portada + índice de "medallones" centrado.
+// Con monstruo elegido: el índice se pliega en una columna a la izquierda (como el índice
+// de un libro) y la tarjeta ocupa el resto. En móvil el índice se sustituye por un
+// desplegable con buscador y la tarjeta queda debajo.
+// ==========================================
+
+.bestiario {
+  max-width: 1400px;
   min-height: 60vh;
   margin: 0 auto;
-  display: flex;
-  padding: 40px 0;
+  padding: 32px 24px 48px;
+  box-sizing: border-box;
+
+  @include tablet {
+    padding: 16px 0 32px;
+  }
+}
+
+// Portada del libro
+.portada {
+  text-align: center;
+  margin-bottom: 32px;
+
+  h1 {
+    margin: 6px 0;
+    font-size: 2.4rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+
+    @include movil {
+      font-size: 1.7rem;
+    }
+  }
+
+  .portada-ornamento {
+    color: $oro;
+    opacity: 0.7;
+    letter-spacing: 6px;
+  }
+
+  .portada-sub {
+    margin: 0;
+    font-style: italic;
+    color: $tinta-apagada;
+  }
+
+  // Con un monstruo abierto la portada se reduce para dejar sitio a la tarjeta
+  .con-seleccion & {
+    margin-bottom: 16px;
+
+    h1 {
+      font-size: 1.6rem;
+    }
+
+    .portada-sub,
+    .portada-ornamento {
+      display: none;
+    }
+  }
 
   @include movil {
-    min-height: 50vh;
-    padding: 16px 0;
+    margin-bottom: 16px;
+  }
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+
+  .con-seleccion & {
+    grid-template-columns: 250px minmax(0, 1fr);
+
+    @include tablet {
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    @include movil {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+// 🗂️ ÍNDICE
+.indice {
+  ul {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+    justify-content: center;
+    // Todas las fichas iguales: cada fila toma la altura de la ficha más alta (la de
+    // nombre más largo, p. ej. "Anjanath Fulgúreo Guardián"), y el ancho ya es el mismo
+    // para todas las columnas.
+    grid-auto-rows: 1fr;
+  }
+
+  // Plegado a la izquierda: lista vertical fija mientras se lee la tarjeta
+  .con-seleccion & {
+    position: sticky;
+    top: calc(var(--altura-navbar) + 16px);
+    max-height: calc(100vh - var(--altura-navbar) - 32px);
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    border-radius: 6px;
+    background: rgba(20, 16, 12, 0.75);
+    backdrop-filter: blur(6px);
+    animation: plegar 0.35s ease-out;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: $oro;
+      border-radius: 10px;
+    }
+
+    ul {
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto; // En la lista compacta cada fila mide lo que necesite
+      gap: 2px;
+    }
+  }
+
+  @include movil {
+    display: none;
+  }
+}
+
+@keyframes plegar {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ficha-indice {
+  width: 100%;
+  height: 100%; // Ocupa toda la celda para que todas las fichas midan lo mismo
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 8px 12px;
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(42, 34, 25, 0.85), rgba(26, 20, 14, 0.9));
+  color: #eadfc4;
+  font-family: $font-titles;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  @include con-hover {
+    &:hover {
+      border-color: $oro;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(197, 160, 89, 0.2);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $oro;
+    outline-offset: 2px;
+  }
+
+  .ficha-nombre {
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  // Versión compacta en la columna izquierda
+  .con-seleccion & {
+    flex-direction: row;
+    gap: 10px;
+    padding: 6px 8px;
+    border-color: transparent;
+    background: transparent;
+    font-size: 0.8rem;
+    text-align: left;
+
+    @include con-hover {
+      &:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(197, 160, 89, 0.4);
+        background: rgba(197, 160, 89, 0.08);
+      }
+    }
+
+    .ficha-nombre {
+      text-align: left;
+    }
+
+    .medallon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+  }
+
+  &.activa {
+    border-color: $oro !important;
+    background: linear-gradient(90deg, rgba(142, 59, 46, 0.55), rgba(142, 59, 46, 0.15)) !important;
+    color: $oro-claro;
+  }
+}
+
+// Retrato redondo "acuñado" como una medalla
+.medallon {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(197, 160, 89, 0.5);
+  background: radial-gradient(circle at 50% 40%, rgba(234, 223, 196, 0.14), rgba(0, 0, 0, 0.35) 75%);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+
+  img {
+    width: 88%;
+    height: 88%;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.6));
+  }
+}
+
+.tarjeta {
+  animation: abrir 0.4s ease-out;
+}
+
+@keyframes abrir {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// 📱 Desplegable móvil (oculto en escritorio / tablet)
+.selector-movil {
+  display: none;
+
+  @include movil {
+    display: block;
+  }
+}
+
+.opcion-monstruo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+@include avisos;
+
+.aviso {
+  min-height: 0;
+  padding: 48px 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indice,
+  .tarjeta {
+    animation: none !important;
   }
 }

@@ -1,0 +1,64 @@
+<h3 class="titulo-seccion">{{ 'bestiary.weaknesses.title' | translate }}</h3>
+<div class="tabla-envoltorio">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'bestiary.weaknesses.type' | translate }}</th>
+        <th scope="col" class="centro">{{ 'bestiary.weaknesses.effectiveness' | translate }}</th>
+      </tr>
+    </thead>
+    @for (grupo of debilidades(); track grupo.clave) {
+      <tbody>
+        <tr class="fila-grupo"><th colspan="2" scope="colgroup">{{ 'bestiary.weaknesses.groups.' + grupo.clave | translate }}</th></tr>
+        @for (fila of grupo.elementos; track fila.clave) {
+          <tr>
+            <td>
+              <span class="icono" aria-hidden="true">{{ fila.icono }}</span>
+              {{ fila.claveNombre | translate }}
+              @for (nota of fila.condiciones; track nota) {
+                <small class="nota">{{ nota }}</small>
+              }
+            </td>
+            <td class="centro">
+              @if (fila.resiste && fila.estrellas === 1) {
+                <span class="resiste">✕ {{ 'bestiary.weaknesses.resists' | translate }}</span>
+              } @else {
+                <span class="estrellas" [attr.aria-label]="fila.estrellas + ' ★'">{{ estrellas(fila.estrellas) }}</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    }
+  </table>
+</div>
+
+<h3 class="titulo-seccion">{{ 'bestiary.hitzones.title' | translate }}</h3>
+<p class="leyenda">{{ 'bestiary.hitzones.legend' | translate }}</p>
+<div class="tabla-envoltorio desplazable">
+  <table class="tabla tabla-zonas">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'bestiary.parts.title' | translate }}</th>
+        @for (columna of columnasZonas; track columna.clave) {
+          <th scope="col" class="centro" [title]="columna.claveNombre | translate">
+            <span aria-hidden="true">{{ columna.icono }}</span>
+            <span class="solo-lector">{{ columna.claveNombre | translate }}</span>
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (zona of zonas(); track $index) {
+        <tr>
+          <th scope="row">{{ claveParte(zona.parte) | translate }}@if (zona.indice) { {{ zona.indice }}}</th>
+          @for (columna of columnasZonas; track columna.clave) {
+            <td class="centro" [class.debil]="esZonaDebil(columna.clave, zona.valores[columna.clave])">
+              {{ zona.valores[columna.clave] }}
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
