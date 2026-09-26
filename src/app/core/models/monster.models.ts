@@ -117,7 +117,7 @@ export interface MonsterDetalle {
   rewards: MonsterReward[];
 }
 
-// ⚔️🛡️ Equipo relacionado con un monstruo (pantalla 5). Solo descriptivo: se piden
+// ⚔️🛡️ Equipo relacionado con un monstruo (pantalla IV). Solo descriptivo: se piden
 // únicamente los campos que se muestran, con la proyección "p" de la API.
 export interface ArmaRelacionada {
   id: number;

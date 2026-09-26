@@ -96,7 +96,6 @@
       "info": "記録",
       "weaknesses": "弱点",
       "parts": "部位",
-      "special": "特別",
       "gear": "装備"
     },
     "info": {
@@ -224,9 +223,7 @@
     "rewardKinds": {
       "target-reward": "目的報酬",
       "carve": "剥ぎ取り",
-      "carve-rotten": "剥ぎ取り（腐）",
       "wound-destroyed": "傷口破壊",
-      "carve-rotten-severed": "切断部位剥ぎ取り（腐）",
       "broken-part": "部位破壊",
       "carve-severed": "切断部位剥ぎ取り",
       "carve-crystallized": "剥ぎ取り（結晶）",
@@ -248,15 +245,15 @@
       "elder-dragon": "古龍種"
     },
     "ailments": {
-      "fireblight": "火属性やられ",
-      "waterblight": "水属性やられ",
-      "thunderblight": "雷属性やられ",
-      "iceblight": "氷属性やられ",
-      "dragonblight": "龍属性やられ",
+      "fireblight": "火",
+      "waterblight": "水",
+      "thunderblight": "雷",
+      "iceblight": "氷",
+      "dragonblight": "龍",
       "poison": "毒",
       "paralysis": "麻痺",
       "sleep": "睡眠",
-      "blastblight": "爆破やられ",
+      "blastblight": "爆破",
       "bleeding": "裂傷",
       "bubbleblight": "泡まみれ",
       "webbed": "拘束（糸）",

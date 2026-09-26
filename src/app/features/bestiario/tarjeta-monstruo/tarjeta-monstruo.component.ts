@@ -2,24 +2,23 @@ import { Component, computed, inject, input, linkedSignal, output, signal } from
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ApiLocale, WildsApiService } from '../../../core/services/wilds-api.service';
-import { EnDesarrolloComponent } from '../../../shared/components/en-desarrollo/en-desarrollo.component';
 import { ICONOS_ESTADO_APLICADO, estadosQueAplica, idsMateriales, imagenMonstruo } from '../bestiario.datos';
 import { PaginaDebilidadesComponent } from '../paginas/pagina-debilidades/pagina-debilidades.component';
 import { PaginaPartesComponent } from '../paginas/pagina-partes/pagina-partes.component';
 import { PaginaEquipoComponent } from '../paginas/pagina-equipo/pagina-equipo.component';
 
 // Pantallas ("páginas") de la tarjeta, en orden. La clave se usa para las traducciones.
-export const PAGINAS_TARJETA = ['info', 'weaknesses', 'parts', 'special', 'gear'] as const;
+export const PAGINAS_TARJETA = ['info', 'weaknesses', 'parts', 'gear'] as const;
 const PAGINA_EQUIPO = PAGINAS_TARJETA.indexOf('gear');
-const NUMEROS_ROMANOS = ['I', 'II', 'III', 'IV', 'V'];
+const NUMEROS_ROMANOS = ['I', 'II', 'III', 'IV'];
 
 // 📖 Tarjeta del Bestiario de bolsillo: la "página" del libro con la ficha de un monstruo.
 // Todas las pantallas comparten cabecera (nombre + foto). La ficha se pide a la API al
-// seleccionar el monstruo, y el equipo relacionado solo al abrir la pantalla V.
+// seleccionar el monstruo, y el equipo relacionado solo al abrir la pantalla IV.
 @Component({
   selector: 'app-tarjeta-monstruo',
   standalone: true,
-  imports: [TranslatePipe, EnDesarrolloComponent, PaginaDebilidadesComponent, PaginaPartesComponent, PaginaEquipoComponent],
+  imports: [TranslatePipe, PaginaDebilidadesComponent, PaginaPartesComponent, PaginaEquipoComponent],
   templateUrl: './tarjeta-monstruo.component.html',
   styleUrl: './tarjeta-monstruo.component.scss'
 })
@@ -54,8 +53,8 @@ export class TarjetaMonstruoComponent {
   readonly imagen = computed(() => imagenMonstruo(this.idMonstruo()));
   readonly estados = computed(() => estadosQueAplica(this.idMonstruo()));
 
-  // ⚔️🛡️ EQUIPO RELACIONADO (pantalla V)
-  // La clave de la petición solo existe una vez abierta la pantalla V para ESTE monstruo:
+  // ⚔️🛡️ EQUIPO RELACIONADO (pantalla IV)
+  // La clave de la petición solo existe una vez abierta la pantalla IV para ESTE monstruo:
   // se conserva al volver a otras pantallas (no se repite la llamada) y se descarta al
   // cambiar de monstruo estando en otra pantalla (no se pide equipo que nadie va a ver).
   private readonly claveEquipo = linkedSignal<{ enEquipo: boolean; clave: string | null }, string | undefined>({

@@ -99,6 +99,10 @@
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 16px;
     justify-content: center;
+    // Todas las fichas iguales: cada fila toma la altura de la ficha más alta (la de
+    // nombre más largo, p. ej. "Anjanath Fulgúreo Guardián"), y el ancho ya es el mismo
+    // para todas las columnas.
+    grid-auto-rows: 1fr;
   }
 
   // Plegado a la izquierda: lista vertical fija mientras se lee la tarjeta
@@ -124,6 +128,7 @@
 
     ul {
       grid-template-columns: 1fr;
+      grid-auto-rows: auto; // En la lista compacta cada fila mide lo que necesite
       gap: 2px;
     }
   }
@@ -146,6 +151,7 @@
 
 .ficha-indice {
   width: 100%;
+  height: 100%; // Ocupa toda la celda para que todas las fichas midan lo mismo
   display: flex;
   flex-direction: column;
   align-items: center;

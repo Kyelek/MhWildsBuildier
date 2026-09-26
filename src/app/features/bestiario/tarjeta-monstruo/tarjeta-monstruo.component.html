@@ -107,13 +107,8 @@
               <app-pagina-partes [monstruo]="m" />
             }
 
-            <!-- IV · ESPECIAL (en construcción) -->
+            <!-- IV · ARMAS Y ARMADURAS -->
             @case (3) {
-              <app-en-desarrollo [titulo]="'bestiary.pages.special' | translate" />
-            }
-
-            <!-- V · ARMAS Y ARMADURAS -->
-            @case (4) {
               <app-pagina-equipo
                 [armas]="armasResource.value() ?? []"
                 [armaduras]="armadurasResource.value() ?? []"
