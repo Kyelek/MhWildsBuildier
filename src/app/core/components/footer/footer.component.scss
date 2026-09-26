@@ -3,11 +3,8 @@
 $color-gold: #c5a059;
 $font-main: 'Montserrat', sans-serif;
 
-// 🦶 FOOTER FIJO, mismo cristal oscuro y borde dorado que el navbar
+// 🦶 FOOTER AL FINAL DE LA PÁGINA (no fijo), mismo cristal oscuro y borde dorado que el navbar
 .main-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
   width: 100%;
   // Altura definida en src/styles.scss, más el hueco de la barra de gestos en móvil
   height: calc(var(--altura-footer) + env(safe-area-inset-bottom));
@@ -21,8 +18,6 @@ $font-main: 'Montserrat', sans-serif;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid rgba(197, 160, 89, 0.2);
-  // Por debajo del navbar y de los popups (overlay de CDK, z-index 1000)
-  z-index: 900;
   font-family: $font-main;
 
   @include tablet {

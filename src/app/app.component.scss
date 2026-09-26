@@ -5,18 +5,20 @@ $color-bg-dark: #0f0e0c;
 $color-text: rgba(255, 255, 255, 0.9);
 $font-main: 'Montserrat', sans-serif;
 
-// 📦 CONTENEDOR PRINCIPAL (Margen superior e inferior para no quedar oculto bajo el Navbar ni el Footer)
+// 📦 CONTENEDOR PRINCIPAL (Margen superior para no quedar oculto bajo el Navbar)
 // El Navbar (core/components/navbar) y cada pantalla ruteada (features/*) llevan
 // ya sus propios estilos; este componente raíz solo aporta el layout que envuelve
 // al <router-outlet>. La altura del navbar y el relleno lateral salen de las variables
 // CSS de src/styles.scss, que cambian según el tamaño de pantalla.
+// El alto mínimo descuenta también el footer (core/components/footer), que va justo
+// después: así en páginas cortas queda pegado al fondo de la pantalla y en las largas
+// solo aparece al llegar al final.
 .main-content {
   margin-top: var(--altura-navbar);
-  min-height: calc(100vh - var(--altura-navbar));
-  min-height: calc(100dvh - var(--altura-navbar)); // Alto real visible en móvil (sin la barra del navegador)
+  min-height: calc(100vh - var(--altura-navbar) - var(--altura-footer) - env(safe-area-inset-bottom));
+  // Alto real visible en móvil (sin la barra del navegador)
+  min-height: calc(100dvh - var(--altura-navbar) - var(--altura-footer) - env(safe-area-inset-bottom));
   padding: var(--relleno-pagina);
-  // Hueco para el footer fijo (core/components/footer)
-  padding-bottom: calc(var(--relleno-pagina) + var(--altura-footer) + env(safe-area-inset-bottom));
   box-sizing: border-box;
   background-color: $color-bg-dark;
   color: $color-text;
