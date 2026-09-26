@@ -21,13 +21,14 @@ export const ICONOS_RANURA: Record<RanuraArmadura, string> = {
 // 🔍 FILTROS DE LA LISTA DE ARMADURAS (ver dialogo-armaduras)
 // ==========================================
 
-// Las habilidades de cada pieza vienen de la API con un "kind" que las separa en tres
-// secciones de filtro distintas:
-//   - "armor": habilidades normales (Ojo crítico, Bonus crítico...)
-//   - "set":   bonificación de conjunto (Tiranía de Gore Magala: 2/4 piezas del set)
-//   - "group": bonificación de grupo, compartida por piezas de varios conjuntos (Alma del amo)
-export type TipoHabilidadArmadura = 'armor' | 'set' | 'group';
-export const TIPOS_HABILIDAD_ARMADURA: readonly TipoHabilidadArmadura[] = ['armor', 'set', 'group'];
+// Las habilidades de cada pieza se reparten en dos secciones de filtro:
+//   - "armor": habilidades normales (Punto débil, Aguante...)
+//   - "set":   habilidades de set, las que se activan al llevar varias piezas que las tengan
+//              (Tiranía de Gore Magala, Pulso de Guardián, Alma del amo...)
+// La API separa las de set en "set" y "group", pero en el juego son lo mismo: una pieza puede
+// traer dos (p. ej. Yelmo Fulgúreo G. α: Afán de Anjanath Fulgúreo y Pulso de Guardián) y las
+// dos tienen que salir juntas en el filtro.
+export type TipoHabilidadArmadura = 'armor' | 'set';
 
 // Cómo se combinan varias habilidades normales marcadas: piezas con ALGUNA de ellas o
 // solo las que las tienen TODAS
@@ -54,8 +55,7 @@ export const NIVELES_HUECO: readonly number[] = [1, 2, 3];
 export interface FiltrosArmadura {
   habilidades: number[];          // Habilidades normales (id). Vacío = sin filtrar
   modoHabilidades: ModoHabilidades;
-  bonusConjunto: number[];        // Piezas con CUALQUIERA de estas bonificaciones de conjunto
-  bonusGrupo: number[];           // Piezas con CUALQUIERA de estas bonificaciones de grupo
+  habilidadesSet: number[];       // Piezas con CUALQUIERA de estas habilidades de set
   huecoMinimo: number | null;     // Piezas con al menos un hueco de este nivel o superior
   rangos: RangoArmadura[];        // Vacío = rango bajo y alto
   rarezas: number[];              // Vacío = todas las rarezas
@@ -66,8 +66,7 @@ export interface FiltrosArmadura {
 export const FILTROS_ARMADURA_VACIOS: FiltrosArmadura = {
   habilidades: [],
   modoHabilidades: 'any',
-  bonusConjunto: [],
-  bonusGrupo: [],
+  habilidadesSet: [],
   huecoMinimo: null,
   rangos: [],
   rarezas: [],

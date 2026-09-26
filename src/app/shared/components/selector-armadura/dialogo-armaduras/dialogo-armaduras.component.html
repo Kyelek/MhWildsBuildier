@@ -49,26 +49,16 @@
         }
       </section>
 
-      <!-- Bonificación de conjunto (2/4 piezas del mismo set) -->
+      <!-- Habilidades de set: se activan llevando varias piezas que las tengan. Una pieza
+           puede traer más de una (Afán de Anjanath Fulgúreo + Pulso de Guardián) -->
       <section class="filtro-seccion">
-        <h3 class="filtro-titulo">🎖️ {{ 'armorPicker.filters.setBonus' | translate }}</h3>
+        <h3 class="filtro-titulo">🎖️ {{ 'armorPicker.filters.setSkills' | translate }}</h3>
         <app-selector-habilidades
           [opciones]="opcionesHabilidad().set"
           [nombres]="nombresHabilidades()"
-          [placeholder]="'armorPicker.filters.setBonusSearch' | translate"
-          [seleccionadas]="filtros().bonusConjunto"
+          [placeholder]="'armorPicker.filters.setSkillsSearch' | translate"
+          [seleccionadas]="filtros().habilidadesSet"
           (seleccionadasChange)="cambiarHabilidades('set', $event)" />
-      </section>
-
-      <!-- Bonificación de grupo (piezas de distintos conjuntos que la comparten) -->
-      <section class="filtro-seccion">
-        <h3 class="filtro-titulo">🔗 {{ 'armorPicker.filters.groupBonus' | translate }}</h3>
-        <app-selector-habilidades
-          [opciones]="opcionesHabilidad().group"
-          [nombres]="nombresHabilidades()"
-          [placeholder]="'armorPicker.filters.groupBonusSearch' | translate"
-          [seleccionadas]="filtros().bonusGrupo"
-          (seleccionadasChange)="cambiarHabilidades('group', $event)" />
       </section>
 
       <!-- Ordenar por: criterio + sentido (de mayor a menor o al revés) -->
@@ -203,13 +193,10 @@
                 <span
                   class="fila-habilidad"
                   [class.buscada]="habilidad.buscada"
-                  [class.bonus]="habilidad.tipo !== 'armor'"
-                  [title]="habilidad.tipo === 'set' ? ('armorPicker.filters.setBonus' | translate)
-                    : habilidad.tipo === 'group' ? ('armorPicker.filters.groupBonus' | translate) : ''">
+                  [class.bonus]="habilidad.tipo === 'set'"
+                  [title]="habilidad.tipo === 'set' ? ('armorPicker.filters.setSkills' | translate) : ''">
                   @if (habilidad.tipo === 'set') {
                     <span aria-hidden="true">🎖️</span>
-                  } @else if (habilidad.tipo === 'group') {
-                    <span aria-hidden="true">🔗</span>
                   }
                   {{ habilidad.nombre }}
                   @if (habilidad.tipo === 'armor') {

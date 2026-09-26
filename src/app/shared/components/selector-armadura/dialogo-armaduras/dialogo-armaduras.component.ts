@@ -38,10 +38,9 @@ export interface FilaArmadura {
 }
 
 // Clave de los filtros donde se guarda cada tipo de habilidad
-const CLAVE_FILTRO: Record<TipoHabilidadArmadura, 'habilidades' | 'bonusConjunto' | 'bonusGrupo'> = {
+const CLAVE_FILTRO: Record<TipoHabilidadArmadura, 'habilidades' | 'habilidadesSet'> = {
   armor: 'habilidades',
-  set: 'bonusConjunto',
-  group: 'bonusGrupo'
+  set: 'habilidadesSet'
 };
 
 // 🛡️ Popup de selección de una pieza de armadura para una ranura (casco, pecho...):
@@ -49,7 +48,7 @@ const CLAVE_FILTRO: Record<TipoHabilidadArmadura, 'habilidades' | 'bonusConjunto
 //
 // Filtros del panel:
 //   - Habilidades normales (alguna o todas las marcadas)
-//   - Bonificación de conjunto y bonificación de grupo (cualquiera de las marcadas)
+//   - Habilidades de set (cualquiera de las marcadas)
 //   - Hueco mínimo, rango y rareza
 //   - Ordenar por: habilidades buscadas, defensa, rareza, huecos o resistencia elemental
 // Los filtros no son del popup sino de quien lo abre (ver DatosDialogoArmaduras), así se
@@ -111,7 +110,7 @@ export class DialogoArmadurasComponent {
   // por orden alfabético y con cuántas piezas las tienen
   readonly opcionesHabilidad = computed<Record<TipoHabilidadArmadura, OpcionHabilidad[]>>(() => {
     const opciones: Record<TipoHabilidadArmadura, Map<number, OpcionHabilidad>> =
-      { armor: new Map(), set: new Map(), group: new Map() };
+      { armor: new Map(), set: new Map() };
 
     for (const pieza of this.piezasRanura()) {
       for (const { skill } of pieza.skills) {
@@ -123,14 +122,14 @@ export class DialogoArmadurasComponent {
 
     const ordenar = (mapa: Map<number, OpcionHabilidad>) =>
       [...mapa.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
-    return { armor: ordenar(opciones.armor), set: ordenar(opciones.set), group: ordenar(opciones.group) };
+    return { armor: ordenar(opciones.armor), set: ordenar(opciones.set) };
   });
 
-  // Todas las habilidades buscadas (de las tres secciones): se resaltan en cada fila y son
+  // Todas las habilidades buscadas (de las dos secciones): se resaltan en cada fila y son
   // las que puntúan al ordenar por "Habilidades buscadas"
   private readonly idsBuscados = computed(() => {
-    const { habilidades, bonusConjunto, bonusGrupo } = this.filtros();
-    return new Set([...habilidades, ...bonusConjunto, ...bonusGrupo]);
+    const { habilidades, habilidadesSet } = this.filtros();
+    return new Set([...habilidades, ...habilidadesSet]);
   });
 
   readonly hayHabilidadesBuscadas = computed(() => this.idsBuscados().size > 0);
@@ -140,7 +139,7 @@ export class DialogoArmadurasComponent {
     // El orden por "Habilidades buscadas" se pone solo al buscar una habilidad (ver
     // actualizarFiltros), así que no cuenta como un filtro más
     const ordenCuenta = f.orden !== 'default' && f.orden !== 'match';
-    return f.habilidades.length + f.bonusConjunto.length + f.bonusGrupo.length + f.rangos.length +
+    return f.habilidades.length + f.habilidadesSet.length + f.rangos.length +
       f.rarezas.length + (f.huecoMinimo === null ? 0 : 1) + (ordenCuenta ? 1 : 0);
   });
 
@@ -157,8 +156,7 @@ export class DialogoArmadurasComponent {
       return (!texto || normalizar(pieza.name).includes(texto)) &&
         (f.habilidades.length === 0 ||
           (f.modoHabilidades === 'all' ? f.habilidades.every(tiene) : f.habilidades.some(tiene))) &&
-        (f.bonusConjunto.length === 0 || f.bonusConjunto.some(tiene)) &&
-        (f.bonusGrupo.length === 0 || f.bonusGrupo.some(tiene)) &&
+        (f.habilidadesSet.length === 0 || f.habilidadesSet.some(tiene)) &&
         (f.huecoMinimo === null || pieza.slots.some(nivel => nivel >= f.huecoMinimo!)) &&
         (f.rangos.length === 0 || f.rangos.includes(pieza.rank as RangoArmadura)) &&
         (f.rarezas.length === 0 || f.rarezas.includes(pieza.rarity));
@@ -307,14 +305,14 @@ export class DialogoArmadurasComponent {
   }
 }
 
-// La API marca cada habilidad como "armor", "set" o "group"; cualquier otro valor se
-// trata como una habilidad normal
+// La API marca cada habilidad como "armor", "set" o "group". "set" y "group" son las dos
+// habilidades de set (ver TipoHabilidadArmadura); cualquier otro valor es una habilidad normal
 function tipoHabilidad(kind: string): TipoHabilidadArmadura {
-  return kind === 'set' || kind === 'group' ? kind : 'armor';
+  return kind === 'set' || kind === 'group' ? 'set' : 'armor';
 }
 
 function contarHabilidades(filtros: FiltrosArmadura): number {
-  return filtros.habilidades.length + filtros.bonusConjunto.length + filtros.bonusGrupo.length;
+  return filtros.habilidades.length + filtros.habilidadesSet.length;
 }
 
 function valorOrden(pieza: ArmorPiece, orden: CriterioOrdenArmadura, buscados: ReadonlySet<number>): number {
