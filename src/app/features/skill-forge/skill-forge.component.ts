@@ -21,13 +21,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatTooltipModule} from '@angular/material/tooltip';
 
-// 🌟 EXCEPCIÓN: habilidades de GRUPO que se tratan como una bonificación de conjunto más.
-// Se activan al llevar varias piezas (de cualquier conjunto) que tengan esa habilidad, con
-// los rangos de su "groupBonus" en /armor/sets. De momento solo "Alma del amo" (id 131,
-// el mismo en todos los idiomas: "Lord's Soul" / "ヌシの魂"); el resto de habilidades de
-// grupo siguen mostrándose como habilidades normales.
-const HABILIDADES_GRUPO_COMO_BONIFICACION: readonly number[] = [131];
-
 @Component({
   selector: 'app-skill-forge',
   standalone: true,
@@ -218,8 +211,22 @@ export class SkillForgeComponent {
     return conteo;
   });
 
+  // 🌟 Habilidades de GRUPO equipadas ("kind" = "group" en la API: Alma del amo, Pulso de
+  // Guardián, Protección de Guardián...). En el juego son habilidades de set como las de
+  // conjunto: se activan al llevar varias piezas (de cualquier conjunto) que las tengan, con
+  // los rangos de su "groupBonus" en /armor/sets, así que se tratan como una bonificación más.
+  private readonly habilidadesGrupoEquipadas = computed<number[]>(() => {
+    const ids = new Set<number>();
+    for (const pieza of this.piezasSeleccionadas()) {
+      for (const { skill } of pieza.skills) {
+        if (skill.kind === 'group') ids.add(skill.id);
+      }
+    }
+    return [...ids];
+  });
+
   // Lista de TODAS las bonificaciones activas a la vez: una por cada conjunto con piezas
-  // suficientes, más las bonificaciones de grupo tratadas como excepción ("Alma del amo").
+  // suficientes, más una por cada habilidad de grupo con piezas suficientes.
   readonly bonificacionesSet = computed<BonificacionSetActiva[]>(() => {
     const todosLosSets = this.armorSetsResource.value() ?? [];
     const bonificaciones: BonificacionSetActiva[] = [];
@@ -233,7 +240,7 @@ export class SkillForgeComponent {
       if (bonificacion) bonificaciones.push(bonificacion);
     }
 
-    for (const skillId of HABILIDADES_GRUPO_COMO_BONIFICACION) {
+    for (const skillId of this.habilidadesGrupoEquipadas()) {
       // Los rangos son los mismos en todos los conjuntos que comparten esta habilidad de grupo
       const grupo = todosLosSets.find(set => set.groupBonus?.skill.id === skillId)?.groupBonus;
       if (!grupo) continue;
@@ -300,12 +307,12 @@ export class SkillForgeComponent {
   // 📋 REQUISITO 4: Descripciones detalladas de las habilidades aportadas por las piezas
   // ==========================================
   readonly descripcionesDetalladas = computed<DescripcionHabilidad[]>(() => {
-    // Habilidades de las piezas. Se excluyen las de tipo "set" (p. ej. "Tiranía de Gore
-    // Magala") y las de grupo tratadas como bonificación ("Alma del amo"): su nivel activado
-    // ya se describe en la pestaña "Bonificaciones de Conjunto" (p. ej. "Eclipse negro I").
+    // Habilidades de las piezas. Se excluyen las de set, tanto de conjunto (p. ej. "Tiranía
+    // de Gore Magala") como de grupo ("Alma del amo", "Pulso de Guardián"): se describen al
+    // activarse, las de conjunto en "Bonificaciones de Conjunto" ("Eclipse negro I") y las de
+    // grupo aquí mismo con la habilidad que otorgan ("Agallas (tenacidad)", justo debajo).
     const deLasPiezas = this.habilidadesActivas()
-      .filter(habilidad =>
-        habilidad.kind !== 'set' && !HABILIDADES_GRUPO_COMO_BONIFICACION.includes(habilidad.skillId))
+      .filter(habilidad => habilidad.kind !== 'set' && habilidad.kind !== 'group')
       .map(habilidad => ({
         clave: `pieza-${habilidad.skillId}`,
         nombre: habilidad.nombre,

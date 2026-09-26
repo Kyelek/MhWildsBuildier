@@ -21,7 +21,7 @@ export interface HabilidadAcumulada {
 
 // 🎖️ Bonificación de conjunto actualmente activada (puede haber varias a la vez, una por cada
 // conjunto del que se tengan 2 o más piezas equipadas simultáneamente). También se usa para
-// las bonificaciones de grupo tratadas como excepción (p. ej. "Alma del amo").
+// las bonificaciones de grupo (p. ej. "Alma del amo" o "Pulso de Guardián").
 export interface BonificacionSetActiva {
   clave: string;           // Identificador único para la plantilla: "set-<id>" o "grupo-<skillId>"
   esGrupo: boolean;        // true en las bonificaciones de grupo ("Alma del amo")
