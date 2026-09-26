@@ -55,6 +55,17 @@ describe('BuscadorFiltrosComponent', () => {
     cerrarCon(() => document.body.click());
   });
 
+  it('no se cierra si lo pulsado dentro del panel desaparece con el propio click (la X de un chip)', () => {
+    abrir();
+    const chip = document.createElement('button');
+    elemento.querySelector('.panel-cuerpo')!.appendChild(chip);
+    chip.addEventListener('click', () => chip.remove());
+
+    chip.click();
+    fixture.detectChanges();
+    expect(elemento.querySelector('.panel-filtros')).not.toBeNull();
+  });
+
   it('Escape no se propaga (no cierra un popup contenedor) mientras el panel está abierto', () => {
     abrir();
     const evento = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });

@@ -30,60 +30,32 @@
         </ng-template>
       </app-selector-buscable>
 
-      <app-selector-buscable
-        [elementos]="cascos()"
+      <!-- 🛡️ Cada pieza se elige en un popup con buscador y filtros (habilidades, bonificaciones,
+           huecos...). Las 5 ranuras comparten los filtros: ver shared/components/selector-armadura -->
+      <app-selector-armadura
+        ranura="head"
         [(valor)]="piezaCabeza"
-        [etiqueta]="'armorSlots.head.label' | translate"
-        [textoBuscador]="'armorSlots.head.search' | translate"
-        [textoVacio]="'armorSlots.head.empty' | translate">
-        <ng-template let-pieza>
-          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
-        </ng-template>
-      </app-selector-buscable>
+        [(filtros)]="filtrosArmadura" />
 
-      <app-selector-buscable
-        [elementos]="pechos()"
+      <app-selector-armadura
+        ranura="chest"
         [(valor)]="piezaPecho"
-        [etiqueta]="'armorSlots.chest.label' | translate"
-        [textoBuscador]="'armorSlots.chest.search' | translate"
-        [textoVacio]="'armorSlots.chest.empty' | translate">
-        <ng-template let-pieza>
-          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
-        </ng-template>
-      </app-selector-buscable>
+        [(filtros)]="filtrosArmadura" />
 
-      <app-selector-buscable
-        [elementos]="brazos()"
+      <app-selector-armadura
+        ranura="arms"
         [(valor)]="piezaBrazos"
-        [etiqueta]="'armorSlots.arms.label' | translate"
-        [textoBuscador]="'armorSlots.arms.search' | translate"
-        [textoVacio]="'armorSlots.arms.empty' | translate">
-        <ng-template let-pieza>
-          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
-        </ng-template>
-      </app-selector-buscable>
+        [(filtros)]="filtrosArmadura" />
 
-      <app-selector-buscable
-        [elementos]="cinturas()"
+      <app-selector-armadura
+        ranura="waist"
         [(valor)]="piezaCintura"
-        [etiqueta]="'armorSlots.waist.label' | translate"
-        [textoBuscador]="'armorSlots.waist.search' | translate"
-        [textoVacio]="'armorSlots.waist.empty' | translate">
-        <ng-template let-pieza>
-          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
-        </ng-template>
-      </app-selector-buscable>
+        [(filtros)]="filtrosArmadura" />
 
-      <app-selector-buscable
-        [elementos]="piernas()"
+      <app-selector-armadura
+        ranura="legs"
         [(valor)]="piezaPiernas"
-        [etiqueta]="'armorSlots.legs.label' | translate"
-        [textoBuscador]="'armorSlots.legs.search' | translate"
-        [textoVacio]="'armorSlots.legs.empty' | translate">
-        <ng-template let-pieza>
-          {{ pieza.name }} ({{ 'armorSlots.defenseMax' | translate }}: {{ pieza.defense.max }})
-        </ng-template>
-      </app-selector-buscable>
+        [(filtros)]="filtrosArmadura" />
 
     </mat-card>
   </div>

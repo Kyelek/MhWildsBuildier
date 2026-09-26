@@ -63,6 +63,11 @@ function bonusDePrueba(skillId: number, nombre: string, rangos: [number, number]
   };
 }
 
+// Habilidad de set de conjunto ("kind" = "set") tal y como la aporta cada pieza
+function habilidadSet(skillId: number, nombre: string): ArmorSkill {
+  return { id: skillId, level: 1, description: '', setPiecesRequired: null, skill: { id: skillId, gameId: skillId, name: nombre, kind: 'set' } };
+}
+
 // Habilidad de grupo "Alma del amo" (id 131) tal y como la aporta cada pieza
 function almaDelAmo(): ArmorSkill {
   return {
@@ -206,25 +211,28 @@ describe('SkillForgeComponent', () => {
     await fixture.whenStable();
 
     // 2 piezas del Set A (llega justo al único rango, de 2 piezas)
-    component.piezaCabeza.set(crearPiezaDePrueba({ id: 20, kind: 'head', armorSet: { id: 1, name: 'Set A' } }));
-    component.piezaPecho.set(crearPiezaDePrueba({ id: 21, kind: 'chest', armorSet: { id: 1, name: 'Set A' } }));
+    const setA = [habilidadSet(900, 'Bono Set A')];
+    const setB = [habilidadSet(901, 'Bono Set B')];
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 20, kind: 'head', armorSet: { id: 1, name: 'Set A' }, skills: setA }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 21, kind: 'chest', armorSet: { id: 1, name: 'Set A' }, skills: setA }));
     // 3 piezas del Set B (supera el rango de 2 y alcanza también el de 3)
-    component.piezaBrazos.set(crearPiezaDePrueba({ id: 22, kind: 'arms', armorSet: { id: 2, name: 'Set B' } }));
-    component.piezaCintura.set(crearPiezaDePrueba({ id: 23, kind: 'waist', armorSet: { id: 2, name: 'Set B' } }));
-    component.piezaPiernas.set(crearPiezaDePrueba({ id: 24, kind: 'legs', armorSet: { id: 2, name: 'Set B' } }));
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 22, kind: 'arms', armorSet: { id: 2, name: 'Set B' }, skills: setB }));
+    component.piezaCintura.set(crearPiezaDePrueba({ id: 23, kind: 'waist', armorSet: { id: 2, name: 'Set B' }, skills: setB }));
+    component.piezaPiernas.set(crearPiezaDePrueba({ id: 24, kind: 'legs', armorSet: { id: 2, name: 'Set B' }, skills: setB }));
     fixture.detectChanges();
 
     const bonificaciones = component.bonificacionesSet();
     expect(bonificaciones.length).toEqual(2);
 
     // Orden: el set con más piezas equipadas va primero
-    expect(bonificaciones[0].clave).toEqual('set-2');
+    expect(bonificaciones[0].clave).toEqual('set-901');
+    expect(bonificaciones[0].nombreSet).toEqual('Bono Set B');
     expect(bonificaciones[0].piezasEquipadas).toEqual(3);
     expect(bonificaciones[0].piezasMaximas).toEqual(3);
     expect(bonificaciones[0].nombreHabilidad).toEqual('Bono Set B Nv2');
     expect(bonificaciones[0].nivel).toEqual(2);
 
-    expect(bonificaciones[1].clave).toEqual('set-1');
+    expect(bonificaciones[1].clave).toEqual('set-900');
     expect(bonificaciones[1].piezasEquipadas).toEqual(2);
     expect(bonificaciones[1].piezasMaximas).toEqual(2);
     expect(bonificaciones[1].nombreHabilidad).toEqual('Bono Set A');
@@ -236,14 +244,44 @@ describe('SkillForgeComponent', () => {
     ]);
     await fixture.whenStable();
 
-    component.piezaCabeza.set(crearPiezaDePrueba({ id: 30, kind: 'head', armorSet: { id: 1, name: 'Gore α' } }));
-    component.piezaPecho.set(crearPiezaDePrueba({ id: 31, kind: 'chest', armorSet: { id: 1, name: 'Gore α' } }));
+    const gore = [habilidadSet(900, 'Eclipse negro')];
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 30, kind: 'head', armorSet: { id: 1, name: 'Gore α' }, skills: gore }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 31, kind: 'chest', armorSet: { id: 1, name: 'Gore α' }, skills: gore }));
     fixture.detectChanges();
     expect(component.bonificacionesSet()[0]).toEqual(jasmine.objectContaining({ piezasEquipadas: 2, piezasMaximas: 4, nivel: 1 }));
 
-    component.piezaBrazos.set(crearPiezaDePrueba({ id: 32, kind: 'arms', armorSet: { id: 1, name: 'Gore α' } }));
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 32, kind: 'arms', armorSet: { id: 1, name: 'Gore α' }, skills: gore }));
     fixture.detectChanges();
     expect(component.bonificacionesSet()[0]).toEqual(jasmine.objectContaining({ piezasEquipadas: 3, piezasMaximas: 4, nivel: 1 }));
+  });
+
+  it('cuenta las piezas que traen la habilidad de set, no las del conjunto al que pertenecen', async () => {
+    flushCatalogos([
+      { id: 1, gameId: 1, name: 'Gore α', pieces: [], groupBonus: null, bonus: bonusDePrueba(106, 'Tiranía de Gore Magala', [[2, 1], [4, 2]]) },
+      { id: 2, gameId: 2, name: 'Gore β', pieces: [], groupBonus: null, bonus: bonusDePrueba(106, 'Tiranía de Gore Magala', [[2, 1], [4, 2]]) },
+      { id: 3, gameId: 3, name: 'Rathalos α', pieces: [], groupBonus: null, bonus: bonusDePrueba(71, 'Fulgor de Rathalos', [[2, 1], [4, 2]]) },
+      // Como en la API: el bonus de Gogmazios β es el de Arkveld, pero solo su yelmo lo trae
+      { id: 4, gameId: 4, name: 'Gogmazios β', pieces: [], groupBonus: null, bonus: bonusDePrueba(26, 'Salud de Arkveld Guardián', [[2, 1], [4, 2]]) }
+    ]);
+    await fixture.whenStable();
+
+    const tirania = [habilidadSet(106, 'Tiranía de Gore Magala')];
+    const fulgor = [habilidadSet(71, 'Fulgor de Rathalos')];
+    // Gore α + Gore β suman juntas: comparten "Tiranía de Gore Magala"
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 60, kind: 'head', armorSet: { id: 1, name: 'Gore α' }, skills: tirania }));
+    component.piezaPecho.set(crearPiezaDePrueba({ id: 61, kind: 'chest', armorSet: { id: 2, name: 'Gore β' }, skills: tirania }));
+    // La malla de Gogmazios β trae "Fulgor de Rathalos" y suma con la pieza de Rathalos...
+    component.piezaBrazos.set(crearPiezaDePrueba({ id: 62, kind: 'arms', armorSet: { id: 3, name: 'Rathalos α' }, skills: fulgor }));
+    component.piezaCintura.set(crearPiezaDePrueba({ id: 63, kind: 'waist', armorSet: { id: 4, name: 'Gogmazios β' }, skills: fulgor }));
+    // ...y esta otra pieza de Gogmazios β no trae la de Arkveld: esa no se activa
+    component.piezaPiernas.set(crearPiezaDePrueba({ id: 64, kind: 'legs', armorSet: { id: 4, name: 'Gogmazios β' }, skills: [] }));
+    fixture.detectChanges();
+
+    expect(component.bonificacionesSet()).toEqual(jasmine.arrayWithExactContents([
+      jasmine.objectContaining({ clave: 'set-106', nombreSet: 'Tiranía de Gore Magala', piezasEquipadas: 2 }),
+      jasmine.objectContaining({ clave: 'set-71', nombreSet: 'Fulgor de Rathalos', piezasEquipadas: 2 })
+    ]));
+    expect(component.bonificacionesSet()[1].aportes.map(a => a.ranura)).toEqual(['arms', 'waist']);
   });
 
   it('activa "Alma del amo" como bonificación con 3 piezas que la tengan, aunque sean de conjuntos distintos', async () => {
@@ -268,6 +306,40 @@ describe('SkillForgeComponent', () => {
     // Las piezas con "Alma del amo" aparecen como origen de la bonificación y de lo que otorga
     expect(component.bonificacionesSet()[0].aportes.map(a => a.ranura)).toEqual(['head', 'chest', 'arms']);
     expect(component.descripcionesDetalladas()[1].aportes.map(a => a.ranura)).toEqual(['head', 'chest', 'arms']);
+  });
+
+  it('trata igual cualquier otra habilidad de grupo ("Pulso de Guardián"), junto a la de conjunto de la misma pieza', async () => {
+    const pulso: ArmorSkill = {
+      id: 3, level: 1, description: 'Descripción de Pulso de Guardián', setPiecesRequired: null,
+      skill: { id: 27, gameId: 27, name: 'Pulso de Guardián', kind: 'group' }
+    };
+    const afan: ArmorSkill = {
+      id: 4, level: 1, description: '', setPiecesRequired: null,
+      skill: { id: 900, gameId: 900, name: 'Afán de Anjanath Fulgúreo', kind: 'set' }
+    };
+    flushCatalogos([
+      { id: 1, gameId: 1, name: 'Fulgúreo G. α', pieces: [],
+        bonus: bonusDePrueba(900, 'Afán de Anjanath Fulgúreo', [[2, 1], [4, 2]]),
+        groupBonus: bonusDePrueba(27, 'Pulso de Guardián', [[3, 1]]) }
+    ]);
+    await fixture.whenStable();
+
+    const fulgurea = (id: number, kind: ArmorPiece['kind']) =>
+      crearPiezaDePrueba({ id, kind, armorSet: { id: 1, name: 'Fulgúreo G. α' }, skills: [afan, pulso] });
+    component.piezaCabeza.set(fulgurea(50, 'head'));
+    component.piezaPecho.set(fulgurea(51, 'chest'));
+    fixture.detectChanges();
+    // Con 2 piezas solo se activa la de conjunto, y "Pulso de Guardián" no sale como habilidad suelta
+    expect(component.bonificacionesSet().map(b => b.clave)).toEqual(['set-900']);
+    expect(component.descripcionesDetalladas()).toEqual([]);
+
+    component.piezaBrazos.set(fulgurea(52, 'arms'));
+    fixture.detectChanges();
+    expect(component.bonificacionesSet()).toEqual(jasmine.arrayWithExactContents([
+      jasmine.objectContaining({ clave: 'set-900', piezasEquipadas: 3 }),
+      jasmine.objectContaining({ clave: 'grupo-27', esGrupo: true, piezasEquipadas: 3, nombreHabilidad: 'Pulso de Guardián' })
+    ]));
+    expect(component.descripcionesDetalladas().map(d => d.nombre)).toEqual(['Pulso de Guardián 1']);
   });
 
   // ==========================================

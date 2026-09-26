@@ -4,12 +4,12 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ApiLocale, WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
-import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 import { SelectorArmaComponent } from '../../shared/components/selector-arma/selector-arma.component';
+import { SelectorArmaduraComponent } from '../../shared/components/selector-armadura/selector-armadura.component';
+import { FILTROS_ARMADURA_VACIOS, FiltrosArmadura, ICONOS_RANURA } from '../../shared/models/filtros-armadura.models';
 import {
   AportePieza,
   BonificacionSetActiva,
-  ConteoPorSet,
   DescripcionHabilidad,
   HabilidadAcumulada
 } from './models/skill-forge.models';
@@ -20,25 +20,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatTooltipModule} from '@angular/material/tooltip';
 
-type TipoPieza = 'head' | 'chest' | 'arms' | 'waist' | 'legs';
-
-// 🌟 EXCEPCIÓN: habilidades de GRUPO que se tratan como una bonificación de conjunto más.
-// Se activan al llevar varias piezas (de cualquier conjunto) que tengan esa habilidad, con
-// los rangos de su "groupBonus" en /armor/sets. De momento solo "Alma del amo" (id 131,
-// el mismo en todos los idiomas: "Lord's Soul" / "ヌシの魂"); el resto de habilidades de
-// grupo siguen mostrándose como habilidades normales.
-const HABILIDADES_GRUPO_COMO_BONIFICACION: readonly number[] = [131];
-
-// 🛡️ Icono de cada ranura de armadura (public/images/armor). Hay uno por tipo de pieza,
-// no uno por armadura: sirve para ver de qué parte del equipo viene cada habilidad.
-const ICONOS_RANURA: Record<TipoPieza, string> = {
-  head: 'images/armor/48px-MHWilds-Helmet.png',
-  chest: 'images/armor/48px-MHWilds-Chestplate.png',
-  arms: 'images/armor/48px-MHWilds-Armguards.png',
-  waist: 'images/armor/48px-MHWilds-Waist.png',
-  legs: 'images/armor/48px-MHWilds-Leggings.png'
-};
-
 @Component({
   selector: 'app-skill-forge',
   standalone: true,
@@ -48,8 +29,8 @@ const ICONOS_RANURA: Record<TipoPieza, string> = {
     MatProgressSpinnerModule,
     MatDividerModule,
     TranslatePipe,
-    SelectorBuscableComponent,
     SelectorArmaComponent,
+    SelectorArmaduraComponent,
     MatTooltipModule
   ],
   templateUrl: './skill-forge.component.html',
@@ -159,13 +140,9 @@ export class SkillForgeComponent {
     return catalogo.find(item => item.id === actual.id) ?? actual;
   }
 
-  // 3. Piezas de armadura acotadas por ranura. El buscador de texto de cada selector ya lo
-  // resuelve internamente <app-selector-buscable> (ver shared/components/selector-buscable).
-  readonly cascos = computed(() => this.armorPorRanura('head'));
-  readonly pechos = computed(() => this.armorPorRanura('chest'));
-  readonly brazos = computed(() => this.armorPorRanura('arms'));
-  readonly cinturas = computed(() => this.armorPorRanura('waist'));
-  readonly piernas = computed(() => this.armorPorRanura('legs'));
+  // 3. 🔍 Filtros de los popups de armadura, compartidos por las 5 ranuras: lo que se
+  // filtra al elegir el casco (habilidades, bonificaciones...) sigue puesto al abrir el pecho
+  readonly filtrosArmadura = signal<FiltrosArmadura>(FILTROS_ARMADURA_VACIOS);
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {
@@ -206,56 +183,57 @@ export class SkillForgeComponent {
   });
 
   // ==========================================
-  // 🎖️ REQUISITO 3: Detección de conjuntos y bonificaciones de set (bonus.ranks)
+  // 🎖️ REQUISITO 3: Bonificaciones de set (bonus.ranks / groupBonus.ranks)
   //
-  // 💡 IMPORTANTE: un cazador puede mezclar piezas de varios conjuntos distintos (p. ej.
-  // 2 piezas del Set A + 3 piezas del Set B). Por eso NO nos quedamos con "el conjunto
-  // predominante": calculamos el conteo de piezas por CADA conjunto presente y activamos
-  // la bonificación de TODOS los conjuntos que alcancen el mínimo de piezas requerido,
-  // permitiendo que varias bonificaciones de set convivan de forma simultánea.
+  // 💡 IMPORTANTE: una bonificación se activa por las piezas que TRAEN su habilidad de set,
+  // no por el conjunto al que pertenece cada pieza. Casi siempre coincide, pero no siempre:
+  //   - Varios conjuntos comparten la misma habilidad (Gore α y Gore β dan "Tiranía de Gore
+  //     Magala"): sus piezas suman juntas.
+  //   - Hay piezas que traen la habilidad de otro conjunto (la Malla de Gogmazios β da
+  //     "Fulgor de Rathalos", no la de su propio conjunto): cuenta para esa otra.
+  // Un cazador puede mezclar piezas, así que se activan a la vez TODAS las bonificaciones que
+  // alcancen el mínimo de piezas, no solo la "predominante".
+  //
+  // La API separa las habilidades de set en "set" (rangos en "bonus", 2/4 piezas) y "group"
+  // (rangos en "groupBonus", 3 piezas: Alma del amo, Pulso de Guardián...). En el juego son lo
+  // mismo; solo cambia cómo se muestran (ver el bucle de abajo).
   // ==========================================
 
-  // Cuenta cuántas piezas seleccionadas pertenecen a cada conjunto de armadura (armorSet.id)
-  private readonly conteoPorSet = computed<Map<number, ConteoPorSet>>(() => {
-    const conteo = new Map<number, ConteoPorSet>();
-
+  // Habilidades de set equipadas, con las piezas que aportan cada una (en orden de ranura)
+  private readonly piezasPorHabilidadSet = computed<Map<number, { kind: string; piezas: ArmorPiece[] }>>(() => {
+    const porHabilidad = new Map<number, { kind: string; piezas: ArmorPiece[] }>();
     for (const pieza of this.piezasSeleccionadas()) {
-      const set = pieza.armorSet;
-      if (!set) continue;
-
-      const actual = conteo.get(set.id);
-      conteo.set(set.id, {
-        nombre: set.name,
-        cantidad: (actual?.cantidad ?? 0) + 1
-      });
+      for (const { skill } of pieza.skills) {
+        if (skill.kind !== 'set' && skill.kind !== 'group') continue;
+        const actual = porHabilidad.get(skill.id) ?? { kind: skill.kind, piezas: [] };
+        actual.piezas.push(pieza);
+        porHabilidad.set(skill.id, actual);
+      }
     }
-
-    return conteo;
+    return porHabilidad;
   });
 
-  // Lista de TODAS las bonificaciones activas a la vez: una por cada conjunto con piezas
-  // suficientes, más las bonificaciones de grupo tratadas como excepción ("Alma del amo").
+  // Lista de TODAS las bonificaciones activas a la vez: una por cada habilidad de set con
+  // piezas suficientes.
   readonly bonificacionesSet = computed<BonificacionSetActiva[]>(() => {
     const todosLosSets = this.armorSetsResource.value() ?? [];
     const bonificaciones: BonificacionSetActiva[] = [];
 
-    for (const [setId, info] of this.conteoPorSet()) {
-      const bonus = todosLosSets.find(set => set.id === setId)?.bonus;
-      if (!bonus) continue;
+    for (const [skillId, { kind, piezas }] of this.piezasPorHabilidadSet()) {
+      // Los rangos son los mismos en todos los conjuntos que comparten la habilidad
+      if (kind === 'set') {
+        const bonus = todosLosSets.find(set => set.bonus?.skill.id === skillId)?.bonus;
+        if (!bonus) continue;
 
-      const piezasDelSet = this.piezasSeleccionadas().filter(pieza => pieza.armorSet?.id === setId);
-      const bonificacion = this.construirBonificacion(`set-${setId}`, info.nombre, piezasDelSet, bonus);
-      if (bonificacion) bonificaciones.push(bonificacion);
-    }
+        // La tarjeta se titula con el rango activado ("Eclipse negro I") y su origen es la
+        // habilidad de set ("Tiranía de Gore Magala")
+        const bonificacion = this.construirBonificacion(`set-${skillId}`, bonus.skill.name, piezas, bonus);
+        if (bonificacion) bonificaciones.push(bonificacion);
+        continue;
+      }
 
-    for (const skillId of HABILIDADES_GRUPO_COMO_BONIFICACION) {
-      // Los rangos son los mismos en todos los conjuntos que comparten esta habilidad de grupo
       const grupo = todosLosSets.find(set => set.groupBonus?.skill.id === skillId)?.groupBonus;
       if (!grupo) continue;
-
-      // Cuenta las piezas equipadas que aportan la habilidad, sean del conjunto que sean
-      const piezas = this.piezasSeleccionadas()
-        .filter(pieza => pieza.skills.some(habilidad => habilidad.skill.id === skillId));
 
       const bonificacion = this.construirBonificacion(`grupo-${skillId}`, grupo.skill.name, piezas, grupo);
       if (!bonificacion) continue;
@@ -315,12 +293,12 @@ export class SkillForgeComponent {
   // 📋 REQUISITO 4: Descripciones detalladas de las habilidades aportadas por las piezas
   // ==========================================
   readonly descripcionesDetalladas = computed<DescripcionHabilidad[]>(() => {
-    // Habilidades de las piezas. Se excluyen las de tipo "set" (p. ej. "Tiranía de Gore
-    // Magala") y las de grupo tratadas como bonificación ("Alma del amo"): su nivel activado
-    // ya se describe en la pestaña "Bonificaciones de Conjunto" (p. ej. "Eclipse negro I").
+    // Habilidades de las piezas. Se excluyen las de set, tanto de conjunto (p. ej. "Tiranía
+    // de Gore Magala") como de grupo ("Alma del amo", "Pulso de Guardián"): se describen al
+    // activarse, las de conjunto en "Bonificaciones de Conjunto" ("Eclipse negro I") y las de
+    // grupo aquí mismo con la habilidad que otorgan ("Agallas (tenacidad)", justo debajo).
     const deLasPiezas = this.habilidadesActivas()
-      .filter(habilidad =>
-        habilidad.kind !== 'set' && !HABILIDADES_GRUPO_COMO_BONIFICACION.includes(habilidad.skillId))
+      .filter(habilidad => habilidad.kind !== 'set' && habilidad.kind !== 'group')
       .map(habilidad => ({
         clave: `pieza-${habilidad.skillId}`,
         nombre: habilidad.nombre,
@@ -383,9 +361,6 @@ export class SkillForgeComponent {
     return { ranura: pieza.kind, nombrePieza: pieza.name, nivel, icono: ICONOS_RANURA[pieza.kind] };
   }
 
-  private armorPorRanura(ranura: TipoPieza): ArmorPiece[] {
-    return (this.armorResource.value() ?? []).filter(piece => piece.kind === ranura);
-  }
 
   // Busca en el catálogo de /skills la descripción exacta del nivel total alcanzado.
   // Si no está disponible (catálogo cargando o nivel fuera de rango), usa la descripción de la pieza como respaldo.

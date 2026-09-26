@@ -132,9 +132,51 @@
       "label": "脚部(脛当て)",
       "search": "脛当てを検索...",
       "empty": "防具が見つかりません"
+    }
+  },
+  "armorPicker": {
+    "close": "閉じる",
+    "remove": "防具を外す",
+    "loading": "防具を読み込み中...",
+    "loadError": "防具を読み込めませんでした。接続を確認してください。",
+    "rarity": "レア度",
+    "defense": "防御力",
+    "slots": "装飾品スロット",
+    "rank": {
+      "low": "下位",
+      "high": "上位"
     },
-    "unequipped": "— 未装備 —",
-    "defenseMax": "最大防御力"
+    "filters": {
+      "skills": "スキル",
+      "skillsSearch": "スキルを検索...",
+      "setSkills": "シリーズスキル",
+      "setSkillsSearch": "シリーズスキルを検索...",
+      "noSkills": "該当なし",
+      "removeSkill": "外す",
+      "matchMode": "表示する防具:",
+      "match": {
+        "any": "いずれか",
+        "all": "すべて"
+      },
+      "minSlot": "最低スロット",
+      "slotLevel": "Lv{{level}}以上",
+      "rank": "ランク",
+      "sortBy": "並び替え",
+      "descending": "高い順",
+      "ascending": "低い順",
+      "sort": {
+        "default": "デフォルト",
+        "match": "検索スキル",
+        "defense": "防御力",
+        "rarity": "レア度",
+        "slots": "スロット",
+        "fire": "火耐性",
+        "water": "水耐性",
+        "thunder": "雷耐性",
+        "ice": "氷耐性",
+        "dragon": "龍耐性"
+      }
+    }
   },
   "builder": {
     "title": "ハンター装備",

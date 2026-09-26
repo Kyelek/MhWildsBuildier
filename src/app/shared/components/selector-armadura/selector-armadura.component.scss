@@ -1,0 +1,7 @@
+// Estilos compartidos con el selector de arma: ver src/styles/_campo-selector.scss
+@use 'campo-selector';
+
+// Sin pieza elegida el icono de la ranura se ve apagado, como la etiqueta
+.campo-selector:not(.con-valor) .campo-icono {
+  opacity: 0.45;
+}

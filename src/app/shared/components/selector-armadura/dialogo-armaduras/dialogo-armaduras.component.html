@@ -1,0 +1,220 @@
+<div class="dialogo-seleccion">
+  <!-- Cabecera: icono y nombre de la ranura, con la X de cerrar a la derecha -->
+  <header class="dialogo-cabecera">
+    <h2 class="dialogo-titulo">
+      <img [src]="icono" alt="" width="28" height="28" />
+      {{ 'armorSlots.' + ranura + '.label' | translate }}
+    </h2>
+    <button
+      type="button"
+      class="btn-cabecera"
+      [attr.aria-label]="'armorPicker.close' | translate"
+      [title]="'armorPicker.close' | translate"
+      (click)="cerrar()">×</button>
+  </header>
+
+  <div class="zona-busqueda">
+    <app-buscador-filtros
+      [placeholder]="'armorSlots.' + ranura + '.search' | translate"
+      [filtrosActivos]="filtrosActivos()"
+      [resultados]="piezasFiltradas().length"
+      (textoChange)="onBusquedaInput($event)"
+      (limpiar)="borrarFiltros()">
+
+      <!-- Habilidades normales: piezas con alguna (o con todas) de las elegidas -->
+      <section class="filtro-seccion">
+        <h3 class="filtro-titulo">{{ 'armorPicker.filters.skills' | translate }}</h3>
+        <app-selector-habilidades
+          [opciones]="opcionesHabilidad().armor"
+          [nombres]="nombresHabilidades()"
+          [placeholder]="'armorPicker.filters.skillsSearch' | translate"
+          [seleccionadas]="filtros().habilidades"
+          (seleccionadasChange)="cambiarHabilidades('armor', $event)" />
+        @if (filtros().habilidades.length > 1) {
+          <div class="filtro-modo">
+            <span>{{ 'armorPicker.filters.matchMode' | translate }}</span>
+            <div class="filtro-chips">
+              @for (modo of modosHabilidades; track modo) {
+                <button
+                  type="button"
+                  class="filtro-chip"
+                  [class.activo]="filtros().modoHabilidades === modo"
+                  [attr.aria-pressed]="filtros().modoHabilidades === modo"
+                  (click)="elegirModoHabilidades(modo)">
+                  {{ 'armorPicker.filters.match.' + modo | translate }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Habilidades de set: se activan llevando varias piezas que las tengan. Una pieza
+           puede traer más de una (Afán de Anjanath Fulgúreo + Pulso de Guardián) -->
+      <section class="filtro-seccion">
+        <h3 class="filtro-titulo">🎖️ {{ 'armorPicker.filters.setSkills' | translate }}</h3>
+        <app-selector-habilidades
+          [opciones]="opcionesHabilidad().set"
+          [nombres]="nombresHabilidades()"
+          [placeholder]="'armorPicker.filters.setSkillsSearch' | translate"
+          [seleccionadas]="filtros().habilidadesSet"
+          (seleccionadasChange)="cambiarHabilidades('set', $event)" />
+      </section>
+
+      <!-- Ordenar por: criterio + sentido (de mayor a menor o al revés) -->
+      <section class="filtro-seccion">
+        <h3 class="filtro-titulo">{{ 'armorPicker.filters.sortBy' | translate }}</h3>
+        <div class="filtro-chips">
+          @for (criterio of criteriosOrden; track criterio) {
+            <button
+              type="button"
+              class="filtro-chip"
+              [class.activo]="filtros().orden === criterio"
+              [attr.aria-pressed]="filtros().orden === criterio"
+              [disabled]="criterio === 'match' && !hayHabilidadesBuscadas()"
+              (click)="elegirOrden(criterio)">
+              {{ 'armorPicker.filters.sort.' + criterio | translate }}
+            </button>
+          }
+        </div>
+        <button
+          type="button"
+          class="filtro-sentido"
+          [disabled]="filtros().orden === 'default'"
+          (click)="alternarSentido()">
+          <span aria-hidden="true">{{ filtros().descendente ? '↓' : '↑' }}</span>
+          {{ (filtros().descendente ? 'armorPicker.filters.descending' : 'armorPicker.filters.ascending') | translate }}
+        </button>
+      </section>
+
+      <!-- Hueco mínimo: piezas con al menos un hueco de ese nivel o superior -->
+      <section class="filtro-seccion">
+        <h3 class="filtro-titulo">{{ 'armorPicker.filters.minSlot' | translate }}</h3>
+        <div class="filtro-chips">
+          @for (nivel of nivelesHueco; track nivel) {
+            @let total = conteoHuecos().get(nivel) ?? 0;
+            <button
+              type="button"
+              class="filtro-chip"
+              [class.activo]="filtros().huecoMinimo === nivel"
+              [attr.aria-pressed]="filtros().huecoMinimo === nivel"
+              [disabled]="total === 0 && filtros().huecoMinimo !== nivel"
+              (click)="elegirHuecoMinimo(nivel)">
+              <span class="hueco" aria-hidden="true">{{ nivel }}</span>
+              {{ 'armorPicker.filters.slotLevel' | translate: { level: nivel } }}
+              <span class="filtro-total">{{ total }}</span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Rango: bajo / alto (ninguno marcado = ambos) -->
+      <section class="filtro-seccion">
+        <h3 class="filtro-titulo">{{ 'armorPicker.filters.rank' | translate }}</h3>
+        <div class="filtro-chips">
+          @for (rango of rangos; track rango) {
+            @let total = conteoRangos().get(rango) ?? 0;
+            <button
+              type="button"
+              class="filtro-chip"
+              [class.activo]="filtros().rangos.includes(rango)"
+              [attr.aria-pressed]="filtros().rangos.includes(rango)"
+              [disabled]="total === 0 && !filtros().rangos.includes(rango)"
+              (click)="alternarRango(rango)">
+              {{ 'armorPicker.rank.' + rango | translate }}
+              <span class="filtro-total">{{ total }}</span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Rareza: solo las marcadas (ninguna marcada = todas) -->
+      <section class="filtro-seccion">
+        <h3 class="filtro-titulo">{{ 'armorPicker.rarity' | translate }}</h3>
+        <div class="filtro-rarezas">
+          @for (rareza of rarezas; track rareza) {
+            @let total = conteoRarezas().get(rareza) ?? 0;
+            <button
+              type="button"
+              class="filtro-rareza"
+              [class.activo]="filtros().rarezas.includes(rareza)"
+              [attr.aria-pressed]="filtros().rarezas.includes(rareza)"
+              [disabled]="total === 0 && !filtros().rarezas.includes(rareza)"
+              [title]="total"
+              (click)="alternarRareza(rareza)">{{ rareza }}</button>
+          }
+        </div>
+      </section>
+    </app-buscador-filtros>
+  </div>
+
+  <!-- Hay ~140 piezas por ranura: se pintan todas (sin scroll virtual), así cada fila
+       puede crecer para mostrar todas sus habilidades -->
+  @if (catalogo.isLoading()) {
+    <p class="lista-estado">{{ 'armorPicker.loading' | translate }}</p>
+  } @else if (catalogo.error()) {
+    <div class="lista-estado">
+      <p>{{ 'armorPicker.loadError' | translate }}</p>
+      <button type="button" class="btn-reintentar" (click)="reintentarCarga()">{{ 'common.errors.retry' | translate }}</button>
+    </div>
+  } @else if (filas().length > 0) {
+    <div #lista class="lista-armaduras">
+      @for (fila of filas(); track fila.pieza.id) {
+        <button
+          type="button"
+          class="fila-armadura"
+          [class.seleccionada]="fila.pieza.id === seleccionada?.id"
+          (click)="elegirPieza(fila.pieza)">
+          <span class="fila-cabecera">
+            <span class="fila-nombre">{{ fila.pieza.name }}</span>
+            @if (fila.pieza.slots.length > 0) {
+              <span class="fila-huecos" [title]="'armorPicker.slots' | translate">
+                @for (nivel of fila.pieza.slots; track $index) {
+                  <span class="hueco">{{ nivel }}</span>
+                }
+              </span>
+            }
+          </span>
+
+          <span class="fila-datos">
+            <span>{{ 'armorPicker.rank.' + fila.pieza.rank | translate }}</span>
+            <span>{{ 'armorPicker.rarity' | translate }} <strong>{{ fila.pieza.rarity }}</strong></span>
+            <span>{{ 'armorPicker.defense' | translate }} <strong>{{ fila.pieza.defense.max }}</strong></span>
+            @if (elementoOrden(); as elemento) {
+              <span [title]="'armorPicker.filters.sort.' + elemento | translate">
+                {{ iconosElemento[elemento] }} <strong>{{ fila.pieza.resistances[elemento] }}</strong>
+              </span>
+            }
+          </span>
+
+          @if (fila.habilidades.length > 0) {
+            <span class="fila-habilidades">
+              @for (habilidad of fila.habilidades; track habilidad.id) {
+                <span
+                  class="fila-habilidad"
+                  [class.buscada]="habilidad.buscada"
+                  [class.bonus]="habilidad.tipo === 'set'"
+                  [title]="habilidad.tipo === 'set' ? ('armorPicker.filters.setSkills' | translate) : ''">
+                  @if (habilidad.tipo === 'set') {
+                    <span aria-hidden="true">🎖️</span>
+                  }
+                  {{ habilidad.nombre }}
+                  @if (habilidad.tipo === 'armor') {
+                    <strong>{{ habilidad.nivel }}</strong>
+                  }
+                </span>
+              }
+            </span>
+          }
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="lista-estado">
+      <p>{{ 'armorSlots.' + ranura + '.empty' | translate }}</p>
+      @if (filtrosActivos() > 0) {
+        <button type="button" class="btn-reintentar" (click)="borrarFiltros()">{{ 'searchFilters.clear' | translate }}</button>
+      }
+    </div>
+  }
+</div>
