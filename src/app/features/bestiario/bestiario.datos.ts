@@ -108,7 +108,7 @@ export const ESTADOS_QUE_APLICA: Record<number, EstadoQueAplica[]> = {
   18: ['fireblight'],                   // Yian Kut-Ku
   19: ['poison'],                       // Rompopolo
   20: ['dragonblight'],                 // Arkveld
-  21: ['fireblight'],                   // Ajarakan
+  21: ['fireblight', 'blastblight'],    // Ajarakan
   22: ['poison'],                       // Gypceros
   23: [],                               // Xu Wu
   24: ['fireblight', 'poison'],         // Rathalos Guardián
@@ -121,7 +121,7 @@ export const ESTADOS_QUE_APLICA: Record<number, EstadoQueAplica[]> = {
   31: ['thunderblight'],                // Lagiacrus
   32: ['bleeding'],                     // Seregios
   33: [],                               // Omega Planetes
-  34: ['fireblight', 'blastblight']     // Gogmazios
+  34: ['fireblight']                    // Gogmazios
 };
 
 export function estadosQueAplica(id: number): EstadoQueAplica[] {
@@ -146,7 +146,7 @@ export interface FilaDebilidad {
   clave: ClaveDebilidad;
   icono: string;
   claveNombre: string;       // Clave de traducción del nombre
-  nivel: number;             // 0 = sin debilidad; 1-3 = estrellas
+  estrellas: number;         // 1 = sin debilidad (base); cada nivel de la API suma una más
   resiste: boolean;
   condiciones: string[];     // Notas de la API (p. ej. "Solo al enterrarse")
 }
@@ -165,7 +165,9 @@ function claveDe(entrada: { element?: string; status?: string; effect?: string }
   return entrada.element ?? entrada.status ?? entrada.effect;
 }
 
-// Una fila por cada elemento/estado/efecto. Si la API trae varias entradas para el mismo
+// Una fila por cada elemento/estado/efecto. La eficacia va en estrellas con 1 como base
+// (sin debilidad) y una más por cada nivel de debilidad de la API (1-3 → 2-4 estrellas).
+// Si la API trae varias entradas para el mismo
 // (p. ej. dos debilidades al sonido con condiciones distintas), se queda el nivel más alto
 // y se juntan todas las condiciones.
 export function calcularDebilidades(monstruo: MonsterDetalle): FilaDebilidad[] {
@@ -178,7 +180,7 @@ export function calcularDebilidades(monstruo: MonsterDetalle): FilaDebilidad[] {
 
     return {
       ...base,
-      nivel: Math.max(0, ...debilidades.map(d => d.level)),
+      estrellas: 1 + Math.max(0, ...debilidades.map(d => d.level)),
       resiste: resistencias.length > 0,
       condiciones: [...new Set(condiciones)]
     };
@@ -290,6 +292,9 @@ export interface FilaRecompensa {
   formas: FormaObtener[];
 }
 
+// Formas de obtener que no se muestran en la lista de materiales (desollar zonas podridas)
+const TIPOS_OCULTOS = ['carve-rotten', 'carve-rotten-severed'];
+
 // Objetos que se consiguen del monstruo en el rango indicado, con cada forma de obtenerlos.
 // La API repite a veces la misma forma con distinta probabilidad y nada más que las
 // distinga (p. ej. tres "target-reward" al 8, 10 y 21 %, que corresponden a misiones de
@@ -298,7 +303,10 @@ export function recompensasPorRango(monstruo: MonsterDetalle, rango: RangoRecomp
   return monstruo.rewards
     .map(recompensa => {
       const formas = new Map<string, FormaObtener>();
-      for (const c of recompensa.conditions.filter(condicion => condicion.rank === rango)) {
+      const condiciones = recompensa.conditions.filter(
+        condicion => condicion.rank === rango && !TIPOS_OCULTOS.includes(condicion.kind)
+      );
+      for (const c of condiciones) {
         const clave = `${c.kind}|${c.part}|${c.quantity}`;
         const forma = formas.get(clave);
         if (forma) {

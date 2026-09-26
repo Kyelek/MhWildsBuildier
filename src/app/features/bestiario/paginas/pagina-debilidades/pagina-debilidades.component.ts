@@ -19,8 +19,8 @@ export class PaginaDebilidadesComponent {
   readonly debilidades = computed(() => agrupar(calcularDebilidades(this.monstruo()), fila => fila.tipo));
   readonly zonas = computed(() => calcularZonas(this.monstruo()));
 
-  estrellas(nivel: number): string {
-    return '★'.repeat(nivel);
+  estrellas(total: number): string {
+    return '★'.repeat(total);
   }
 
   // Zona débil: desde 45 en daño físico o 20 en elemental (criterio habitual de la

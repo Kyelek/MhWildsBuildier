@@ -20,12 +20,10 @@
               }
             </td>
             <td class="centro">
-              @if (fila.nivel > 0) {
-                <span class="estrellas" [attr.aria-label]="fila.nivel + ' / 3'">{{ estrellas(fila.nivel) }}</span>
-              } @else if (fila.resiste) {
+              @if (fila.resiste && fila.estrellas === 1) {
                 <span class="resiste">✕ {{ 'bestiary.weaknesses.resists' | translate }}</span>
               } @else {
-                <span class="apagado">–</span>
+                <span class="estrellas" [attr.aria-label]="fila.estrellas + ' ★'">{{ estrellas(fila.estrellas) }}</span>
               }
             </td>
           </tr>

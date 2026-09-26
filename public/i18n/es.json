@@ -96,7 +96,6 @@
       "info": "Crónica",
       "weaknesses": "Debilidades",
       "parts": "Partes",
-      "special": "Especial",
       "gear": "Equipo"
     },
     "info": {
@@ -188,7 +187,7 @@
       "right-wing-arm-wear": "Coraza del brazo alar der.",
       "right-wing-blade": "Filo alar der.",
       "right-wing-legs": "Pata alar der.",
-      "stomach": "Vientre",
+      "stomach": "Pecho",
       "tail": "Cola",
       "tail-hair": "Pelaje de la cola",
       "tail-tip": "Punta de la cola",
@@ -223,13 +222,11 @@
     },
     "rewardKinds": {
       "target-reward": "Recompensa de misión",
-      "carve": "Tallar",
-      "carve-rotten": "Tallar (zona podrida)",
+      "carve": "Desollar",
       "wound-destroyed": "Destruir herida",
-      "carve-rotten-severed": "Tallar parte cortada (podrida)",
       "broken-part": "Romper parte",
-      "carve-severed": "Tallar parte cortada",
-      "carve-crystallized": "Tallar (cristalizado)",
+      "carve-severed": "Desollar parte cortada",
+      "carve-crystallized": "Desollar (cristalizado)",
       "tempered-wound-destroyed": "Destruir herida (curtido)",
       "broken-fragment": "Fragmento roto"
     },
@@ -248,11 +245,11 @@
       "elder-dragon": "Dragón anciano"
     },
     "ailments": {
-      "fireblight": "Nitro de fuego",
-      "waterblight": "Nitro de agua",
-      "thunderblight": "Nitro de rayo",
-      "iceblight": "Nitro de hielo",
-      "dragonblight": "Nitro de draco",
+      "fireblight": "Fuego",
+      "waterblight": "Agua",
+      "thunderblight": "Rayo",
+      "iceblight": "Hielo",
+      "dragonblight": "Draco",
       "poison": "Veneno",
       "paralysis": "Parálisis",
       "sleep": "Sueño",

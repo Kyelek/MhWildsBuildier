@@ -11,7 +11,7 @@ function ordenTipo(tipo: string): number {
   return indice === -1 ? TIPOS_ARMA.length : indice;
 }
 
-// 📖 Página V de la tarjeta: armas y armaduras relacionadas con el monstruo, en dos
+// 📖 Página IV de la tarjeta: armas y armaduras relacionadas con el monstruo, en dos
 // columnas. Solo descriptivo (de momento no se pueden seleccionar).
 // Las peticiones viven en la tarjeta para no repetirlas cada vez que se vuelve a esta página.
 @Component({

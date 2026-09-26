@@ -71,16 +71,18 @@ describe('bestiario.datos', () => {
     expect(partes.some(p => p.cortable || p.rompible)).toBeFalse();
   });
 
-  it('muestra todas las debilidades con su nivel más alto, resistencias y condiciones', () => {
+  it('muestra todas las debilidades en estrellas (1 de base), resistencias y condiciones', () => {
     const filas = calcularDebilidades(crearMonstruo());
     const dragon = filas.find(f => f.clave === 'dragon');
     const fuego = filas.find(f => f.clave === 'fire');
+    const agua = filas.find(f => f.clave === 'water');
     const sonido = filas.find(f => f.clave === 'noise');
 
     expect(filas.length).toBe(13); // 5 elementos + 4 estados + 4 efectos
-    expect(dragon).toEqual(jasmine.objectContaining({ nivel: 3, resiste: false }));
-    expect(fuego).toEqual(jasmine.objectContaining({ nivel: 0, resiste: true }));
-    expect(sonido?.nivel).toBe(2);
+    expect(dragon).toEqual(jasmine.objectContaining({ estrellas: 4, resiste: false }));
+    expect(fuego).toEqual(jasmine.objectContaining({ estrellas: 1, resiste: true }));
+    expect(agua).toEqual(jasmine.objectContaining({ estrellas: 1, resiste: false }));
+    expect(sonido?.estrellas).toBe(3);
     expect(sonido?.condiciones).toEqual(['Solo al enterrarse.']);
   });
 
@@ -106,6 +108,23 @@ describe('bestiario.datos', () => {
     const formas = recompensasPorRango(conRepetidas, 'high')[0].formas;
     expect(formas.length).toBe(2);
     expect(formas[0]).toEqual(jasmine.objectContaining({ tipo: 'target-reward', probabilidadMin: 8, probabilidadMax: 21 }));
+  });
+
+  it('no muestra las formas de obtener de zonas podridas', () => {
+    const conPodridas = crearMonstruo({
+      rewards: [{
+        id: 1,
+        item: { id: 100, name: 'Escama', rarity: 6 },
+        conditions: [condicion('carve', 'high'), condicion('carve-rotten', 'high'), condicion('carve-rotten-severed', 'high')]
+      }, {
+        id: 2,
+        item: { id: 101, name: 'Solo podrida', rarity: 6 },
+        conditions: [condicion('carve-rotten', 'high')]
+      }]
+    });
+    const filas = recompensasPorRango(conPodridas, 'high');
+    expect(filas.map(f => f.nombre)).toEqual(['Escama']);
+    expect(filas[0].formas.map(f => f.tipo)).toEqual(['carve']);
   });
 
   it('filtra las recompensas por rango', () => {
