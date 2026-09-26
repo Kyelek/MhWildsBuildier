@@ -1,7 +1,7 @@
 <!-- <fieldset> + <legend> dibujan el contorno "partido" por la etiqueta, igual que el
      campo outline de Material que usa <app-selector-buscable>: sin arma, la etiqueta se
      muestra dentro del campo; con arma, "flota" sobre el borde superior. -->
-<fieldset class="campo-arma" [class.con-valor]="valor()">
+<fieldset class="campo-selector" [class.con-valor]="valor()">
   <legend class="campo-etiqueta" [attr.aria-hidden]="!valor()">{{ etiqueta() }}</legend>
 
   <button type="button" class="campo-boton" aria-haspopup="dialog" (click)="abrir()">

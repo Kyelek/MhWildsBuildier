@@ -132,9 +132,53 @@
       "label": "Piernas (Grebas)",
       "search": "Buscar grebas...",
       "empty": "No se encontraron piezas"
+    }
+  },
+  "armorPicker": {
+    "close": "Cerrar",
+    "remove": "Quitar pieza",
+    "loading": "Cargando armaduras...",
+    "loadError": "No se pudieron cargar las armaduras. Comprueba tu conexión.",
+    "rarity": "Rareza",
+    "defense": "Defensa",
+    "slots": "Huecos para adornos",
+    "rank": {
+      "low": "Rango bajo",
+      "high": "Rango alto"
     },
-    "unequipped": "— Sin equipar —",
-    "defenseMax": "Def Max"
+    "filters": {
+      "skills": "Habilidades",
+      "skillsSearch": "Buscar habilidad...",
+      "setBonus": "Bonificación de conjunto",
+      "setBonusSearch": "Buscar bonificación de conjunto...",
+      "groupBonus": "Bonificación de grupo",
+      "groupBonusSearch": "Buscar bonificación de grupo...",
+      "noSkills": "Ninguna coincide",
+      "removeSkill": "Quitar",
+      "matchMode": "Mostrar piezas con:",
+      "match": {
+        "any": "Alguna",
+        "all": "Todas"
+      },
+      "minSlot": "Hueco mínimo",
+      "slotLevel": "Nv {{level}}+",
+      "rank": "Rango",
+      "sortBy": "Ordenar por",
+      "descending": "De mayor a menor",
+      "ascending": "De menor a mayor",
+      "sort": {
+        "default": "Por defecto",
+        "match": "Habilidades buscadas",
+        "defense": "Defensa",
+        "rarity": "Rareza",
+        "slots": "Huecos",
+        "fire": "Res. fuego",
+        "water": "Res. agua",
+        "thunder": "Res. rayo",
+        "ice": "Res. hielo",
+        "dragon": "Res. draco"
+      }
+    }
   },
   "builder": {
     "title": "Equipamiento del Cazador",

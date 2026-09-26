@@ -5,6 +5,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, Weapon } from '../../core/models/wilds.models';
 import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
+import { SelectorArmaduraComponent } from '../../shared/components/selector-armadura/selector-armadura.component';
+import { FILTROS_ARMADURA_VACIOS, FiltrosArmadura } from '../../shared/models/filtros-armadura.models';
 
 // Importaciones Standalone de Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -20,7 +22,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatProgressSpinnerModule,
     MatDividerModule,
     TranslatePipe,
-    SelectorBuscableComponent
+    SelectorBuscableComponent,
+    SelectorArmaduraComponent
   ],
   templateUrl: './builder.component.html',
   styleUrl: './builder.component.scss'
@@ -98,16 +101,13 @@ export class BuilderComponent {
     return catalogo.find(item => item.id === actual.id) ?? actual;
   }
 
-  // 3. Catálogo de armas y piezas de armadura acotadas por tipo/ranura. El buscador de
-  // texto de cada selector ya lo resuelve internamente <app-selector-buscable> (ver
-  // shared/components/selector-buscable), así que aquí solo queda el filtro por ranura.
+  // 3. Catálogo de armas para el selector (su buscador de texto lo resuelve internamente
+  // <app-selector-buscable>, ver shared/components/selector-buscable)
   readonly armas = computed(() => this.weaponsResource.value() ?? []);
 
-  readonly cascos = computed(() => this.armorPorRanura('head'));
-  readonly pechos = computed(() => this.armorPorRanura('chest'));
-  readonly brazos = computed(() => this.armorPorRanura('arms'));
-  readonly cinturas = computed(() => this.armorPorRanura('waist'));
-  readonly piernas = computed(() => this.armorPorRanura('legs'));
+  // 🔍 Filtros de los popups de armadura, compartidos por las 5 ranuras: lo que se filtra
+  // al elegir el casco (habilidades, rango...) sigue puesto al abrir el pecho
+  readonly filtrosArmadura = signal<FiltrosArmadura>(FILTROS_ARMADURA_VACIOS);
 
   // Referencia estable (no se recrea en cada ciclo) para agrupar el selector de armas
   // por tipo ('kind') dentro de <app-selector-buscable>. Devuelve la CLAVE de traducción
@@ -158,12 +158,4 @@ export class BuilderComponent {
     }
     return totales;
   });
-
-  // ==========================================
-  // ⚙️ MÉTODOS DE FILTRADO INTERNOS
-  // ==========================================
-
-  private armorPorRanura(ranura: ArmorPiece['kind']): ArmorPiece[] {
-    return (this.armorResource.value() ?? []).filter(piece => piece.kind === ranura);
-  }
 }

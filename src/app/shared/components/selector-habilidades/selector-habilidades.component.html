@@ -1,0 +1,47 @@
+<input
+  #campo
+  type="search"
+  class="habilidades-campo"
+  autocomplete="off"
+  spellcheck="false"
+  role="combobox"
+  aria-autocomplete="list"
+  [attr.aria-expanded]="abierto()"
+  [placeholder]="placeholder()"
+  (focus)="abierto.set(true)"
+  (blur)="onBlur()"
+  (input)="onInput($any($event.target).value)"
+  (keydown.enter)="onEnter($event)"
+  (keydown.escape)="onEscape($event)" />
+
+<!-- Sugerencias: "mousedown" se cancela para que el campo no pierda el foco (y la lista
+     no se cierre) antes de que llegue el click sobre la opción -->
+@if (abierto()) {
+  <ul class="habilidades-sugerencias" role="listbox" (mousedown)="$event.preventDefault()">
+    @for (opcion of sugerencias(); track opcion.id) {
+      <li role="option" aria-selected="false">
+        <button type="button" class="habilidades-opcion" tabindex="-1" (click)="elegir(opcion)">
+          <span class="habilidades-nombre">{{ opcion.nombre }}</span>
+          <span class="habilidades-total">{{ opcion.total }}</span>
+        </button>
+      </li>
+    } @empty {
+      <li class="habilidades-vacio">{{ 'armorPicker.filters.noSkills' | translate }}</li>
+    }
+  </ul>
+}
+
+@if (chips().length > 0) {
+  <div class="habilidades-chips">
+    @for (chip of chips(); track chip.id) {
+      <span class="habilidades-chip" [class.sin-piezas]="chip.total === 0">
+        {{ chip.nombre }}
+        <button
+          type="button"
+          [attr.aria-label]="('armorPicker.filters.removeSkill' | translate) + ': ' + chip.nombre"
+          [title]="'armorPicker.filters.removeSkill' | translate"
+          (click)="quitar(chip.id)">×</button>
+      </span>
+    }
+  </div>
+}

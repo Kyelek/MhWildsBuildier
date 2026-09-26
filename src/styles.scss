@@ -316,7 +316,8 @@ h1, h2, h3, h4 {
   }
 }
 // ==========================================
-// 🗡️ POPUP DE SELECCIÓN DE ARMAS (ver shared/components/selector-arma)
+// 🗡️🛡️ POPUPS DE SELECCIÓN DE ARMAS Y ARMADURAS (ver shared/components/selector-arma
+// y shared/components/selector-armadura, que abren sus popups con este mismo panelClass)
 //
 // Material inserta el popup en un overlay fuera del componente, así que su fondo y
 // su tamaño en móvil se ajustan aquí mediante el "panelClass" con que se abre.
