@@ -1,3 +1,65 @@
-<div class="bestiario-container animate-fade-in">
-  <app-en-desarrollo [titulo]="'bestiary.title' | translate" />
+<div class="bestiario animate-fade-in" [class.con-seleccion]="seleccionado()">
+  <header class="portada">
+    <span class="portada-ornamento" aria-hidden="true">✦ ❦ ✦</span>
+    <h1>{{ 'bestiary.title' | translate }}</h1>
+    <p class="portada-sub">{{ 'bestiary.subtitle' | translate }}</p>
+  </header>
+
+  @if (monstruosResource.error() && !monstruosResource.isLoading()) {
+    <div class="aviso aviso-error" role="alert">
+      <p>{{ 'bestiary.listError' | translate }}</p>
+      <button type="button" class="boton-dorado" (click)="reintentar()">{{ 'common.errors.retry' | translate }}</button>
+    </div>
+  } @else if (monstruosResource.isLoading() && !monstruos().length) {
+    <div class="aviso"><span class="pluma" aria-hidden="true">🪶</span> {{ 'bestiary.loadingList' | translate }}</div>
+  } @else {
+    <!-- 📱 Móvil: desplegable con buscador -->
+    <div class="selector-movil">
+      <app-selector-buscable
+        [elementos]="monstruos()"
+        [valor]="seleccionado()"
+        (valorChange)="seleccionar($event)"
+        [etiqueta]="'bestiary.select' | translate"
+        [textoBuscador]="'bestiary.search' | translate"
+        [textoVacio]="'bestiary.empty' | translate">
+        <ng-template let-monstruo>
+          <span class="opcion-monstruo">
+            @if (imagen(monstruo.id); as src) {
+              <img [src]="src" alt="" width="32" height="32" />
+            }
+            {{ monstruo.name }}
+          </span>
+        </ng-template>
+      </app-selector-buscable>
+    </div>
+
+    <div class="cuerpo">
+      <!-- 🗂️ Índice de monstruos (escritorio / tablet) -->
+      <nav class="indice" [attr.aria-label]="'bestiary.index' | translate">
+        <ul>
+          @for (monstruo of monstruos(); track monstruo.id) {
+            <li>
+              <button
+                type="button"
+                class="ficha-indice"
+                [class.activa]="monstruo.id === idSeleccionado()"
+                [attr.aria-pressed]="monstruo.id === idSeleccionado()"
+                (click)="seleccionar(monstruo)">
+                <span class="medallon">
+                  @if (imagen(monstruo.id); as src) {
+                    <img [src]="src" alt="" loading="lazy" />
+                  }
+                </span>
+                <span class="ficha-nombre">{{ monstruo.name }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </nav>
+
+      @if (seleccionado(); as monstruo) {
+        <app-tarjeta-monstruo class="tarjeta" [idMonstruo]="monstruo.id" (cerrar)="cerrar()" />
+      }
+    </div>
+  }
 </div>

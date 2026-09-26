@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, catchError, of, shareReplay, tap, throwError } from 'rxjs';
 import { SkillDetail, ArmorPiece, ArmorSet, Weapon } from '../models/wilds.models';
+import { ArmaRelacionada, ArmaduraRelacionada, MonsterDetalle, MonsterResumen } from '../models/monster.models';
 import { environment } from '../../../environments/environment';
 
 // 🌐 Idiomas que realmente sirve https://wilds.mhdb.io con contenido traducido
@@ -105,6 +106,51 @@ export class WildsApiService {
           .set('p', PROYECCION_ARMA)
       })
     );
+  }
+
+  // ==========================================
+  // 🐉 BESTIARIO: SIN CACHÉ
+  //
+  // Los datos de monstruos son muy pesados (~470 KB el catálogo completo por idioma), así
+  // que NO se guardan en localStorage: se piden bajo demanda, solo lo que hace falta.
+  // ==========================================
+
+  // Lista ligera para el índice del Bestiario (solo id, nombre y especie: ~3 KB)
+  getMonstruosResumen(locale: ApiLocale = this.locale()): Observable<MonsterResumen[]> {
+    const proyeccion = JSON.stringify({ id: true, name: true, species: true });
+    return this.http.get<MonsterResumen[]>(`${this.apiRoot}/${locale}/monsters`, {
+      params: new HttpParams().set('p', proyeccion)
+    }).pipe(catchError(error => this.manejarError(`monsters (${locale})`, error)));
+  }
+
+  // Ficha completa de un monstruo, pedida al seleccionarlo
+  getMonstruo(id: number, locale: ApiLocale = this.locale()): Observable<MonsterDetalle> {
+    return this.http.get<MonsterDetalle>(`${this.apiRoot}/${locale}/monsters/${id}`)
+      .pipe(catchError(error => this.manejarError(`monsters/${id} (${locale})`, error)));
+  }
+
+  // ⚔️ Armas que usan alguno de los materiales indicados (al fabricarlas o al mejorarlas).
+  // El filtro se hace en la propia API con su parámetro "q", así que solo viajan esas armas.
+  getArmasPorMateriales(idsMateriales: number[], locale: ApiLocale = this.locale()): Observable<ArmaRelacionada[]> {
+    const filtro = {
+      $or: [
+        { 'crafting.craftingMaterials.item.id': { $in: idsMateriales } },
+        { 'crafting.upgradeMaterials.item.id': { $in: idsMateriales } }
+      ]
+    };
+    const proyeccion = JSON.stringify({ id: true, name: true, kind: true, rarity: true });
+    return this.http.get<ArmaRelacionada[]>(`${this.apiRoot}/${locale}/weapons`, {
+      params: new HttpParams().set('q', JSON.stringify(filtro)).set('p', proyeccion)
+    }).pipe(catchError(error => this.manejarError(`weapons por materiales (${locale})`, error)));
+  }
+
+  // 🛡️ Piezas de armadura que usan alguno de los materiales indicados
+  getArmaduraPorMateriales(idsMateriales: number[], locale: ApiLocale = this.locale()): Observable<ArmaduraRelacionada[]> {
+    const filtro = { 'crafting.materials.item.id': { $in: idsMateriales } };
+    const proyeccion = JSON.stringify({ id: true, name: true, kind: true, rarity: true, armorSet: true });
+    return this.http.get<ArmaduraRelacionada[]>(`${this.apiRoot}/${locale}/armor`, {
+      params: new HttpParams().set('q', JSON.stringify(filtro)).set('p', proyeccion)
+    }).pipe(catchError(error => this.manejarError(`armor por materiales (${locale})`, error)));
   }
 
   // 🗄️ Punto único de caché: primero mira en memoria (evita releer localStorage dentro de la

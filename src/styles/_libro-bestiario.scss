@@ -1,0 +1,168 @@
+@use 'responsive' as *;
+
+// ==========================================
+// 📖 ESTILOS COMUNES DE LAS PÁGINAS DEL BESTIARIO (ver features/bestiario)
+//
+// Paleta de "libro antiguo" (pergamino oscuro, tinta clara y detalles dorados) y piezas
+// que se repiten en varias páginas de la tarjeta: títulos con filetes, tablas, avisos...
+// Cada componente lo incluye con `@use 'libro-bestiario' as *;`.
+// ==========================================
+
+$font-titles: 'Cinzel', serif;
+$oro: #c5a059;
+$oro-claro: #e2c47f;
+$tinta: #eadfc4;
+$tinta-apagada: #a89878;
+$pergamino: #2a2219;
+$pergamino-claro: #372c1f;
+$cuero: #1a120c;
+$sangre: #8e3b2e;
+
+@mixin titulo-seccion {
+  .titulo-seccion {
+    margin: 28px 0 14px;
+    text-align: center;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    // Filetes decorativos a ambos lados del título
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.6), transparent);
+    }
+
+    &:first-child {
+      margin-top: 8px;
+    }
+  }
+
+  .apagado {
+    color: $tinta-apagada;
+  }
+
+  .leyenda {
+    margin: -4px 0 12px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: $tinta-apagada;
+  }
+
+  .rareza {
+    display: block;
+    font-size: 0.72rem;
+    color: $tinta-apagada;
+    font-weight: 400;
+  }
+
+  .solo-lector {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+@mixin tabla {
+  .tabla-envoltorio {
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.18);
+
+    &.desplazable {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  .tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+
+    th,
+    td {
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+
+      @include movil {
+        padding: 7px 8px;
+      }
+    }
+
+    thead th {
+      font-family: $font-titles;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      color: $oro;
+      background: rgba(197, 160, 89, 0.1);
+      border-bottom: 1px solid rgba(197, 160, 89, 0.4);
+      white-space: nowrap;
+    }
+
+    tbody th {
+      font-weight: 500;
+    }
+
+    tbody tr:last-child > * {
+      border-bottom: none;
+    }
+
+    .centro {
+      text-align: center;
+    }
+  }
+}
+
+@mixin avisos {
+  .aviso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 240px;
+    padding: 0 16px;
+    text-align: center;
+    font-family: $font-titles;
+    color: $tinta-apagada;
+
+    &.aviso-error {
+      color: #e0a090;
+    }
+  }
+
+  .pluma {
+    font-size: 1.8rem;
+    animation: escribir 1.2s ease-in-out infinite alternate;
+  }
+
+  @keyframes escribir {
+    from { transform: rotate(-12deg) translateX(-4px); }
+    to { transform: rotate(8deg) translateX(4px); }
+  }
+
+  .boton-dorado {
+    padding: 8px 20px;
+    border: 1px solid $oro;
+    border-radius: 4px;
+    background: transparent;
+    color: $oro;
+    font-family: $font-titles;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(197, 160, 89, 0.15);
+    }
+  }
+}
