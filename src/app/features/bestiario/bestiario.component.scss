@@ -1,0 +1,15 @@
+@use 'responsive' as *;
+
+// 🐉 ESTILOS DE LA SECCIÓN BESTIARIO
+.bestiario-container {
+  max-width: 1200px;
+  min-height: 60vh;
+  margin: 0 auto;
+  display: flex;
+  padding: 40px 0;
+
+  @include movil {
+    min-height: 50vh;
+    padding: 16px 0;
+  }
+}

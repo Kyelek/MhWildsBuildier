@@ -74,10 +74,14 @@
     "title": "En desarrollo",
     "message": "Estamos trabajando en esta sección. Estará disponible próximamente."
   },
+  "bestiary": {
+    "title": "Bestiario"
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
     "skills-forge": "Forja de Habilidades",
+    "bestiary": "Bestiario",
     "menu": "Abrir o cerrar el menú"
   },
   "home": {
@@ -105,7 +109,8 @@
     }
   },
   "buttons": {
-    "open-forge": "Abrir la Forja"
+    "open-forge": "Abrir la Forja",
+    "open-bestiary": "Abrir el Bestiario"
   },
   "armorSlots": {
     "head": {
