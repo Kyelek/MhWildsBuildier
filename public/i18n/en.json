@@ -132,9 +132,53 @@
       "label": "Legs (Greaves)",
       "search": "Search greaves...",
       "empty": "No pieces found"
+    }
+  },
+  "armorPicker": {
+    "close": "Close",
+    "remove": "Remove piece",
+    "loading": "Loading armor...",
+    "loadError": "Armor could not be loaded. Check your connection.",
+    "rarity": "Rarity",
+    "defense": "Defense",
+    "slots": "Decoration slots",
+    "rank": {
+      "low": "Low rank",
+      "high": "High rank"
     },
-    "unequipped": "— Unequipped —",
-    "defenseMax": "Max Def"
+    "filters": {
+      "skills": "Skills",
+      "skillsSearch": "Search skill...",
+      "setBonus": "Set bonus",
+      "setBonusSearch": "Search set bonus...",
+      "groupBonus": "Group bonus",
+      "groupBonusSearch": "Search group bonus...",
+      "noSkills": "No matches",
+      "removeSkill": "Remove",
+      "matchMode": "Show pieces with:",
+      "match": {
+        "any": "Any",
+        "all": "All"
+      },
+      "minSlot": "Minimum slot",
+      "slotLevel": "Lv {{level}}+",
+      "rank": "Rank",
+      "sortBy": "Sort by",
+      "descending": "Highest first",
+      "ascending": "Lowest first",
+      "sort": {
+        "default": "Default",
+        "match": "Searched skills",
+        "defense": "Defense",
+        "rarity": "Rarity",
+        "slots": "Slots",
+        "fire": "Fire res.",
+        "water": "Water res.",
+        "thunder": "Thunder res.",
+        "ice": "Ice res.",
+        "dragon": "Dragon res."
+      }
+    }
   },
   "builder": {
     "title": "Hunter Equipment",

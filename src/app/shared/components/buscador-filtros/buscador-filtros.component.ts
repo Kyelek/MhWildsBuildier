@@ -55,10 +55,12 @@ export class BuscadorFiltrosComponent {
     this.campo()?.nativeElement.focus();
   }
 
-  // Un click fuera del buscador (y de su panel) cierra el panel
+  // Un click fuera del buscador (y de su panel) cierra el panel. Se mira la ruta del evento
+  // y no `contains(target)`: si el click quita del DOM lo pulsado (la X de un chip, una
+  // sugerencia ya elegida), el elemento ya no estaría dentro y el panel se cerraría solo.
   @HostListener('document:click', ['$event'])
   onClickDocumento(evento: MouseEvent): void {
-    if (this.abierto() && !this.host.nativeElement.contains(evento.target as Node)) {
+    if (this.abierto() && !evento.composedPath().includes(this.host.nativeElement)) {
       this.cerrarPanel();
     }
   }

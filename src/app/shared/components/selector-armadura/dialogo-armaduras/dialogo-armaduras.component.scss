@@ -1,0 +1,168 @@
+@use 'responsive' as *;
+// Cabecera, buscador, panel de filtros y estados de la lista son comunes a los popups de
+// selección (ver src/styles/_dialogo-seleccion.scss); aquí solo va lo propio de las armaduras.
+@use 'dialogo-seleccion';
+
+$color-gold: #c5a059;
+$color-text: #f5f5e9;
+
+// "Mostrar piezas con: [Alguna] [Todas]", bajo las habilidades elegidas
+.filtro-modo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #9e9e93;
+}
+
+// El total dentro de un chip (hueco mínimo, rango) va separado del texto
+.filtro-chip .filtro-total {
+  margin-left: 4px;
+}
+
+// Hueco para decoraciones: cuadradito con su nivel (en la lista y en el filtro)
+.hueco {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(197, 160, 89, 0.6);
+  border-radius: 3px;
+  color: $color-gold;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.filtro-chip .hueco {
+  margin-right: 4px;
+}
+
+// ==========================================
+// 🛡️ Lista de piezas
+// ==========================================
+.lista-armaduras {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid rgba(197, 160, 89, 0.15);
+  border-radius: 6px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gold;
+    border-radius: 10px;
+  }
+}
+
+.fila-armadura {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: $color-text;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(197, 160, 89, 0.15);
+    outline: none;
+  }
+
+  &.seleccionada {
+    background: rgba(197, 160, 89, 0.3);
+
+    .fila-nombre {
+      color: $color-gold;
+    }
+  }
+
+  @include movil {
+    padding: 10px 12px;
+  }
+}
+
+.fila-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fila-nombre {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fila-huecos {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.fila-datos {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 0.8rem;
+  color: #9e9e93;
+
+  strong {
+    color: $color-gold;
+  }
+
+  @include movil {
+    gap: 4px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+.fila-habilidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+// Etiqueta de cada habilidad de la pieza; las buscadas en los filtros se resaltan
+.fila-habilidad {
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+
+  strong {
+    margin-left: 2px;
+    color: $color-gold;
+  }
+
+  // Bonificaciones de conjunto y de grupo: borde punteado para distinguirlas
+  &.bonus {
+    border-style: dashed;
+  }
+
+  &.buscada {
+    background: rgba(197, 160, 89, 0.2);
+    border-color: $color-gold;
+    color: $color-gold;
+  }
+}

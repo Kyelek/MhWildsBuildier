@@ -22,6 +22,7 @@ import {
 } from '../../../models/tipos-arma.models';
 import { EnDesarrolloComponent } from '../../en-desarrollo/en-desarrollo.component';
 import { BuscadorFiltrosComponent } from '../../buscador-filtros/buscador-filtros.component';
+import { alternar, contar, normalizar } from '../../../utils/listas';
 
 // Alto fijo (px) de cada fila de la lista: el scroll virtual lo necesita para calcular
 // qué filas pintar. Debe coincidir con la altura de ".fila-arma" en el SCSS.
@@ -241,22 +242,4 @@ function valorOrden(arma: Weapon, orden: CriterioOrden): number {
     case 'special': return arma.specials?.[0]?.damage.display ?? 0;
     default: return 0;
   }
-}
-
-function contar<K>(armas: Weapon[], clave: (arma: Weapon) => K): Map<K, number> {
-  const conteo = new Map<K, number>();
-  for (const arma of armas) {
-    const k = clave(arma);
-    conteo.set(k, (conteo.get(k) ?? 0) + 1);
-  }
-  return conteo;
-}
-
-// Añade el valor a la lista si no estaba, o lo quita si ya estaba
-function alternar<T>(lista: T[], valor: T): T[] {
-  return lista.includes(valor) ? lista.filter(v => v !== valor) : [...lista, valor];
-}
-
-function normalizar(texto: string): string {
-  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }

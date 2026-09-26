@@ -1,0 +1,24 @@
+<!-- Mismo campo que <app-selector-arma> (ver src/styles/_campo-selector.scss): sin pieza,
+     la etiqueta de la ranura va dentro del campo; con pieza, "flota" sobre el borde. -->
+<fieldset class="campo-selector" [class.con-valor]="valor()">
+  <legend class="campo-etiqueta" [attr.aria-hidden]="!valor()">{{ 'armorSlots.' + ranura() + '.label' | translate }}</legend>
+
+  <button type="button" class="campo-boton" aria-haspopup="dialog" (click)="abrir()">
+    <img class="campo-icono" [src]="iconos[ranura()]" alt="" width="28" height="28" />
+    @if (valor(); as pieza) {
+      <span class="campo-texto">{{ pieza.name }}</span>
+    } @else {
+      <span class="campo-texto campo-placeholder">{{ 'armorSlots.' + ranura() + '.label' | translate }}</span>
+    }
+    <span class="campo-flecha" aria-hidden="true">▾</span>
+  </button>
+
+  @if (permitirQuitar() && valor()) {
+    <button
+      type="button"
+      class="campo-quitar"
+      [attr.aria-label]="'armorPicker.remove' | translate"
+      [title]="'armorPicker.remove' | translate"
+      (click)="quitar()">×</button>
+  }
+</fieldset>

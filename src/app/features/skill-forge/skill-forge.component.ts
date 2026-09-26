@@ -4,8 +4,9 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ApiLocale, WildsApiService } from '../../core/services/wilds-api.service';
 import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
-import { SelectorBuscableComponent } from '../../shared/components/selector-buscable/selector-buscable.component';
 import { SelectorArmaComponent } from '../../shared/components/selector-arma/selector-arma.component';
+import { SelectorArmaduraComponent } from '../../shared/components/selector-armadura/selector-armadura.component';
+import { FILTROS_ARMADURA_VACIOS, FiltrosArmadura, ICONOS_RANURA } from '../../shared/models/filtros-armadura.models';
 import {
   AportePieza,
   BonificacionSetActiva,
@@ -20,24 +21,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatTooltipModule} from '@angular/material/tooltip';
 
-type TipoPieza = 'head' | 'chest' | 'arms' | 'waist' | 'legs';
-
 // 🌟 EXCEPCIÓN: habilidades de GRUPO que se tratan como una bonificación de conjunto más.
 // Se activan al llevar varias piezas (de cualquier conjunto) que tengan esa habilidad, con
 // los rangos de su "groupBonus" en /armor/sets. De momento solo "Alma del amo" (id 131,
 // el mismo en todos los idiomas: "Lord's Soul" / "ヌシの魂"); el resto de habilidades de
 // grupo siguen mostrándose como habilidades normales.
 const HABILIDADES_GRUPO_COMO_BONIFICACION: readonly number[] = [131];
-
-// 🛡️ Icono de cada ranura de armadura (public/images/armor). Hay uno por tipo de pieza,
-// no uno por armadura: sirve para ver de qué parte del equipo viene cada habilidad.
-const ICONOS_RANURA: Record<TipoPieza, string> = {
-  head: 'images/armor/48px-MHWilds-Helmet.png',
-  chest: 'images/armor/48px-MHWilds-Chestplate.png',
-  arms: 'images/armor/48px-MHWilds-Armguards.png',
-  waist: 'images/armor/48px-MHWilds-Waist.png',
-  legs: 'images/armor/48px-MHWilds-Leggings.png'
-};
 
 @Component({
   selector: 'app-skill-forge',
@@ -48,8 +37,8 @@ const ICONOS_RANURA: Record<TipoPieza, string> = {
     MatProgressSpinnerModule,
     MatDividerModule,
     TranslatePipe,
-    SelectorBuscableComponent,
     SelectorArmaComponent,
+    SelectorArmaduraComponent,
     MatTooltipModule
   ],
   templateUrl: './skill-forge.component.html',
@@ -159,13 +148,9 @@ export class SkillForgeComponent {
     return catalogo.find(item => item.id === actual.id) ?? actual;
   }
 
-  // 3. Piezas de armadura acotadas por ranura. El buscador de texto de cada selector ya lo
-  // resuelve internamente <app-selector-buscable> (ver shared/components/selector-buscable).
-  readonly cascos = computed(() => this.armorPorRanura('head'));
-  readonly pechos = computed(() => this.armorPorRanura('chest'));
-  readonly brazos = computed(() => this.armorPorRanura('arms'));
-  readonly cinturas = computed(() => this.armorPorRanura('waist'));
-  readonly piernas = computed(() => this.armorPorRanura('legs'));
+  // 3. 🔍 Filtros de los popups de armadura, compartidos por las 5 ranuras: lo que se
+  // filtra al elegir el casco (habilidades, bonificaciones...) sigue puesto al abrir el pecho
+  readonly filtrosArmadura = signal<FiltrosArmadura>(FILTROS_ARMADURA_VACIOS);
 
   // Piezas actualmente equipadas (sin huecos vacíos)
   readonly piezasSeleccionadas = computed<ArmorPiece[]>(() => {
@@ -383,9 +368,6 @@ export class SkillForgeComponent {
     return { ranura: pieza.kind, nombrePieza: pieza.name, nivel, icono: ICONOS_RANURA[pieza.kind] };
   }
 
-  private armorPorRanura(ranura: TipoPieza): ArmorPiece[] {
-    return (this.armorResource.value() ?? []).filter(piece => piece.kind === ranura);
-  }
 
   // Busca en el catálogo de /skills la descripción exacta del nivel total alcanzado.
   // Si no está disponible (catálogo cargando o nivel fuera de rango), usa la descripción de la pieza como respaldo.
