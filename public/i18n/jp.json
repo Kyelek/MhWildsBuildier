@@ -77,6 +77,13 @@
   "bestiary": {
     "title": "モンスター図鑑"
   },
+  "footer": {
+    "legal": "モンスターハンター®は株式会社カプコンの登録商標です。© CAPCOM. All rights reserved. 非公式ファンサイトです。",
+    "legalShort": "モンスターハンター® · © CAPCOM · 非公式ファンサイト",
+    "api": "MHDB API",
+    "apiTitle": "Monster Hunter Wilds DB(wilds.mhdb.io)のデータ",
+    "links": "外部リンク"
+  },
   "nav": {
     "home": "ホーム",
     "constructor": "ビルダー",

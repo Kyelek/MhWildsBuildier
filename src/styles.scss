@@ -12,6 +12,7 @@ $color-text: #f5f5e9;
 // por breakpoint para que todos los componentes se adapten a la vez.
 :root {
   --altura-navbar: 70px;
+  --altura-footer: 48px;
   --relleno-pagina: 40px;
 
   @include tablet {
@@ -20,6 +21,7 @@ $color-text: #f5f5e9;
 
   @include movil {
     --altura-navbar: 60px;
+    --altura-footer: 56px;
     --relleno-pagina: 12px;
   }
 }
