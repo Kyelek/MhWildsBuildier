@@ -270,6 +270,40 @@ describe('SkillForgeComponent', () => {
     expect(component.descripcionesDetalladas()[1].aportes.map(a => a.ranura)).toEqual(['head', 'chest', 'arms']);
   });
 
+  it('trata igual cualquier otra habilidad de grupo ("Pulso de Guardián"), junto a la de conjunto de la misma pieza', async () => {
+    const pulso: ArmorSkill = {
+      id: 3, level: 1, description: 'Descripción de Pulso de Guardián', setPiecesRequired: null,
+      skill: { id: 27, gameId: 27, name: 'Pulso de Guardián', kind: 'group' }
+    };
+    const afan: ArmorSkill = {
+      id: 4, level: 1, description: '', setPiecesRequired: null,
+      skill: { id: 900, gameId: 900, name: 'Afán de Anjanath Fulgúreo', kind: 'set' }
+    };
+    flushCatalogos([
+      { id: 1, gameId: 1, name: 'Fulgúreo G. α', pieces: [],
+        bonus: bonusDePrueba(900, 'Afán de Anjanath Fulgúreo', [[2, 1], [4, 2]]),
+        groupBonus: bonusDePrueba(27, 'Pulso de Guardián', [[3, 1]]) }
+    ]);
+    await fixture.whenStable();
+
+    const fulgurea = (id: number, kind: ArmorPiece['kind']) =>
+      crearPiezaDePrueba({ id, kind, armorSet: { id: 1, name: 'Fulgúreo G. α' }, skills: [afan, pulso] });
+    component.piezaCabeza.set(fulgurea(50, 'head'));
+    component.piezaPecho.set(fulgurea(51, 'chest'));
+    fixture.detectChanges();
+    // Con 2 piezas solo se activa la de conjunto, y "Pulso de Guardián" no sale como habilidad suelta
+    expect(component.bonificacionesSet().map(b => b.clave)).toEqual(['set-1']);
+    expect(component.descripcionesDetalladas()).toEqual([]);
+
+    component.piezaBrazos.set(fulgurea(52, 'arms'));
+    fixture.detectChanges();
+    expect(component.bonificacionesSet()).toEqual(jasmine.arrayWithExactContents([
+      jasmine.objectContaining({ clave: 'set-1', piezasEquipadas: 3 }),
+      jasmine.objectContaining({ clave: 'grupo-27', esGrupo: true, piezasEquipadas: 3, nombreHabilidad: 'Pulso de Guardián' })
+    ]));
+    expect(component.descripcionesDetalladas().map(d => d.nombre)).toEqual(['Pulso de Guardián 1']);
+  });
+
   // ==========================================
   // 📊 PESTAÑA "ESTADÍSTICAS TOTALES" (mismo comportamiento que en el Constructor)
   // ==========================================
