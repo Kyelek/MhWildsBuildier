@@ -35,6 +35,11 @@
         {{ "nav.skills-forge" | translate }}
       </a>
     </li>
+    <li>
+      <a routerLink="/bestiario" routerLinkActive="active" (click)="cerrarMenu()">
+        {{ "nav.bestiary" | translate }}
+      </a>
+    </li>
 
     <!-- Los tres idiomas van juntos para que en el menú móvil queden en una sola fila.
          En escritorio se ve el código (EN/ES/JP); en el menú desplegable, la bandera,

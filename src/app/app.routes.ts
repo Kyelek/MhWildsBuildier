@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/skill-forge/skill-forge.component').then(m => m.SkillForgeComponent)
   },
   {
+    path: 'bestiario',
+    loadComponent: () => import('./features/bestiario/bestiario.component').then(m => m.BestiarioComponent)
+  },
+  {
     path: '**',
     redirectTo: '' // Redirige al inicio si meten una URL rara
   }
