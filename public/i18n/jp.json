@@ -203,7 +203,8 @@
       "waterfilm-right-front-leg": "水膜（右前脚）",
       "waterfilm-right-head": "水膜（右頭）",
       "waterfilm-right-tail": "水膜（右尻尾）",
-      "waterfilm-tail": "水膜（尻尾）"
+      "waterfilm-tail": "水膜（尻尾）",
+      "upper-back": "背中上部"
     },
     "essence": {
       "red": "赤",
@@ -256,8 +257,9 @@
       "blastblight": "爆破",
       "bleeding": "裂傷",
       "bubbleblight": "泡まみれ",
-      "webbed": "拘束（糸）",
-      "frenzy": "狂竜症"
+      "frenzy": "狂竜症",
+      "entangled": "拘束",
+      "stun": "気絶"
     },
     "gear": {
       "weapons": "武器",

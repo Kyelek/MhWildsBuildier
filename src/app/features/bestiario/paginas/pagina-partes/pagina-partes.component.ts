@@ -1,7 +1,7 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MonsterDetalle, RangoRecompensa } from '../../../../core/models/monster.models';
-import { calcularPartes, recompensasPorRango } from '../../bestiario.datos';
+import { calcularPartes, claveParte, recompensasPorRango } from '../../bestiario.datos';
 
 // 📖 Página III de la tarjeta: partes rompibles/cortables (con su esencia de kinsecto) y
 // los materiales que suelta el monstruo, filtrados por rango (alto por defecto).
@@ -20,4 +20,9 @@ export class PaginaPartesComponent {
 
   readonly partes = computed(() => calcularPartes(this.monstruo()));
   readonly recompensas = computed(() => recompensasPorRango(this.monstruo(), this.rango()));
+
+  // Clave de traducción del nombre de una parte (algunos monstruos tienen nombres propios)
+  claveParte(parte: string): string {
+    return claveParte(this.monstruo().id, parte);
+  }
 }

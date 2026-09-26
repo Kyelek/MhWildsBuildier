@@ -65,11 +65,13 @@ export function imagenMonstruo(id: number): string | null {
 // ⚠️ El campo "ailments" de la API viene VACÍO en todos los monstruos (comprobado en los
 // 34, incluido Seregios), así que esta tabla se mantiene a mano con lo que aplican en el
 // juego. Un monstruo sin entrada (o con la lista vacía) muestra "No aplica".
+// Los iconos son emojis, salvo los que no existen como emoji (p. ej. la red de
+// "Enmarañado"), que son una imagen de public/images/estados (ver esIconoImagen).
 // ==========================================
 export type EstadoQueAplica =
   | 'fireblight' | 'waterblight' | 'thunderblight' | 'iceblight' | 'dragonblight'
   | 'poison' | 'paralysis' | 'sleep' | 'blastblight' | 'bleeding'
-  | 'bubbleblight' | 'webbed' | 'frenzy';
+  | 'bubbleblight' | 'entangled' | 'frenzy' | 'stun';
 
 export const ICONOS_ESTADO_APLICADO: Record<EstadoQueAplica, string> = {
   fireblight: ICONOS_ELEMENTO.fire,
@@ -83,8 +85,9 @@ export const ICONOS_ESTADO_APLICADO: Record<EstadoQueAplica, string> = {
   blastblight: ICONOS_ESTADO.blastblight,
   bleeding: '🩸',
   bubbleblight: '🫧',
-  webbed: '🕸️',
-  frenzy: '🦠'
+  entangled: 'images/estados/enmaranado.svg',
+  frenzy: '🦠',
+  stun: '😵'
 };
 
 export const ESTADOS_QUE_APLICA: Record<number, EstadoQueAplica[]> = {
@@ -93,7 +96,7 @@ export const ESTADOS_QUE_APLICA: Record<number, EstadoQueAplica[]> = {
   3: ['thunderblight'],                 // Rey Dau
   4: ['paralysis'],                     // Lala Barina
   5: ['poison', 'fireblight'],          // Congalala
-  6: ['poison', 'sleep', 'webbed'],     // Nerscylla
+  6: ['poison', 'sleep', 'entangled'],  // Nerscylla
   7: ['frenzy'],                        // Gore Magala
   8: ['fireblight', 'sleep'],           // Gravios
   9: ['dragonblight'],                  // Arkveld Guardián
@@ -104,12 +107,12 @@ export const ESTADOS_QUE_APLICA: Record<number, EstadoQueAplica[]> = {
   14: [],                               // Chatacabra
   15: ['bubbleblight'],                 // Mizutsune
   16: ['thunderblight'],                // Anjanath Fulgúreo Guardián
-  17: ['iceblight'],                    // Hirabami
+  17: ['iceblight', 'entangled'],       // Hirabami
   18: ['fireblight'],                   // Yian Kut-Ku
   19: ['poison'],                       // Rompopolo
   20: ['dragonblight'],                 // Arkveld
   21: ['fireblight', 'blastblight'],    // Ajarakan
-  22: ['poison'],                       // Gypceros
+  22: ['poison', 'stun'],               // Gypceros
   23: [],                               // Xu Wu
   24: ['fireblight', 'poison'],         // Rathalos Guardián
   25: ['waterblight'],                  // Uth Duna
@@ -120,9 +123,14 @@ export const ESTADOS_QUE_APLICA: Record<number, EstadoQueAplica[]> = {
   30: ['iceblight'],                    // Blangonga
   31: ['thunderblight'],                // Lagiacrus
   32: ['bleeding'],                     // Seregios
-  33: [],                               // Omega Planetes
+  33: ['fireblight'],                   // Omega Planetes
   34: ['fireblight']                    // Gogmazios
 };
+
+// ¿El icono es una ruta de imagen en vez de un emoji?
+export function esIconoImagen(icono: string): boolean {
+  return icono.startsWith('images/');
+}
 
 export function estadosQueAplica(id: number): EstadoQueAplica[] {
   return ESTADOS_QUE_APLICA[id] ?? [];
@@ -225,6 +233,17 @@ function contarPorParte(monstruo: MonsterDetalle): Map<string, number> {
     totales.set(parte.kind, (totales.get(parte.kind) ?? 0) + 1);
   }
   return totales;
+}
+
+// 🏷️ Nombres de parte propios de un monstruo concreto: la clave de traducción que se usa en
+// vez de la genérica "bestiary.parts.<parte>". Gogmazios tiene pecho ("chest"), vientre
+// ("stomach") y lomo ("back"): se muestran como Pecho, Lomo y Espalda para no repetir nombres.
+const NOMBRES_PARTE_MONSTRUO: Record<number, Record<string, string>> = {
+  34: { stomach: 'back', back: 'upper-back' }
+};
+
+export function claveParte(idMonstruo: number, parte: string): string {
+  return `bestiary.parts.${NOMBRES_PARTE_MONSTRUO[idMonstruo]?.[parte] ?? parte}`;
 }
 
 // ==========================================

@@ -51,7 +51,7 @@
     <tbody>
       @for (zona of zonas(); track $index) {
         <tr>
-          <th scope="row">{{ 'bestiary.parts.' + zona.parte | translate }}@if (zona.indice) { {{ zona.indice }}}</th>
+          <th scope="row">{{ claveParte(zona.parte) | translate }}@if (zona.indice) { {{ zona.indice }}}</th>
           @for (columna of columnasZonas; track columna.clave) {
             <td class="centro" [class.debil]="esZonaDebil(columna.clave, zona.valores[columna.clave])">
               {{ zona.valores[columna.clave] }}
