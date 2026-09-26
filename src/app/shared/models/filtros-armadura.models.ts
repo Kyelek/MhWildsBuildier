@@ -41,11 +41,11 @@ export interface OpcionHabilidad {
   total: number;
 }
 
-// Criterios de "Ordenar por". "default" respeta el orden de la API (el del juego) y
-// "match" pone arriba las piezas que más niveles aportan de las habilidades buscadas.
-export type CriterioOrdenArmadura = 'default' | 'match' | 'defense' | 'rarity' | 'slots' | ElementoResistencia;
+// Criterios de "Ordenar por". "default" respeta el orden de la API (el del juego), salvo si
+// hay habilidades buscadas: entonces suben las piezas que más niveles aportan de ellas.
+export type CriterioOrdenArmadura = 'default' | 'defense' | 'rarity' | 'slots' | ElementoResistencia;
 export const CRITERIOS_ORDEN_ARMADURA: readonly CriterioOrdenArmadura[] =
-  ['default', 'match', 'defense', 'rarity', 'slots', 'fire', 'water', 'thunder', 'ice', 'dragon'];
+  ['default', 'defense', 'rarity', 'slots', 'fire', 'water', 'thunder', 'ice', 'dragon'];
 
 export const RANGOS_ARMADURA: readonly RangoArmadura[] = ['low', 'high'];
 

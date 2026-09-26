@@ -166,7 +166,6 @@
       "ascending": "De menor a mayor",
       "sort": {
         "default": "Por defecto",
-        "match": "Habilidades buscadas",
         "defense": "Defensa",
         "rarity": "Rareza",
         "slots": "Huecos",

@@ -166,7 +166,6 @@
       "ascending": "Lowest first",
       "sort": {
         "default": "Default",
-        "match": "Searched skills",
         "defense": "Defense",
         "rarity": "Rarity",
         "slots": "Slots",
