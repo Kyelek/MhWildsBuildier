@@ -71,7 +71,6 @@
               class="filtro-chip"
               [class.activo]="filtros().orden === criterio"
               [attr.aria-pressed]="filtros().orden === criterio"
-              [disabled]="criterio === 'match' && !hayHabilidadesBuscadas()"
               (click)="elegirOrden(criterio)">
               {{ 'armorPicker.filters.sort.' + criterio | translate }}
             </button>
