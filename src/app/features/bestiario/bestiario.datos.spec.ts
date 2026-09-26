@@ -1,6 +1,9 @@
 import { MonsterDetalle, MonsterPart, RewardCondition } from '../../core/models/monster.models';
 import {
+  ICONOS_ESTADO_APLICADO,
   calcularDebilidades,
+  claveParte,
+  esIconoImagen,
   calcularPartes,
   calcularZonas,
   estadosQueAplica,
@@ -138,5 +141,21 @@ describe('bestiario.datos', () => {
     expect(imagenMonstruo(999)).toBeNull();
     expect(estadosQueAplica(32)).toEqual(['bleeding']);
     expect(estadosQueAplica(999)).toEqual([]);
+  });
+
+  it('aplica los estados corregidos a mano y usa imagen para el icono de red', () => {
+    expect(estadosQueAplica(17)).toContain('entangled'); // Hirabami
+    expect(estadosQueAplica(6)).toContain('entangled');  // Nerscylla
+    expect(estadosQueAplica(22)).toContain('stun');      // Gypceros
+    expect(estadosQueAplica(33)).toEqual(['fireblight']); // Omega Planetes
+    expect(esIconoImagen(ICONOS_ESTADO_APLICADO.entangled)).toBeTrue();
+    expect(esIconoImagen(ICONOS_ESTADO_APLICADO.fireblight)).toBeFalse();
+  });
+
+  it('usa nombres de parte propios en Gogmazios y los genéricos en el resto', () => {
+    expect(claveParte(34, 'stomach')).toBe('bestiary.parts.back');
+    expect(claveParte(34, 'back')).toBe('bestiary.parts.upper-back');
+    expect(claveParte(34, 'chest')).toBe('bestiary.parts.chest');
+    expect(claveParte(6, 'stomach')).toBe('bestiary.parts.stomach');
   });
 });

@@ -61,7 +61,13 @@
                   <dt>{{ 'bestiary.info.ailments' | translate }}</dt>
                   <dd>
                     @for (estado of estados(); track estado) {
-                      <span class="sello"><span aria-hidden="true">{{ iconosEstado[estado] }}</span> {{ 'bestiary.ailments.' + estado | translate }}</span>
+                      <span class="sello">
+                        @if (esIconoImagen(iconosEstado[estado])) {
+                          <img class="icono-estado" [src]="iconosEstado[estado]" alt="" width="18" height="18" />
+                        } @else {
+                          <span aria-hidden="true">{{ iconosEstado[estado] }}</span>
+                        }
+                        {{ 'bestiary.ailments.' + estado | translate }}</span>
                     } @empty {
                       <span class="apagado">{{ 'bestiary.info.notApplicable' | translate }}</span>
                     }

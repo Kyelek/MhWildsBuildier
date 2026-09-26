@@ -203,7 +203,8 @@
       "waterfilm-right-front-leg": "Película de agua: pata delantera der.",
       "waterfilm-right-head": "Película de agua: cabeza der.",
       "waterfilm-right-tail": "Película de agua: cola der.",
-      "waterfilm-tail": "Película de agua: cola"
+      "waterfilm-tail": "Película de agua: cola",
+      "upper-back": "Espalda"
     },
     "essence": {
       "red": "Roja",
@@ -256,8 +257,9 @@
       "blastblight": "Nitro",
       "bleeding": "Sangrado",
       "bubbleblight": "Burbujas",
-      "webbed": "Telaraña",
-      "frenzy": "Virus frenético"
+      "frenzy": "Cólera",
+      "entangled": "Enmarañado",
+      "stun": "Aturdimiento"
     },
     "gear": {
       "weapons": "Armas",

@@ -2,7 +2,7 @@ import { Component, computed, inject, input, linkedSignal, output, signal } from
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ApiLocale, WildsApiService } from '../../../core/services/wilds-api.service';
-import { ICONOS_ESTADO_APLICADO, estadosQueAplica, idsMateriales, imagenMonstruo } from '../bestiario.datos';
+import { ICONOS_ESTADO_APLICADO, esIconoImagen, estadosQueAplica, idsMateriales, imagenMonstruo } from '../bestiario.datos';
 import { PaginaDebilidadesComponent } from '../paginas/pagina-debilidades/pagina-debilidades.component';
 import { PaginaPartesComponent } from '../paginas/pagina-partes/pagina-partes.component';
 import { PaginaEquipoComponent } from '../paginas/pagina-equipo/pagina-equipo.component';
@@ -31,6 +31,7 @@ export class TarjetaMonstruoComponent {
   readonly paginas = PAGINAS_TARJETA;
   readonly romanos = NUMEROS_ROMANOS;
   readonly iconosEstado = ICONOS_ESTADO_APLICADO;
+  readonly esIconoImagen = esIconoImagen;
 
   // Se conserva la página al cambiar de monstruo (útil para comparar debilidades)
   readonly pagina = signal(0);

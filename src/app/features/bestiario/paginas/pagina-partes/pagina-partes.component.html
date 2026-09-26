@@ -12,7 +12,7 @@
     <tbody>
       @for (fila of partes(); track fila.parte) {
         <tr [class.destacada]="fila.rompible || fila.cortable">
-          <th scope="row">{{ 'bestiary.parts.' + fila.parte | translate }}</th>
+          <th scope="row">{{ claveParte(fila.parte) | translate }}</th>
           <td class="centro">
             @if (fila.rompible) { <span class="si" [attr.aria-label]="'bestiary.yes' | translate">✔</span> } @else { <span class="apagado">–</span> }
           </td>
@@ -61,7 +61,7 @@
                 <li>
                   <span>
                     {{ 'bestiary.rewardKinds.' + forma.tipo | translate }}
-                    @if (forma.parte) { <span class="apagado">({{ 'bestiary.parts.' + forma.parte | translate }})</span> }
+                    @if (forma.parte) { <span class="apagado">({{ claveParte(forma.parte) | translate }})</span> }
                     @if (forma.cantidad > 1) { ×{{ forma.cantidad }} }
                   </span>
                   <span class="probabilidad">

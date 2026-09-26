@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MonsterDetalle } from '../../../../core/models/monster.models';
-import { COLUMNAS_ZONAS, agrupar, calcularDebilidades, calcularZonas } from '../../bestiario.datos';
+import { COLUMNAS_ZONAS, agrupar, calcularDebilidades, calcularZonas, claveParte } from '../../bestiario.datos';
 
 // 📖 Página II de la tarjeta: debilidades/resistencias a elementos, estados y efectos,
 // y tabla de zonas de daño (multiplicadores de cada parte).
@@ -28,5 +28,10 @@ export class PaginaDebilidadesComponent {
   esZonaDebil(clave: string, valor: number): boolean {
     if (['slash', 'blunt', 'pierce'].includes(clave)) return valor >= 45;
     return clave === 'stun' ? valor >= 100 : valor >= 20;
+  }
+
+  // Clave de traducción del nombre de una parte (algunos monstruos tienen nombres propios)
+  claveParte(parte: string): string {
+    return claveParte(this.monstruo().id, parte);
   }
 }

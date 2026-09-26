@@ -203,7 +203,8 @@
       "waterfilm-right-front-leg": "Water film: right foreleg",
       "waterfilm-right-head": "Water film: right head",
       "waterfilm-right-tail": "Water film: right tail",
-      "waterfilm-tail": "Water film: tail"
+      "waterfilm-tail": "Water film: tail",
+      "upper-back": "Upper back"
     },
     "essence": {
       "red": "Red",
@@ -256,8 +257,9 @@
       "blastblight": "Blast",
       "bleeding": "Bleeding",
       "bubbleblight": "Bubbleblight",
-      "webbed": "Webbed",
-      "frenzy": "Frenzy"
+      "frenzy": "Frenzy",
+      "entangled": "Entangled",
+      "stun": "Stun"
     },
     "gear": {
       "weapons": "Weapons",
