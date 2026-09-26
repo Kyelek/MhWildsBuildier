@@ -77,6 +77,13 @@
   "bestiary": {
     "title": "Bestiario"
   },
+  "footer": {
+    "legal": "Monster Hunter® es una marca registrada de CAPCOM CO., LTD. © CAPCOM. Todos los derechos reservados. Web de fans no oficial.",
+    "legalShort": "Monster Hunter® · © CAPCOM · Web de fans no oficial",
+    "api": "API MHDB",
+    "apiTitle": "Datos de Monster Hunter Wilds DB (wilds.mhdb.io)",
+    "links": "Enlaces externos"
+  },
   "nav": {
     "home": "Home",
     "constructor": "Constructor",
