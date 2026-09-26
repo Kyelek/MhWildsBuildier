@@ -10,7 +10,6 @@ import { FILTROS_ARMADURA_VACIOS, FiltrosArmadura, ICONOS_RANURA } from '../../s
 import {
   AportePieza,
   BonificacionSetActiva,
-  ConteoPorSet,
   DescripcionHabilidad,
   HabilidadAcumulada
 } from './models/skill-forge.models';
@@ -184,70 +183,57 @@ export class SkillForgeComponent {
   });
 
   // ==========================================
-  // 🎖️ REQUISITO 3: Detección de conjuntos y bonificaciones de set (bonus.ranks)
+  // 🎖️ REQUISITO 3: Bonificaciones de set (bonus.ranks / groupBonus.ranks)
   //
-  // 💡 IMPORTANTE: un cazador puede mezclar piezas de varios conjuntos distintos (p. ej.
-  // 2 piezas del Set A + 3 piezas del Set B). Por eso NO nos quedamos con "el conjunto
-  // predominante": calculamos el conteo de piezas por CADA conjunto presente y activamos
-  // la bonificación de TODOS los conjuntos que alcancen el mínimo de piezas requerido,
-  // permitiendo que varias bonificaciones de set convivan de forma simultánea.
+  // 💡 IMPORTANTE: una bonificación se activa por las piezas que TRAEN su habilidad de set,
+  // no por el conjunto al que pertenece cada pieza. Casi siempre coincide, pero no siempre:
+  //   - Varios conjuntos comparten la misma habilidad (Gore α y Gore β dan "Tiranía de Gore
+  //     Magala"): sus piezas suman juntas.
+  //   - Hay piezas que traen la habilidad de otro conjunto (la Malla de Gogmazios β da
+  //     "Fulgor de Rathalos", no la de su propio conjunto): cuenta para esa otra.
+  // Un cazador puede mezclar piezas, así que se activan a la vez TODAS las bonificaciones que
+  // alcancen el mínimo de piezas, no solo la "predominante".
+  //
+  // La API separa las habilidades de set en "set" (rangos en "bonus", 2/4 piezas) y "group"
+  // (rangos en "groupBonus", 3 piezas: Alma del amo, Pulso de Guardián...). En el juego son lo
+  // mismo; solo cambia cómo se muestran (ver el bucle de abajo).
   // ==========================================
 
-  // Cuenta cuántas piezas seleccionadas pertenecen a cada conjunto de armadura (armorSet.id)
-  private readonly conteoPorSet = computed<Map<number, ConteoPorSet>>(() => {
-    const conteo = new Map<number, ConteoPorSet>();
-
-    for (const pieza of this.piezasSeleccionadas()) {
-      const set = pieza.armorSet;
-      if (!set) continue;
-
-      const actual = conteo.get(set.id);
-      conteo.set(set.id, {
-        nombre: set.name,
-        cantidad: (actual?.cantidad ?? 0) + 1
-      });
-    }
-
-    return conteo;
-  });
-
-  // 🌟 Habilidades de GRUPO equipadas ("kind" = "group" en la API: Alma del amo, Pulso de
-  // Guardián, Protección de Guardián...). En el juego son habilidades de set como las de
-  // conjunto: se activan al llevar varias piezas (de cualquier conjunto) que las tengan, con
-  // los rangos de su "groupBonus" en /armor/sets, así que se tratan como una bonificación más.
-  private readonly habilidadesGrupoEquipadas = computed<number[]>(() => {
-    const ids = new Set<number>();
+  // Habilidades de set equipadas, con las piezas que aportan cada una (en orden de ranura)
+  private readonly piezasPorHabilidadSet = computed<Map<number, { kind: string; piezas: ArmorPiece[] }>>(() => {
+    const porHabilidad = new Map<number, { kind: string; piezas: ArmorPiece[] }>();
     for (const pieza of this.piezasSeleccionadas()) {
       for (const { skill } of pieza.skills) {
-        if (skill.kind === 'group') ids.add(skill.id);
+        if (skill.kind !== 'set' && skill.kind !== 'group') continue;
+        const actual = porHabilidad.get(skill.id) ?? { kind: skill.kind, piezas: [] };
+        actual.piezas.push(pieza);
+        porHabilidad.set(skill.id, actual);
       }
     }
-    return [...ids];
+    return porHabilidad;
   });
 
-  // Lista de TODAS las bonificaciones activas a la vez: una por cada conjunto con piezas
-  // suficientes, más una por cada habilidad de grupo con piezas suficientes.
+  // Lista de TODAS las bonificaciones activas a la vez: una por cada habilidad de set con
+  // piezas suficientes.
   readonly bonificacionesSet = computed<BonificacionSetActiva[]>(() => {
     const todosLosSets = this.armorSetsResource.value() ?? [];
     const bonificaciones: BonificacionSetActiva[] = [];
 
-    for (const [setId, info] of this.conteoPorSet()) {
-      const bonus = todosLosSets.find(set => set.id === setId)?.bonus;
-      if (!bonus) continue;
+    for (const [skillId, { kind, piezas }] of this.piezasPorHabilidadSet()) {
+      // Los rangos son los mismos en todos los conjuntos que comparten la habilidad
+      if (kind === 'set') {
+        const bonus = todosLosSets.find(set => set.bonus?.skill.id === skillId)?.bonus;
+        if (!bonus) continue;
 
-      const piezasDelSet = this.piezasSeleccionadas().filter(pieza => pieza.armorSet?.id === setId);
-      const bonificacion = this.construirBonificacion(`set-${setId}`, info.nombre, piezasDelSet, bonus);
-      if (bonificacion) bonificaciones.push(bonificacion);
-    }
+        // La tarjeta se titula con el rango activado ("Eclipse negro I") y su origen es la
+        // habilidad de set ("Tiranía de Gore Magala")
+        const bonificacion = this.construirBonificacion(`set-${skillId}`, bonus.skill.name, piezas, bonus);
+        if (bonificacion) bonificaciones.push(bonificacion);
+        continue;
+      }
 
-    for (const skillId of this.habilidadesGrupoEquipadas()) {
-      // Los rangos son los mismos en todos los conjuntos que comparten esta habilidad de grupo
       const grupo = todosLosSets.find(set => set.groupBonus?.skill.id === skillId)?.groupBonus;
       if (!grupo) continue;
-
-      // Cuenta las piezas equipadas que aportan la habilidad, sean del conjunto que sean
-      const piezas = this.piezasSeleccionadas()
-        .filter(pieza => pieza.skills.some(habilidad => habilidad.skill.id === skillId));
 
       const bonificacion = this.construirBonificacion(`grupo-${skillId}`, grupo.skill.name, piezas, grupo);
       if (!bonificacion) continue;
