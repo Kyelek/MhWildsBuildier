@@ -1,0 +1,85 @@
+@use 'responsive' as *;
+@use 'libro-bestiario' as *;
+
+:host {
+  display: block;
+}
+
+@include titulo-seccion;
+@include avisos;
+
+// Dos columnas (armas | armaduras); en móvil una debajo de otra
+.columnas-equipo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+
+  @include movil {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  // Filete vertical entre columnas, como el pliegue de un libro abierto
+  .columna + .columna {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -14px;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, rgba(197, 160, 89, 0.5), transparent);
+
+      @include movil {
+        display: none;
+      }
+    }
+  }
+}
+
+.grupo-equipo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 6px;
+  font-size: 0.85rem;
+  color: $oro;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+.lista-equipo {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    font-size: 0.88rem;
+    border-bottom: 1px dotted rgba(197, 160, 89, 0.2);
+  }
+
+  .rareza {
+    display: inline;
+    flex-shrink: 0;
+  }
+
+  .con-icono {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    img {
+      object-fit: contain;
+      opacity: 0.85;
+    }
+  }
+}

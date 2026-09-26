@@ -3,62 +3,62 @@
 > ⚠️ Este archivo es temporal: se borrará antes de subir a producción (`master`), cuando se dé el aprobado.
 > Rama: `feature/bestiario-bolsillo` (sale de `desarrollo`).
 >
-> Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecho · `❓` pendiente de decisión
+> Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecho · `❓` pendiente de confirmar por el usuario
 
 ---
 
 ## 🎨 Diseño general
-- [ ] Estética de **libro antiguo** (pergamino, tapas, lomo, páginas) integrada con el tema oscuro/dorado de la app (Cinzel/Montserrat, dorado `#c5a059`).
-- [ ] Sin librerías de UI nuevas; reutilizar variables y mixins (`responsive`, etc.).
-- [ ] Textos traducidos con ngx-translate (es / en / jp).
-- [ ] Datos de la API pedidos en el idioma actual (`locale`) y recargados al cambiar de idioma.
+- [x] Estética de **libro antiguo** integrada con el tema oscuro/dorado: tapa de cuero con filete dorado, lomo cosido, página de pergamino oscuro, marcapáginas de tela, letra capitular y animación de "pasar página".
+- [x] Sin librerías de UI nuevas; se reutilizan variables, mixins (`responsive`) y componentes existentes (`app-selector-buscable`, `app-en-desarrollo`).
+- [x] Textos traducidos con ngx-translate (es / en / jp).
+- [x] Datos de la API en el idioma actual y recargados al cambiar de idioma (sin perder el monstruo elegido).
+- [x] Iconos: los emojis que ya usa la app para elementos y estados (`ICONOS_ELEMENTO` / `ICONOS_ESTADO`), ampliados para efectos y plagas.
 
 ## 🖥️ Escritorio / tablet
-- [ ] Estado inicial: todos los monstruos **centrados** en pantalla (retrato + nombre).
-- [ ] Al seleccionar un monstruo: la lista pasa a la **izquierda** y se abre la **tarjeta** a la derecha (con transición).
-- [ ] Se puede cambiar de monstruo desde la lista de la izquierda y cerrar la tarjeta.
+- [x] Estado inicial: todos los monstruos **centrados** (medallón + nombre).
+- [x] Al seleccionar un monstruo: la lista pasa a la **izquierda** (columna fija con scroll propio) y se abre la **tarjeta** a la derecha.
+- [x] Se puede cambiar de monstruo desde la lista y cerrar la tarjeta (×).
 
 ## 📱 Móvil
-- [ ] Desplegable de monstruos al estilo del selector de armas (buscable).
-- [ ] Al elegir monstruo, la tarjeta se rellena **debajo** del desplegable.
+- [x] Desplegable con buscador (el mismo que el de armas del Constructor), con la imagen de cada monstruo.
+- [x] Al elegir monstruo, la tarjeta se rellena **debajo**.
+- [x] Sin scroll horizontal de página (la tabla de zonas de daño se desplaza dentro de su caja).
 
 ## 🃏 Tarjeta (común a todas las pantallas)
-- [ ] Nombre del monstruo centrado arriba.
-- [ ] Foto del monstruo centrada debajo del nombre (`public/images/monsters`).
-- [ ] Navegación entre las 5 pantallas (pestañas / "pasar página").
+- [x] Nombre del monstruo centrado arriba.
+- [x] Foto del monstruo centrada debajo del nombre (34/34 imágenes).
+- [x] Navegación entre las 5 pantallas: marcapáginas arriba + flechas ‹ › con folio (I / V) abajo.
 
-### Pantalla 1 — Datos generales
-- [ ] Especie (API `species`, traducida).
-- [ ] Hábitat (API `locations`).
-- [ ] Estados/plagas que aplica (si no aplica → "No aplica"). ❓ *La API los devuelve vacíos para los 34 monstruos (ver preguntas).*
-- [ ] Breve descripción (API `description`).
+### Pantalla 1 — Crónica
+- [x] Especie (traducida).
+- [x] Hábitat, con número de zonas.
+- [x] Estados/plagas que aplica ("No aplica" si no aplica). Tabla manual: la API los trae vacíos en los 34 monstruos.
+- [x] Variantes (curtido, archicurtido...).
+- [x] Descripción, Ecología (`features`) y Consejos de caza (`tips`).
+- ❓ Revisar los estados de los que no estoy 100 % seguro: **Zoh Shia** (nitro de draco), **Lala Barina** (parálisis), **Gogmazios** (fuego + nitro), y los que he dejado en "No aplica": **Balahara, Xu Wu, Omega Planetes, Chatacabra, Doshaguma (y Guardián)**. Se editan en `ESTADOS_QUE_APLICA` (`bestiario.datos.ts`).
 
-### Pantalla 2 — Debilidades elementales / estados
-- [ ] Título centrado "Debilidades elementales / estados".
-- [ ] Tabla con TODOS los elementos y estados, con nombre + icono. ❓ *No hay iconos en el proyecto (ver preguntas).*
+### Pantalla 2 — Debilidades
+- [x] Tabla con TODOS los elementos, estados y efectos (nombre + icono): ★ a ★★★ si es débil, "✕ Resiste" si lo resiste, "–" si no aplica. Notas de condición de la API debajo.
+- [x] Zonas de daño (multiplicadores de cada parte) con las zonas débiles resaltadas.
 
-### Pantalla 3 — Partes cortables / rompibles
-- [ ] Título centrado "Partes cortables / rompibles".
-- [ ] Tabla de partes.
+### Pantalla 3 — Partes
+- [x] Tabla de partes: rompible / cortable / esencia de kinsecto (sin vida de partes).
+- [x] Rompibles = partes con recompensa de rotura; cortable = la cola (o tentáculos si no hay cola) cuando hay recompensas de corte.
+- [x] Materiales con interruptor **Rango bajo / Rango alto** (alto por defecto).
 
 ### Pantalla 4 — Especial
-- [ ] Componente "En construcción" (reutilizar `app-en-desarrollo`).
+- [x] Componente "En construcción" (`app-en-desarrollo`).
 
-### Pantalla 5 — Armaduras y armas
-- [ ] Dos columnas: armas | armaduras relacionadas con el monstruo según los materiales que suelta.
+### Pantalla 5 — Armas y armaduras
+- [x] Dos columnas: armas (agrupadas por tipo, orden del juego) | armaduras (agrupadas por conjunto). Solo descriptivo.
+- [x] Todas las que usan algún material del monstruo.
 
 ## 🌐 Datos / API
-- [ ] Sin caché en localStorage (esta vez no se guarda nada).
-- [ ] Llamadas bajo demanda:
-  - Lista de monstruos: 1 llamada ligera (solo `id` + `name`, con proyección `p`).
-  - Detalle del monstruo: 1 llamada al seleccionarlo (`/monsters/{id}`).
-  - Armas y armaduras: 2 llamadas filtradas en la propia API por los materiales del monstruo, solo al abrir la pantalla 5.
-- [ ] Modelos tipados en `src/app/core/models/`.
+- [x] Sin caché en localStorage.
+- [x] Llamadas bajo demanda: lista ligera (~3 KB) → ficha al seleccionar → armas + armaduras solo al abrir la pantalla 5 (no se repiten al volver a ella).
+- [x] Modelos tipados en `src/app/core/models/monster.models.ts`.
+- [x] Tests de la lógica en `bestiario.datos.spec.ts`.
 
-## ❓ Preguntas abiertas
-1. Estados/plagas que aplica: la API no los trae. ¿Tabla manual en el código, o quitar el apartado?
-2. Iconos de elementos/estados: no existen en el proyecto. ¿Los aportas tú o los dibujo en SVG?
-3. Partes rompibles/cortables: la API no las marca explícitamente; se deducen de las recompensas.
-4. Armas/armaduras relacionadas: ¿todas las que usan algún material del monstruo, o solo las de su "serie"?
-5. Faltan imágenes de **Gore Magala** y **Rathalos**.
-6. Datos extra que trae la API y no están en el listado (ver respuesta en el chat).
+## ✅ Antes de subir a producción
+- [ ] Aprobado del usuario tras probar en `desarrollo`.
+- [ ] Borrar este archivo.

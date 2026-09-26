@@ -1,0 +1,140 @@
+<article class="libro">
+  <!-- 🔖 Marcapáginas: una cinta por pantalla -->
+  <nav class="marcapaginas" [attr.aria-label]="'bestiary.card.pages' | translate">
+    @for (clave of paginas; track clave; let i = $index) {
+      <button
+        type="button"
+        class="cinta"
+        [class.activa]="pagina() === i"
+        [attr.aria-current]="pagina() === i ? 'page' : null"
+        [title]="'bestiary.pages.' + clave | translate"
+        (click)="irA(i)">
+        <span class="cinta-numero">{{ romanos[i] }}</span>
+        <span class="cinta-texto">{{ 'bestiary.pages.' + clave | translate }}</span>
+      </button>
+    }
+  </nav>
+
+  <div class="pagina">
+    <button type="button" class="cerrar" [attr.aria-label]="'bestiary.card.close' | translate"
+      [title]="'bestiary.card.close' | translate" (click)="cerrar.emit()">×</button>
+
+    @if (detalleResource.error() && !detalleResource.isLoading()) {
+      <div class="aviso aviso-error" role="alert">
+        <p>{{ 'bestiary.loadError' | translate }}</p>
+        <button type="button" class="boton-dorado" (click)="reintentar()">{{ 'common.errors.retry' | translate }}</button>
+      </div>
+    } @else if (monstruo()) {
+      @let m = monstruo()!;
+      <!-- 📜 Cabecera común: nombre y foto -->
+      <header class="cabecera">
+        <span class="ornamento" aria-hidden="true">❦</span>
+        <h2 class="nombre">{{ m.name }}</h2>
+        @if (imagen(); as src) {
+          <div class="retrato">
+            <img [src]="src" [alt]="m.name" />
+          </div>
+        }
+        <p class="subtitulo">{{ romanos[pagina()] }} · {{ 'bestiary.pages.' + paginas[pagina()] | translate }}</p>
+      </header>
+
+      <!-- La clave hace que Angular recree el bloque y se reproduzca la animación de "pasar página" -->
+      @for (p of [pagina()]; track p) {
+        <section class="contenido">
+          @switch (p) {
+            <!-- I · DATOS GENERALES -->
+            @case (0) {
+              <dl class="ficha">
+                <div class="ficha-fila">
+                  <dt>{{ 'bestiary.info.species' | translate }}</dt>
+                  <dd>{{ 'bestiary.species.' + m.species | translate }}</dd>
+                </div>
+                <div class="ficha-fila">
+                  <dt>{{ 'bestiary.info.habitat' | translate }}</dt>
+                  <dd>
+                    @for (lugar of m.locations; track lugar.id) {
+                      <span class="lugar">{{ lugar.name }} <span class="apagado">({{ 'bestiary.info.zones' | translate: { n: lugar.zoneCount } }})</span></span>
+                    } @empty { — }
+                  </dd>
+                </div>
+                <div class="ficha-fila">
+                  <dt>{{ 'bestiary.info.ailments' | translate }}</dt>
+                  <dd>
+                    @for (estado of estados(); track estado) {
+                      <span class="sello"><span aria-hidden="true">{{ iconosEstado[estado] }}</span> {{ 'bestiary.ailments.' + estado | translate }}</span>
+                    } @empty {
+                      <span class="apagado">{{ 'bestiary.info.notApplicable' | translate }}</span>
+                    }
+                  </dd>
+                </div>
+                <div class="ficha-fila">
+                  <dt>{{ 'bestiary.info.variants' | translate }}</dt>
+                  <dd>
+                    @for (variante of m.variants; track variante.id) {
+                      <span class="sello">{{ variante.name }}</span>
+                    } @empty {
+                      <span class="apagado">{{ 'bestiary.info.none' | translate }}</span>
+                    }
+                  </dd>
+                </div>
+              </dl>
+
+              <div class="pasaje">
+                <h3 class="titulo-seccion">{{ 'bestiary.info.description' | translate }}</h3>
+                <p class="capitular">{{ m.description }}</p>
+              </div>
+              @if (m.features) {
+                <div class="pasaje">
+                  <h3 class="titulo-seccion">{{ 'bestiary.info.features' | translate }}</h3>
+                  <p>{{ m.features }}</p>
+                </div>
+              }
+              @if (m.tips) {
+                <div class="pasaje">
+                  <h3 class="titulo-seccion">{{ 'bestiary.info.tips' | translate }}</h3>
+                  <p>{{ m.tips }}</p>
+                </div>
+              }
+            }
+
+            <!-- II · DEBILIDADES Y ZONAS DE DAÑO -->
+            @case (1) {
+              <app-pagina-debilidades [monstruo]="m" />
+            }
+
+            <!-- III · PARTES ROMPIBLES / CORTABLES Y MATERIALES -->
+            @case (2) {
+              <app-pagina-partes [monstruo]="m" />
+            }
+
+            <!-- IV · ESPECIAL (en construcción) -->
+            @case (3) {
+              <app-en-desarrollo [titulo]="'bestiary.pages.special' | translate" />
+            }
+
+            <!-- V · ARMAS Y ARMADURAS -->
+            @case (4) {
+              <app-pagina-equipo
+                [armas]="armasResource.value() ?? []"
+                [armaduras]="armadurasResource.value() ?? []"
+                [cargando]="cargandoEquipo()"
+                [error]="errorEquipo()"
+                (reintentar)="reintentarEquipo()" />
+            }
+          }
+        </section>
+      }
+
+      <!-- 📖 Pasar página -->
+      <footer class="pie-pagina">
+        <button type="button" class="pasar" [disabled]="pagina() === 0" (click)="irA(pagina() - 1)"
+          [attr.aria-label]="'bestiary.card.previous' | translate">‹</button>
+        <span class="folio">{{ romanos[pagina()] }} / {{ romanos[paginas.length - 1] }}</span>
+        <button type="button" class="pasar" [disabled]="pagina() === paginas.length - 1" (click)="irA(pagina() + 1)"
+          [attr.aria-label]="'bestiary.card.next' | translate">›</button>
+      </footer>
+    } @else {
+      <div class="aviso"><span class="pluma" aria-hidden="true">🪶</span> {{ 'bestiary.loadingMonster' | translate }}</div>
+    }
+  </div>
+</article>
