@@ -149,10 +149,8 @@
     "filters": {
       "skills": "Habilidades",
       "skillsSearch": "Buscar habilidad...",
-      "setBonus": "Bonificación de conjunto",
-      "setBonusSearch": "Buscar bonificación de conjunto...",
-      "groupBonus": "Bonificación de grupo",
-      "groupBonusSearch": "Buscar bonificación de grupo...",
+      "setSkills": "Habilidades de set",
+      "setSkillsSearch": "Buscar habilidad de set...",
       "noSkills": "Ninguna coincide",
       "removeSkill": "Quitar",
       "matchMode": "Mostrar piezas con:",

@@ -149,10 +149,8 @@
     "filters": {
       "skills": "Skills",
       "skillsSearch": "Search skill...",
-      "setBonus": "Set bonus",
-      "setBonusSearch": "Search set bonus...",
-      "groupBonus": "Group bonus",
-      "groupBonusSearch": "Search group bonus...",
+      "setSkills": "Set skills",
+      "setSkillsSearch": "Search set skill...",
       "noSkills": "No matches",
       "removeSkill": "Remove",
       "matchMode": "Show pieces with:",

@@ -36,8 +36,9 @@ function pieza(id: number, name: string, overrides: Partial<ArmorPiece> = {}): A
 
 const PUNTO_DEBIL = 1;
 const AGUANTE = 2;
-const FULGOR = 50;     // Bonificación de conjunto
-const ALMA_AMO = 131;  // Bonificación de grupo
+// Habilidades de set: la API marca unas como "set" y otras como "group"
+const FULGOR = 50;     // kind "set"
+const ALMA_AMO = 131;  // kind "group"
 
 const CATALOGO: ArmorPiece[] = [
   pieza(1, 'Yelmo Rathalos', {
@@ -101,15 +102,17 @@ describe('DialogoArmadurasComponent', () => {
     expect(nombres()).toEqual(['Casco Ámbar']);
   });
 
-  it('separa las opciones de habilidades, bonificación de conjunto y de grupo, con cuántas piezas las tienen', async () => {
+  it('separa habilidades normales y de set ("set" y "group" juntas), con cuántas piezas las tienen', async () => {
     await crear();
     const opciones = component.opcionesHabilidad();
     expect(opciones.armor).toEqual([
       { id: AGUANTE, nombre: 'Aguante', total: 2 },
       { id: PUNTO_DEBIL, nombre: 'Punto débil', total: 2 } // La cota (otra ranura) no cuenta
     ]);
-    expect(opciones.set).toEqual([{ id: FULGOR, nombre: 'Fulgor de Rathalos', total: 1 }]);
-    expect(opciones.group).toEqual([{ id: ALMA_AMO, nombre: 'Alma del amo', total: 1 }]);
+    expect(opciones.set).toEqual([
+      { id: ALMA_AMO, nombre: 'Alma del amo', total: 1 },
+      { id: FULGOR, nombre: 'Fulgor de Rathalos', total: 1 }
+    ]);
   });
 
   it('con varias habilidades muestra las piezas con alguna o, si se pide, con todas', async () => {
@@ -121,14 +124,36 @@ describe('DialogoArmadurasComponent', () => {
     expect(nombres()).toEqual(['Yelmo Arkveld']);
   });
 
-  it('filtra por bonificación de conjunto y por bonificación de grupo', async () => {
+  it('filtra por habilidades de set, sean "set" o "group" en la API (cualquiera de las marcadas)', async () => {
     await crear();
     component.cambiarHabilidades('set', [FULGOR]);
     expect(nombres()).toEqual(['Yelmo Rathalos']);
 
-    component.cambiarHabilidades('set', []);
-    component.cambiarHabilidades('group', [ALMA_AMO]);
+    component.cambiarHabilidades('set', [ALMA_AMO]);
     expect(nombres()).toEqual(['Yelmo Arkveld']);
+
+    component.cambiarHabilidades('set', [FULGOR, ALMA_AMO]);
+    expect(nombres()).toEqual(jasmine.arrayWithExactContents(['Yelmo Rathalos', 'Yelmo Arkveld']));
+  });
+
+  it('una pieza con dos habilidades de set aparece al buscar cualquiera de las dos', async () => {
+    await crear();
+    const fulgurea = pieza(9, 'Yelmo Fulgúreo G. α', {
+      skills: [habilidad(60, 'Afán de Anjanath Fulgúreo', 1, 'set'), habilidad(27, 'Pulso de Guardián', 1, 'group')]
+    });
+    CATALOGO.push(fulgurea);
+    try {
+      component.catalogo.set([...CATALOGO]);
+      expect(component.opcionesHabilidad().set.map(o => o.nombre))
+        .toEqual(jasmine.arrayContaining(['Afán de Anjanath Fulgúreo', 'Pulso de Guardián']));
+
+      component.cambiarHabilidades('set', [27]);
+      expect(nombres()).toEqual(['Yelmo Fulgúreo G. α']);
+      component.cambiarHabilidades('set', [60]);
+      expect(nombres()).toEqual(['Yelmo Fulgúreo G. α']);
+    } finally {
+      CATALOGO.pop();
+    }
   });
 
   it('al buscar una habilidad ordena por los niveles que aporta cada pieza, y al quitarla vuelve al orden por defecto', async () => {
@@ -203,7 +228,7 @@ describe('DialogoArmadurasComponent', () => {
     expect(nombres()).toEqual(jasmine.arrayWithExactContents(['Casco Ámbar', 'Yelmo Arkveld']));
   });
 
-  it('resalta en cada fila las habilidades buscadas y marca las bonificaciones', async () => {
+  it('resalta en cada fila las habilidades buscadas y marca las de set', async () => {
     await crear();
     component.cambiarHabilidades('armor', [PUNTO_DEBIL]);
     fixture.detectChanges();

@@ -149,10 +149,8 @@
     "filters": {
       "skills": "スキル",
       "skillsSearch": "スキルを検索...",
-      "setBonus": "シリーズスキル",
-      "setBonusSearch": "シリーズスキルを検索...",
-      "groupBonus": "グループスキル",
-      "groupBonusSearch": "グループスキルを検索...",
+      "setSkills": "シリーズスキル",
+      "setSkillsSearch": "シリーズスキルを検索...",
       "noSkills": "該当なし",
       "removeSkill": "外す",
       "matchMode": "表示する防具:",
