@@ -51,6 +51,19 @@ $font-main: 'Montserrat', sans-serif;
       }
     }
 
+    // Botones de acceso a cada sección: en fila en escritorio y apilados en móvil
+    .hero-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+
+      @include movil {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
     .btn-cta {
       display: inline-block;
       background: transparent;
@@ -84,6 +97,7 @@ $font-main: 'Montserrat', sans-serif;
 
       @include movil {
         display: block;
+        width: 100%;
         max-width: 320px;
         margin: 0 auto;
         padding: 14px 20px;
