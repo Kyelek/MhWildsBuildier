@@ -156,21 +156,25 @@ describe('DialogoArmadurasComponent', () => {
     }
   });
 
-  it('al buscar una habilidad ordena por los niveles que aporta cada pieza, y al quitarla vuelve al orden por defecto', async () => {
+  it('con el orden por defecto, al buscar una habilidad suben las piezas que más niveles aportan', async () => {
     await crear();
     component.cambiarHabilidades('armor', [PUNTO_DEBIL]);
-    expect(component.filtros().orden).toEqual('match');
+    expect(component.filtros().orden).toEqual('default');
     expect(nombres()).toEqual(['Yelmo Arkveld', 'Yelmo Rathalos']); // Nv 2 antes que Nv 1
 
+    // Sin habilidades buscadas vuelve el orden del juego
     component.cambiarHabilidades('armor', []);
-    expect(component.filtros().orden).toEqual('default');
+    expect(nombres()).toEqual(['Yelmo Rathalos', 'Casco Ámbar', 'Yelmo Arkveld']);
   });
 
-  it('no cambia un orden elegido a mano al buscar una habilidad', async () => {
+  it('no hay criterio "Habilidades buscadas" en Ordenar por, y un orden elegido a mano manda', async () => {
     await crear();
+    expect(component.criteriosOrden).not.toContain('match' as never);
+
     component.elegirOrden('defense');
+    component.alternarSentido(); // De menor a mayor
     component.cambiarHabilidades('armor', [PUNTO_DEBIL]);
-    expect(component.filtros().orden).toEqual('defense');
+    expect(nombres()).toEqual(['Yelmo Rathalos', 'Yelmo Arkveld']);
   });
 
   it('filtra por hueco mínimo (ese nivel o superior), rango y rareza', async () => {
@@ -215,7 +219,6 @@ describe('DialogoArmadurasComponent', () => {
     component.elegirHuecoMinimo(1);
 
     expect(filtros().habilidades).toEqual([PUNTO_DEBIL]);
-    // El orden automático por habilidades buscadas no cuenta como filtro
     expect(component.filtrosActivos()).toEqual(3);
 
     component.borrarFiltros();

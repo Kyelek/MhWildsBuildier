@@ -125,26 +125,23 @@ export class DialogoArmadurasComponent {
     return { armor: ordenar(opciones.armor), set: ordenar(opciones.set) };
   });
 
-  // Todas las habilidades buscadas (de las dos secciones): se resaltan en cada fila y son
-  // las que puntúan al ordenar por "Habilidades buscadas"
+  // Todas las habilidades buscadas (de las dos secciones): se resaltan en cada fila y, con el
+  // orden por defecto, suben arriba las piezas que más niveles aportan de ellas
   private readonly idsBuscados = computed(() => {
     const { habilidades, habilidadesSet } = this.filtros();
     return new Set([...habilidades, ...habilidadesSet]);
   });
 
-  readonly hayHabilidadesBuscadas = computed(() => this.idsBuscados().size > 0);
-
   readonly filtrosActivos = computed(() => {
     const f = this.filtros();
-    // El orden por "Habilidades buscadas" se pone solo al buscar una habilidad (ver
-    // actualizarFiltros), así que no cuenta como un filtro más
-    const ordenCuenta = f.orden !== 'default' && f.orden !== 'match';
     return f.habilidades.length + f.habilidadesSet.length + f.rangos.length +
-      f.rarezas.length + (f.huecoMinimo === null ? 0 : 1) + (ordenCuenta ? 1 : 0);
+      f.rarezas.length + (f.huecoMinimo === null ? 0 : 1) + (f.orden === 'default' ? 0 : 1);
   });
 
   // Piezas de la ranura que pasan el buscador (sin distinguir mayúsculas ni tildes) y los
-  // filtros del panel, ordenadas según "Ordenar por"
+  // filtros del panel, ordenadas según "Ordenar por". Con el orden por defecto y alguna
+  // habilidad buscada, primero van las piezas que más niveles aportan de las buscadas
+  // (no hace falta un criterio aparte para eso: si buscas habilidades, es lo que quieres ver)
   readonly piezasFiltradas = computed<ArmorPiece[]>(() => {
     const texto = normalizar(this.textoBusqueda().trim());
     const f = this.filtros();
@@ -162,13 +159,15 @@ export class DialogoArmadurasComponent {
         (f.rarezas.length === 0 || f.rarezas.includes(pieza.rarity));
     });
 
-    if (f.orden === 'default') return filtradas;
-
     // sort() es estable: a igualdad de valor se conserva el orden del juego
+    if (f.orden === 'default') {
+      const buscados = this.idsBuscados();
+      if (buscados.size === 0) return filtradas;
+      return [...filtradas].sort((a, b) => nivelesBuscados(b, buscados) - nivelesBuscados(a, buscados));
+    }
+
     const signo = f.descendente ? -1 : 1;
-    const buscados = this.idsBuscados();
-    return [...filtradas].sort((a, b) =>
-      signo * (valorOrden(a, f.orden, buscados) - valorOrden(b, f.orden, buscados)));
+    return [...filtradas].sort((a, b) => signo * (valorOrden(a, f.orden) - valorOrden(b, f.orden)));
   });
 
   readonly filas = computed<FilaArmadura[]>(() => {
@@ -259,24 +258,9 @@ export class DialogoArmadurasComponent {
     this.actualizarFiltros(() => FILTROS_ARMADURA_VACIOS);
   }
 
-  // Cada cambio de filtros vuelve la lista al principio, como al escribir en el buscador.
-  // Además, al buscar la primera habilidad (con el orden por defecto) la lista pasa a
-  // ordenarse por "Habilidades buscadas", y al quitar la última vuelve al orden por defecto:
-  // es lo que se quiere casi siempre y ahorra ir a cambiarlo a mano.
+  // Cada cambio de filtros vuelve la lista al principio, como al escribir en el buscador
   private actualizarFiltros(cambio: (filtros: FiltrosArmadura) => FiltrosArmadura): void {
-    this.filtros.update(anteriores => {
-      const nuevos = cambio(anteriores);
-      const antes = contarHabilidades(anteriores);
-      const ahora = contarHabilidades(nuevos);
-
-      if (antes === 0 && ahora > 0 && nuevos.orden === 'default') {
-        return { ...nuevos, orden: 'match', descendente: true };
-      }
-      if (ahora === 0 && nuevos.orden === 'match') {
-        return { ...nuevos, orden: 'default', descendente: true };
-      }
-      return nuevos;
-    });
+    this.filtros.update(cambio);
     this.subirLista();
   }
 
@@ -311,15 +295,13 @@ function tipoHabilidad(kind: string): TipoHabilidadArmadura {
   return kind === 'set' || kind === 'group' ? 'set' : 'armor';
 }
 
-function contarHabilidades(filtros: FiltrosArmadura): number {
-  return filtros.habilidades.length + filtros.habilidadesSet.length;
+// Niveles que aporta la pieza de las habilidades buscadas
+function nivelesBuscados(pieza: ArmorPiece, buscados: ReadonlySet<number>): number {
+  return pieza.skills.reduce((total, { skill, level }) => total + (buscados.has(skill.id) ? level : 0), 0);
 }
 
-function valorOrden(pieza: ArmorPiece, orden: CriterioOrdenArmadura, buscados: ReadonlySet<number>): number {
+function valorOrden(pieza: ArmorPiece, orden: CriterioOrdenArmadura): number {
   switch (orden) {
-    // Niveles que aporta la pieza de las habilidades buscadas
-    case 'match':
-      return pieza.skills.reduce((total, { skill, level }) => total + (buscados.has(skill.id) ? level : 0), 0);
     case 'defense': return pieza.defense.max;
     case 'rarity': return pieza.rarity;
     // Suma de niveles de hueco: [3, 1] (4) vale más que [2] (2)

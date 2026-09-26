@@ -166,7 +166,6 @@
       "ascending": "低い順",
       "sort": {
         "default": "デフォルト",
-        "match": "検索スキル",
         "defense": "防御力",
         "rarity": "レア度",
         "slots": "スロット",
