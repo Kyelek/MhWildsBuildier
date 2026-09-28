@@ -44,7 +44,7 @@ export class SelectorArmaComponent {
   });
 
   abrir(): void {
-    const datos: DatosDialogoArmas = { seleccionada: this.valor(), permitirGogma: true };
+    const datos: DatosDialogoArmas = { seleccionada: this.valor() };
 
     this.dialog
       .open<DialogoArmasComponent, DatosDialogoArmas, ArmaEquipada>(DialogoArmasComponent, { ...CONFIG_DIALOGO_ARMAS, data: datos })

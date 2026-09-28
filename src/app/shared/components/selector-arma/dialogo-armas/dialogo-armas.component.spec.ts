@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
@@ -24,15 +24,12 @@ describe('DialogoArmasComponent', () => {
   let fixture: ComponentFixture<DialogoArmasComponent>;
   let component: DialogoArmasComponent;
   let dialogRef: jasmine.SpyObj<MatDialogRef<DialogoArmasComponent, ArmaEquipada>>;
-  let dialog: jasmine.SpyObj<MatDialog>;
   let wildsApi: { locale: WritableSignal<ApiLocale>; getWeaponsPorTipo: jasmine.Spy; getArmor: jasmine.Spy };
 
-  function crear(seleccionada: ArmaEquipada | null = null, permitirGogma = true): void {
+  function crear(seleccionada: ArmaEquipada | null = null): void {
     dialogRef = jasmine.createSpyObj('MatDialogRef', ['close', 'afterOpened']);
     dialogRef.afterOpened.and.returnValue(of(undefined));
-    // Popup de armas que se abre encima para elegir el arma base del arma Gogma
-    dialog = jasmine.createSpyObj('MatDialog', ['open']);
-    const datos: DatosDialogoArmas = { seleccionada, permitirGogma };
+    const datos: DatosDialogoArmas = { seleccionada };
     // La API devuelve solo las armas del tipo pedido
     wildsApi = {
       locale: signal<ApiLocale>('es'),
@@ -48,7 +45,6 @@ describe('DialogoArmasComponent', () => {
         provideTranslateService(),
         { provide: MAT_DIALOG_DATA, useValue: datos },
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: MatDialog, useValue: dialog },
         { provide: WildsApiService, useValue: wildsApi }
       ]
     });
@@ -70,7 +66,7 @@ describe('DialogoArmasComponent', () => {
   it('"Arma Gogma" muestra la imagen de la interrogación y lleva a su formulario; la flecha vuelve a los tipos', () => {
     crear();
     const tarjeta: HTMLElement = fixture.nativeElement.querySelector('.tarjeta-gogma');
-    expect(tarjeta.querySelector('img')?.getAttribute('src')).toEqual('images/recursos/armagogma.jpg');
+    expect(tarjeta.querySelector('img')?.getAttribute('src')).toEqual('images/recursos/armagogmapng.png');
 
     tarjeta.click();
     fixture.detectChanges();
@@ -83,56 +79,62 @@ describe('DialogoArmasComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(15);
   });
 
-  it('sin la Gogma permitida (al elegir el arma base) solo están los 14 tipos, para no entrar en bucle', () => {
-    crear(null, false);
-    expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(14);
-    expect(fixture.nativeElement.querySelector('.tarjeta-gogma')).toBeNull();
-  });
-
   describe('arma Gogma', () => {
     const CONFIGURACION: ConfiguracionGogma = {
+      tipo: 'hammer',
       especial: 'fire',
       habilidadesSet: [{ id: 131, gameId: 131, name: 'Alma del amo', kind: 'group' }, null]
     };
 
-    it('elige el arma base en otro popup de armas sin la Gogma, y solo cambia la imagen', () => {
+    it('la imagen del formulario muestra la rejilla de tipos (sin "Arma Gogma"): el tipo elegido es el del arma, sin buscador', () => {
       crear();
       component.verGogma();
-      dialog.open.and.returnValue({ afterClosed: () => of({ arma: CATALOGO[3], gogma: null }) } as ReturnType<MatDialog['open']>);
+      fixture.detectChanges();
 
-      component.elegirBaseGogma();
-      expect(dialog.open.calls.mostRecent().args[1]?.data).toEqual({ seleccionada: null, permitirGogma: false });
-      expect(component.baseGogma()).toEqual(CATALOGO[3]);
+      component.cambiarTipoGogma();
+      fixture.detectChanges();
+      // Rejilla sin la tarjeta Gogma, y el formulario sigue montado (oculto) para no perder lo rellenado
+      expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(14);
+      expect(fixture.nativeElement.querySelector('.tarjeta-gogma')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.pantalla-gogma').hidden).toBeTrue();
+
+      fixture.nativeElement.querySelectorAll('.tarjeta-tipo')[4].click(); // Martillo
+      fixture.detectChanges();
+      expect(component.tipoGogma()).toEqual('hammer');
+      expect(component.eligiendoTipoGogma()).toBeFalse();
+      expect(component.tipoElegido()).toBeNull();
+      expect(wildsApi.getWeaponsPorTipo).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelector('.pantalla-gogma').hidden).toBeFalse();
       expect(dialogRef.close).not.toHaveBeenCalled();
-
-      // Al volver a elegirla, el popup de encima se abre con la base actual
-      component.elegirBaseGogma();
-      expect(dialog.open.calls.mostRecent().args[1]?.data)
-        .toEqual({ seleccionada: { arma: CATALOGO[3], gogma: null }, permitirGogma: false });
     });
 
-    it('si se cierra el popup de encima sin elegir nada, la base no cambia', () => {
+    it('desde la rejilla del arma Gogma, la flecha vuelve al formulario sin cambiar el tipo', () => {
       crear();
-      component.baseGogma.set(CATALOGO[0]);
-      dialog.open.and.returnValue({ afterClosed: () => of(undefined) } as ReturnType<MatDialog['open']>);
-      component.elegirBaseGogma();
-      expect(component.baseGogma()).toEqual(CATALOGO[0]);
+      component.verGogma();
+      component.tipoGogma.set('bow');
+      component.cambiarTipoGogma();
+      component.volver();
+      expect(component.eligiendoTipoGogma()).toBeFalse();
+      expect(component.viendoGogma()).toBeTrue();
+      expect(component.tipoGogma()).toEqual('bow');
+
+      // Desde el formulario, la flecha sí vuelve a la rejilla normal
+      component.volver();
+      expect(component.viendoGogma()).toBeFalse();
     });
 
-    it('"Aceptar" cierra devolviendo el arma base con la configuración Gogma', () => {
+    it('"Aceptar" cierra devolviendo el arma Gogma', () => {
       crear();
-      component.baseGogma.set(CATALOGO[2]);
       component.aceptarGogma(CONFIGURACION);
-      expect(dialogRef.close).toHaveBeenCalledWith({ arma: CATALOGO[2], gogma: CONFIGURACION });
+      expect(dialogRef.close).toHaveBeenCalledWith({ arma: null, gogma: CONFIGURACION });
     });
 
     it('con un arma Gogma equipada abre directamente en su formulario, con sus datos', () => {
-      crear({ arma: CATALOGO[1], gogma: CONFIGURACION });
+      crear({ arma: null, gogma: CONFIGURACION });
       expect(component.viendoGogma()).toBeTrue();
       expect(component.tipoElegido()).toBeNull();
-      expect(component.baseGogma()).toEqual(CATALOGO[1]);
+      expect(component.tipoGogma()).toEqual('hammer');
       expect(component.gogmaInicial).toEqual(CONFIGURACION);
-      // No se resalta como arma normal en la lista de su tipo
       expect(component.seleccionada).toBeNull();
     });
   });

@@ -115,17 +115,20 @@ export class SkillForgeComponent {
       this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
     }
 
-    // El arma (o la base del arma Gogma) y las habilidades de set del arma Gogma
+    // El arma normal, o las habilidades de set del arma Gogma. Sin cambios se conserva el
+    // mismo objeto, para no redibujar nada sin motivo.
     const armasDelTipo = this.armasDelTipoSeleccionado.value();
     const catalogoHabilidades = this.skillsResource.value();
     this.armaSeleccionada.update(actual => {
-      if (!actual) return null;
-      const arma = armasDelTipo ? this.buscarPorId(actual.arma, armasDelTipo) ?? actual.arma : actual.arma;
-      const gogma = actual.gogma && catalogoHabilidades
-        ? this.traducirGogma(actual.gogma, catalogoHabilidades)
-        : actual.gogma;
-      // Sin cambios se devuelve el mismo objeto, para no redibujar nada sin motivo
-      return arma === actual.arma && gogma === actual.gogma ? actual : { arma, gogma };
+      if (actual?.arma && armasDelTipo) {
+        const arma = this.buscarPorId(actual.arma, armasDelTipo) ?? actual.arma;
+        return arma === actual.arma ? actual : { arma, gogma: null };
+      }
+      if (actual?.gogma && catalogoHabilidades) {
+        const gogma = this.traducirGogma(actual.gogma, catalogoHabilidades);
+        return gogma === actual.gogma ? actual : { arma: null, gogma };
+      }
+      return actual;
     });
   });
 
@@ -135,7 +138,7 @@ export class SkillForgeComponent {
   // dos (al elegir otra arma del mismo tipo no hace falta volver a pedir nada).
   private readonly armasDelTipoSeleccionado = rxResource({
     request: () => {
-      const tipo = this.armaSeleccionada()?.arma.kind;
+      const tipo = this.armaSeleccionada()?.arma?.kind;
       return tipo ? `${tipo}|${this.wildsApi.locale()}` : undefined;
     },
     loader: ({ request }) => {
@@ -185,14 +188,15 @@ export class SkillForgeComponent {
   private readonly fuentesHabilidades = computed<FuenteHabilidades[]>(() => {
     const fuentes: FuenteHabilidades[] = [];
 
-    const equipada = this.armaSeleccionada();
-    const habilidadesArma = habilidadesSetDeGogma(equipada?.gogma ?? null);
-    if (equipada && habilidadesArma.length > 0) {
+    const gogma = this.armaSeleccionada()?.gogma ?? null;
+    const habilidadesArma = habilidadesSetDeGogma(gogma);
+    if (gogma && habilidadesArma.length > 0) {
+      const nombreTipo = this.translate.instant(`weaponTypes.${gogma.tipo}`) as string;
       fuentes.push({
         aporte: {
           ranura: 'weapon',
-          nombrePieza: this.translate.instant('weaponPicker.gogmaName', { name: equipada.arma.name }) as string,
-          icono: iconoTipoArma(equipada.arma.kind)
+          nombrePieza: this.translate.instant('weaponPicker.gogmaName', { name: nombreTipo }) as string,
+          icono: iconoTipoArma(gogma.tipo)
         },
         habilidades: habilidadesArma.map(skill => ({ skill, level: 1, description: '' }))
       });
@@ -380,8 +384,8 @@ export class SkillForgeComponent {
   });
 
   readonly ataqueTotal = computed(() => {
-    // Arma Gogma: de momento, las estadísticas de su arma base
-    return this.armaSeleccionada()?.arma.damage?.raw ?? 0;
+    // El arma Gogma aún no tiene estadísticas (solo tipo, elemento y habilidades)
+    return this.armaSeleccionada()?.arma?.damage?.raw ?? 0;
   });
 
   readonly afinidadTotal = computed(() => {

@@ -1,6 +1,6 @@
 import { Component, Injector, afterNextRender, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Weapon } from '../../../../core/models/wilds.models';
@@ -31,8 +31,7 @@ import { alternar, contar, normalizar } from '../../../utils/listas';
 // qué filas pintar. Debe coincidir con la altura de ".fila-arma" en el SCSS.
 export const ALTO_FILA_ARMA = 64;
 
-// Tamaño y aspecto del popup (también el del selector de armas que se abre encima desde
-// el formulario Gogma para elegir el arma base)
+// Tamaño y aspecto del popup (ver selector-arma, que es quien lo abre)
 export const CONFIG_DIALOGO_ARMAS: MatDialogConfig = {
   panelClass: 'dialogo-armas-panel',
   width: '760px',
@@ -43,12 +42,13 @@ export const CONFIG_DIALOGO_ARMAS: MatDialogConfig = {
 };
 
 // 🗡️ Popup de selección de armas, en dos pantallas:
-//   1. Rejilla con la imagen de cada tipo de arma, más "Arma Gogma" (salvo cuando el popup
-//      se abre desde el propio formulario Gogma, para no entrar en bucle).
+//   1. Rejilla con la imagen de cada tipo de arma, más "Arma Gogma".
 //   2. Buscador + lista (con scroll virtual) de las armas del tipo elegido. Las armas se
 //      piden a la API al elegir el tipo, solo las de ese tipo (ver getWeaponsPorTipo).
-// "Arma Gogma" lleva a su formulario (ver formulario-gogma): el arma base se elige en otro
-// popup de armas abierto encima, y "Aceptar" cierra este devolviendo el arma Gogma.
+// "Arma Gogma" lleva a su formulario (ver formulario-gogma). Al pulsar su imagen se vuelve a
+// mostrar la rejilla de tipos (sin "Arma Gogma", para no entrar en bucle): el tipo elegido
+// pasa a ser el del arma Gogma ("Martillo Gogma") y se regresa al formulario. "Aceptar"
+// cierra el popup devolviendo el arma Gogma.
 // Al elegir un arma el popup se cierra devolviéndola; si se cierra de cualquier otra
 // forma (X, Escape, click fuera) devuelve `undefined` y la selección no cambia.
 @Component({
@@ -61,7 +61,6 @@ export const CONFIG_DIALOGO_ARMAS: MatDialogConfig = {
 export class DialogoArmasComponent {
   private readonly datos = inject<DatosDialogoArmas>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject<MatDialogRef<DialogoArmasComponent, ArmaEquipada>>(MatDialogRef);
-  private readonly dialog = inject(MatDialog);
   private readonly injector = inject(Injector);
   private readonly wildsApi = inject(WildsApiService);
 
@@ -71,23 +70,24 @@ export class DialogoArmasComponent {
   readonly opcionesEspecial = OPCIONES_ESPECIAL;
   readonly criteriosOrden = CRITERIOS_ORDEN;
   readonly rarezas = RAREZAS;
-  readonly permitirGogma = this.datos.permitirGogma;
   readonly imagenGogma = IMAGEN_GOGMA;
 
   // Arma normal ya equipada (se resalta en la lista). Si lo equipado es un arma Gogma, el
   // popup se abre en su formulario, con sus datos para editarlos.
-  private readonly equipada = this.datos.seleccionada;
-  readonly seleccionada: Weapon | null = this.equipada?.gogma ? null : this.equipada?.arma ?? null;
-  readonly gogmaInicial: ConfiguracionGogma | null = this.equipada?.gogma ?? null;
+  readonly seleccionada: Weapon | null = this.datos.seleccionada?.arma ?? null;
+  readonly gogmaInicial: ConfiguracionGogma | null = this.datos.seleccionada?.gogma ?? null;
 
   // null = pantalla 1 (tipos). Si ya había un arma elegida, se abre directamente en la
   // lista de su tipo (con el botón de volver disponible para cambiar de tipo).
   readonly tipoElegido = signal<string | null>(this.seleccionada?.kind ?? null);
   readonly textoBusqueda = signal('');
 
-  // ⚒️ Pantalla "Arma Gogma" (formulario) y el arma base elegida en ella
+  // ⚒️ Pantalla "Arma Gogma" (formulario), el tipo de arma elegido en ella y si se está
+  // eligiendo ese tipo en la rejilla (el formulario sigue montado, oculto, para no perder
+  // lo que ya se haya rellenado)
   readonly viendoGogma = signal(this.gogmaInicial !== null);
-  readonly baseGogma = signal<Weapon | null>(this.gogmaInicial ? this.equipada!.arma : null);
+  readonly tipoGogma = signal<string | null>(this.gogmaInicial?.tipo ?? null);
+  readonly eligiendoTipoGogma = signal(false);
 
   private readonly viewport = viewChild(CdkVirtualScrollViewport);
   private readonly buscador = viewChild(BuscadorFiltrosComponent);
@@ -175,31 +175,38 @@ export class DialogoArmasComponent {
     this.viendoGogma.set(true);
   }
 
-  // Abre encima otro popup de armas (sin "Arma Gogma") para elegir el arma base: lo único
-  // que hace el arma elegida es sustituir a la actual en el formulario
-  elegirBaseGogma(): void {
-    const base = this.baseGogma();
-    const datos: DatosDialogoArmas = { seleccionada: base ? { arma: base, gogma: null } : null, permitirGogma: false };
-
-    this.dialog
-      .open<DialogoArmasComponent, DatosDialogoArmas, ArmaEquipada>(DialogoArmasComponent, { ...CONFIG_DIALOGO_ARMAS, data: datos })
-      .afterClosed()
-      .subscribe(elegida => {
-        if (elegida) this.baseGogma.set(elegida.arma);
-      });
+  // Muestra la rejilla de tipos para elegir (o cambiar) el tipo del arma Gogma
+  cambiarTipoGogma(): void {
+    this.eligiendoTipoGogma.set(true);
   }
 
   aceptarGogma(gogma: ConfiguracionGogma): void {
-    const base = this.baseGogma();
-    if (base) this.dialogRef.close({ arma: base, gogma });
+    this.dialogRef.close({ arma: null, gogma });
   }
 
   elegirTipo(tipo: string): void {
+    // En la rejilla del arma Gogma, el tipo elegido es directamente el suyo
+    if (this.eligiendoTipoGogma()) {
+      this.tipoGogma.set(tipo);
+      this.eligiendoTipoGogma.set(false);
+      return;
+    }
+
     this.textoBusqueda.set('');
     this.tipoElegido.set(tipo);
     this.desplazamientoPendiente = tipo === this.seleccionada?.kind;
     // El buscador aún no existe hasta el siguiente render
     afterNextRender(() => this.enfocarBuscador(), { injector: this.injector });
+  }
+
+  // Flecha de la cabecera: desde la rejilla del arma Gogma vuelve a su formulario; desde
+  // cualquier otra pantalla, a la rejilla de tipos
+  volver(): void {
+    if (this.eligiendoTipoGogma()) {
+      this.eligiendoTipoGogma.set(false);
+      return;
+    }
+    this.volverATipos();
   }
 
   volverATipos(): void {

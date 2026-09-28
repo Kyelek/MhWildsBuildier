@@ -1,10 +1,9 @@
 import { Component, computed, inject, input, linkedSignal, model, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { SkillInfo, Weapon } from '../../../../core/models/wilds.models';
+import { SkillInfo } from '../../../../core/models/wilds.models';
 import { WildsApiService } from '../../../../core/services/wilds-api.service';
 import {
-  CONFIGURACION_GOGMA_VACIA,
   ClaveEspecial,
   ConfiguracionGogma,
   HUECOS_GOGMA,
@@ -23,12 +22,13 @@ export interface OpcionElementoGogma {
 }
 
 // ⚒️ Formulario del arma Gogma (pantalla "Arma Gogma" del popup de armas):
-//   - A la izquierda, la imagen del arma base. Al pulsarla se avisa a quien lo contiene
-//     (ver dialogo-armas) para abrir el selector de armas normal y elegirla.
+//   - A la izquierda, la imagen del tipo de arma. Al pulsarla se avisa a quien lo contiene
+//     (ver dialogo-armas) para que muestre la rejilla de tipos y elegirlo. De momento el arma
+//     Gogma no se basa en ningún arma concreta: solo en su tipo ("Martillo Gogma").
 //   - A la derecha, el elemento o estado, dos habilidades de set distintas entre sí (las
 //     mismas que el filtro de habilidades de set de las armaduras) y los tres huecos de
 //     nivel 3 para gemas (de momento solo se muestran).
-// "Aceptar" solo se activa con un arma base elegida; las habilidades pueden quedar vacías.
+// "Aceptar" solo se activa con un tipo elegido; las habilidades pueden quedar vacías.
 @Component({
   selector: 'app-formulario-gogma',
   standalone: true,
@@ -40,12 +40,12 @@ export class FormularioGogmaComponent {
   private readonly wildsApi = inject(WildsApiService);
   private readonly translate = inject(TranslateService);
 
-  // Arma base: la guarda quien contiene el formulario, que es quien abre el selector
-  readonly base = model<Weapon | null>(null);
+  // Tipo de arma: lo guarda quien contiene el formulario, que es quien muestra la rejilla
+  readonly tipo = model<string | null>(null);
   // Configuración con la que se abre (al editar un arma Gogma ya equipada)
   readonly inicial = input<ConfiguracionGogma | null>(null);
 
-  readonly cambiarBase = output<void>();
+  readonly cambiarTipo = output<void>();
   readonly aceptar = output<ConfiguracionGogma>();
 
   readonly imagenGogma = IMAGEN_GOGMA;
@@ -65,7 +65,7 @@ export class FormularioGogmaComponent {
   }));
 
   readonly elemento = linkedSignal<OpcionElementoGogma | null>(() => {
-    const clave = (this.inicial() ?? CONFIGURACION_GOGMA_VACIA).especial;
+    const clave = this.inicial()?.especial ?? 'none';
     return this.opcionesElemento.find(opcion => opcion.clave === clave) ?? this.opcionesElemento[0];
   });
   readonly habilidad1 = linkedSignal<SkillInfo | null>(() => this.inicial()?.habilidadesSet[0] ?? null);
@@ -94,8 +94,10 @@ export class FormularioGogmaComponent {
   readonly opcionesHabilidad2 = computed(() => this.sinLaElegida(this.habilidad1()));
 
   confirmar(): void {
-    if (!this.base()) return;
+    const tipo = this.tipo();
+    if (!tipo) return;
     this.aceptar.emit({
+      tipo,
       especial: this.elemento()?.clave ?? 'none',
       habilidadesSet: [this.habilidad1(), this.habilidad2()]
     });

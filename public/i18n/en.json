@@ -34,8 +34,8 @@
     "gogma": "Gogma Weapon",
     "gogmaName": "{{name}} Gogma",
     "gogmaForm": {
-      "chooseBase": "Choose the base weapon",
-      "changeBase": "Change base weapon",
+      "chooseBase": "Choose the weapon type",
+      "changeBase": "Change weapon type",
       "setSkill": "Set skill {{number}}",
       "skillSearch": "Search set skill...",
       "noSkill": "— No skill —",

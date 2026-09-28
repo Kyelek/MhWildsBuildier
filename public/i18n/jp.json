@@ -34,8 +34,8 @@
     "gogma": "ゴグマ武器",
     "gogmaName": "{{name}} ゴグマ",
     "gogmaForm": {
-      "chooseBase": "ベース武器を選択",
-      "changeBase": "ベース武器を変更",
+      "chooseBase": "武器種を選択",
+      "changeBase": "武器種を変更",
       "setSkill": "シリーズスキル {{number}}",
       "skillSearch": "シリーズスキルを検索...",
       "noSkill": "— スキルなし —",
