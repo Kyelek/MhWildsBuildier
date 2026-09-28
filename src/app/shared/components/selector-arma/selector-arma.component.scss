@@ -4,26 +4,17 @@
 $color-gold: #c5a059;
 
 // ==========================================
-// ⚒️ Arma Gogma: nombre y etiquetas debajo (el campo crece para que quepan)
+// ⚒️ Arma Gogma: sin nombre, solo etiquetas (si no caben en una línea, el campo crece)
 // ==========================================
 .campo-boton:has(.campo-gogma) {
   height: auto;
   min-height: 55px;
-  padding-top: 6px;
+  padding-top: 8px;
   padding-bottom: 8px;
 }
 
 .campo-gogma {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   white-space: normal;
-}
-
-.gogma-nombre {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .gogma-etiquetas {
