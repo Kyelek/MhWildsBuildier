@@ -1,4 +1,4 @@
-import { ElementoArma, EstadoArma, Weapon } from '../../core/models/wilds.models';
+import { ElementoArma, EstadoArma, SkillInfo, Weapon } from '../../core/models/wilds.models';
 
 // 🗡️ Tipos de arma (campo "kind" de la API) en el mismo orden en que los presenta el juego.
 // Cada uno tiene su icono en public/images/arms/<tipo>.png y su nombre traducido en
@@ -49,10 +49,45 @@ export interface EspecialArma {
   oculto: boolean;     // Elemento oculto: se muestra entre paréntesis, como en el juego
 }
 
+// ==========================================
+// ⚒️ ARMA GOGMA
+// ==========================================
+
+// Imagen de la tarjeta "Arma Gogma" y del hueco del formulario mientras no hay arma elegida
+export const IMAGEN_GOGMA = 'images/recursos/armagogma.jpg';
+
+// Las armas Gogma tienen siempre tres huecos de nivel 3 para gemas
+export const HUECOS_GOGMA: readonly number[] = [3, 3, 3];
+
+// Lo que el cazador rellena en el formulario Gogma además del arma base
+export interface ConfiguracionGogma {
+  especial: ClaveEspecial; // Elemento o estado elegido ('none' = sin elemento)
+  // Dos habilidades de set (siempre distintas entre sí); cualquiera puede quedar vacía
+  habilidadesSet: [SkillInfo | null, SkillInfo | null];
+}
+
+// Arma equipada: un arma normal (gogma = null) o un arma Gogma construida sobre un arma
+// base, de la que toma el tipo y, de momento, las estadísticas
+export interface ArmaEquipada {
+  arma: Weapon;
+  gogma: ConfiguracionGogma | null;
+}
+
+export const CONFIGURACION_GOGMA_VACIA: ConfiguracionGogma = { especial: 'none', habilidadesSet: [null, null] };
+
+// Habilidades de set elegidas en un arma Gogma (sin los huecos vacíos)
+export function habilidadesSetDeGogma(gogma: ConfiguracionGogma | null): SkillInfo[] {
+  const habilidades: (SkillInfo | null)[] = gogma?.habilidadesSet ?? [];
+  return habilidades.filter((habilidad): habilidad is SkillInfo => habilidad !== null);
+}
+
 // Datos que recibe el popup de selección de armas al abrirse (las armas las pide él mismo
 // a la API, solo las del tipo que se elija)
 export interface DatosDialogoArmas {
-  seleccionada: Weapon | null;
+  seleccionada: ArmaEquipada | null;
+  // false al elegir el arma base desde el propio formulario Gogma: sin la tarjeta
+  // "Arma Gogma", para no poder entrar en bucle
+  permitirGogma: boolean;
 }
 
 // ==========================================

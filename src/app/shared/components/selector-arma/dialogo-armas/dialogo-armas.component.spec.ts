@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { DialogoArmasComponent } from './dialogo-armas.component';
 import { Weapon } from '../../../../core/models/wilds.models';
-import { DatosDialogoArmas } from '../../../models/tipos-arma.models';
+import { ArmaEquipada, ConfiguracionGogma, DatosDialogoArmas } from '../../../models/tipos-arma.models';
 import { ApiLocale, WildsApiService } from '../../../../core/services/wilds-api.service';
 
 function arma(id: number, name: string, kind: string): Weapon {
@@ -23,18 +23,23 @@ const CATALOGO: Weapon[] = [
 describe('DialogoArmasComponent', () => {
   let fixture: ComponentFixture<DialogoArmasComponent>;
   let component: DialogoArmasComponent;
-  let dialogRef: jasmine.SpyObj<MatDialogRef<DialogoArmasComponent, Weapon>>;
-  let wildsApi: { locale: WritableSignal<ApiLocale>; getWeaponsPorTipo: jasmine.Spy };
+  let dialogRef: jasmine.SpyObj<MatDialogRef<DialogoArmasComponent, ArmaEquipada>>;
+  let dialog: jasmine.SpyObj<MatDialog>;
+  let wildsApi: { locale: WritableSignal<ApiLocale>; getWeaponsPorTipo: jasmine.Spy; getArmor: jasmine.Spy };
 
-  function crear(seleccionada: Weapon | null = null): void {
+  function crear(seleccionada: ArmaEquipada | null = null, permitirGogma = true): void {
     dialogRef = jasmine.createSpyObj('MatDialogRef', ['close', 'afterOpened']);
     dialogRef.afterOpened.and.returnValue(of(undefined));
-    const datos: DatosDialogoArmas = { seleccionada };
+    // Popup de armas que se abre encima para elegir el arma base del arma Gogma
+    dialog = jasmine.createSpyObj('MatDialog', ['open']);
+    const datos: DatosDialogoArmas = { seleccionada, permitirGogma };
     // La API devuelve solo las armas del tipo pedido
     wildsApi = {
       locale: signal<ApiLocale>('es'),
       getWeaponsPorTipo: jasmine.createSpy('getWeaponsPorTipo')
-        .and.callFake((tipo: string) => of(CATALOGO.filter(arma => arma.kind === tipo)))
+        .and.callFake((tipo: string) => of(CATALOGO.filter(arma => arma.kind === tipo))),
+      // Catálogo de armaduras del que el formulario Gogma saca las habilidades de set
+      getArmor: jasmine.createSpy('getArmor').and.returnValue(of([]))
     };
 
     TestBed.configureTestingModule({
@@ -43,6 +48,7 @@ describe('DialogoArmasComponent', () => {
         provideTranslateService(),
         { provide: MAT_DIALOG_DATA, useValue: datos },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: MatDialog, useValue: dialog },
         { provide: WildsApiService, useValue: wildsApi }
       ]
     });
@@ -61,17 +67,74 @@ describe('DialogoArmasComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.btn-cabecera').length).toEqual(1);
   });
 
-  it('"Arma Gogma" lleva al aviso de en desarrollo y la flecha vuelve a los tipos', () => {
+  it('"Arma Gogma" muestra la imagen de la interrogación y lleva a su formulario; la flecha vuelve a los tipos', () => {
     crear();
-    fixture.nativeElement.querySelector('.tarjeta-gogma').click();
+    const tarjeta: HTMLElement = fixture.nativeElement.querySelector('.tarjeta-gogma');
+    expect(tarjeta.querySelector('img')?.getAttribute('src')).toEqual('images/recursos/armagogma.jpg');
+
+    tarjeta.click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('app-en-desarrollo')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-formulario-gogma')).not.toBeNull();
     expect(dialogRef.close).not.toHaveBeenCalled();
 
     fixture.nativeElement.querySelectorAll('.btn-cabecera')[0].click();
     fixture.detectChanges();
     expect(component.viendoGogma()).toBeFalse();
     expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(15);
+  });
+
+  it('sin la Gogma permitida (al elegir el arma base) solo están los 14 tipos, para no entrar en bucle', () => {
+    crear(null, false);
+    expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(14);
+    expect(fixture.nativeElement.querySelector('.tarjeta-gogma')).toBeNull();
+  });
+
+  describe('arma Gogma', () => {
+    const CONFIGURACION: ConfiguracionGogma = {
+      especial: 'fire',
+      habilidadesSet: [{ id: 131, gameId: 131, name: 'Alma del amo', kind: 'group' }, null]
+    };
+
+    it('elige el arma base en otro popup de armas sin la Gogma, y solo cambia la imagen', () => {
+      crear();
+      component.verGogma();
+      dialog.open.and.returnValue({ afterClosed: () => of({ arma: CATALOGO[3], gogma: null }) } as ReturnType<MatDialog['open']>);
+
+      component.elegirBaseGogma();
+      expect(dialog.open.calls.mostRecent().args[1]?.data).toEqual({ seleccionada: null, permitirGogma: false });
+      expect(component.baseGogma()).toEqual(CATALOGO[3]);
+      expect(dialogRef.close).not.toHaveBeenCalled();
+
+      // Al volver a elegirla, el popup de encima se abre con la base actual
+      component.elegirBaseGogma();
+      expect(dialog.open.calls.mostRecent().args[1]?.data)
+        .toEqual({ seleccionada: { arma: CATALOGO[3], gogma: null }, permitirGogma: false });
+    });
+
+    it('si se cierra el popup de encima sin elegir nada, la base no cambia', () => {
+      crear();
+      component.baseGogma.set(CATALOGO[0]);
+      dialog.open.and.returnValue({ afterClosed: () => of(undefined) } as ReturnType<MatDialog['open']>);
+      component.elegirBaseGogma();
+      expect(component.baseGogma()).toEqual(CATALOGO[0]);
+    });
+
+    it('"Aceptar" cierra devolviendo el arma base con la configuración Gogma', () => {
+      crear();
+      component.baseGogma.set(CATALOGO[2]);
+      component.aceptarGogma(CONFIGURACION);
+      expect(dialogRef.close).toHaveBeenCalledWith({ arma: CATALOGO[2], gogma: CONFIGURACION });
+    });
+
+    it('con un arma Gogma equipada abre directamente en su formulario, con sus datos', () => {
+      crear({ arma: CATALOGO[1], gogma: CONFIGURACION });
+      expect(component.viendoGogma()).toBeTrue();
+      expect(component.tipoElegido()).toBeNull();
+      expect(component.baseGogma()).toEqual(CATALOGO[1]);
+      expect(component.gogmaInicial).toEqual(CONFIGURACION);
+      // No se resalta como arma normal en la lista de su tipo
+      expect(component.seleccionada).toBeNull();
+    });
   });
 
   it('muestra el elemento o el estado del arma con su icono, y null si no tiene', () => {
@@ -106,7 +169,7 @@ describe('DialogoArmasComponent', () => {
   });
 
   it('abre directamente en la lista del tipo del arma ya elegida, con el botón de volver', () => {
-    crear(CATALOGO[3]);
+    crear({ arma: CATALOGO[3], gogma: null });
     expect(component.tipoElegido()).toEqual('insect-glaive');
     // Flecha de volver + X de cerrar
     expect(fixture.nativeElement.querySelectorAll('.btn-cabecera').length).toEqual(2);
@@ -200,10 +263,10 @@ describe('DialogoArmasComponent', () => {
     });
   });
 
-  it('cierra devolviendo el arma elegida, o sin nada al pulsar la X', () => {
+  it('cierra devolviendo el arma elegida (como arma normal), o sin nada al pulsar la X', () => {
     crear();
     component.elegirArma(CATALOGO[2]);
-    expect(dialogRef.close).toHaveBeenCalledWith(CATALOGO[2]);
+    expect(dialogRef.close).toHaveBeenCalledWith({ arma: CATALOGO[2], gogma: null });
 
     component.cerrar();
     expect(dialogRef.close).toHaveBeenCalledWith();

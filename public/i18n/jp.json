@@ -32,6 +32,18 @@
     "attack": "攻撃力",
     "affinity": "会心率",
     "gogma": "ゴグマ武器",
+    "gogmaName": "{{name}} ゴグマ",
+    "gogmaForm": {
+      "chooseBase": "ベース武器を選択",
+      "changeBase": "ベース武器を変更",
+      "setSkill": "シリーズスキル {{number}}",
+      "skillSearch": "シリーズスキルを検索...",
+      "noSkill": "— スキルなし —",
+      "noResults": "結果が見つかりません",
+      "slots": "装飾品スロット",
+      "slotsSoon": "装飾品は近日対応予定",
+      "accept": "決定"
+    },
     "hiddenElement": "隠し属性",
     "elements": {
       "fire": "火",
