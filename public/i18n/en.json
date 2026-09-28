@@ -32,6 +32,18 @@
     "attack": "Attack",
     "affinity": "Affinity",
     "gogma": "Gogma Weapon",
+    "gogmaName": "{{name}} Gogma",
+    "gogmaForm": {
+      "chooseBase": "Choose the weapon type",
+      "changeBase": "Change weapon type",
+      "setSkill": "Set skill {{number}}",
+      "skillSearch": "Search set skill...",
+      "noSkill": "— No skill —",
+      "noResults": "No results found",
+      "slots": "Decoration slots",
+      "slotsSoon": "Decorations coming soon",
+      "accept": "Accept"
+    },
     "hiddenElement": "Hidden element",
     "elements": {
       "fire": "Fire",

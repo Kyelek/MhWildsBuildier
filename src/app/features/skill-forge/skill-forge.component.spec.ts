@@ -342,6 +342,40 @@ describe('SkillForgeComponent', () => {
     expect(component.descripcionesDetalladas().map(d => d.nombre)).toEqual(['Pulso de Guardián 1']);
   });
 
+  it('las habilidades de set del arma Gogma cuentan como una pieza más para su bonificación', async () => {
+    flushCatalogos([
+      { id: 1, gameId: 1, name: 'Gore α', pieces: [], groupBonus: null, bonus: bonusDePrueba(900, 'Eclipse negro', [[2, 1], [4, 2]]) },
+      { id: 2, gameId: 2, name: 'Set A', pieces: [], bonus: null, groupBonus: bonusDePrueba(131, 'Alma del amo', [[3, 1]]) }
+    ]);
+    await fixture.whenStable();
+
+    component.piezaCabeza.set(crearPiezaDePrueba({ id: 30, kind: 'head', skills: [habilidadSet(900, 'Eclipse negro')] }));
+    component.armaSeleccionada.set({
+      arma: null,
+      gogma: { tipo: 'great-sword', especial: 'fire', habilidadesSet: [habilidadSet(900, 'Eclipse negro').skill, almaDelAmo().skill] }
+    });
+    fixture.detectChanges();
+
+    // Casco + arma = 2 piezas de "Eclipse negro"; "Alma del amo" (1 de 3) aún no se activa
+    expect(component.bonificacionesSet()).toEqual([
+      jasmine.objectContaining({ clave: 'set-900', piezasEquipadas: 2, nivel: 1 })
+    ]);
+    expect(component.bonificacionesSet()[0].aportes.map(a => a.ranura)).toEqual(['weapon', 'head']);
+    expect(component.bonificacionesSet()[0].aportes[0].icono).toEqual('images/arms/great-sword.png');
+  });
+
+  it('un arma Gogma sin habilidades no aporta nada, y aún no tiene estadísticas', async () => {
+    flushCatalogos();
+    component.armaSeleccionada.set({ arma: null, gogma: { tipo: 'bow', especial: 'none', habilidadesSet: [null, null] } });
+    fixture.detectChanges();
+
+    expect(component.habilidadesActivas()).toEqual([]);
+    expect(component.bonificacionesSet()).toEqual([]);
+    expect(component.ataqueTotal()).toEqual(0);
+    // Sin arma de la API detrás, no se pide ninguna lista de armas
+    httpMock.expectNone(req => req.url.endsWith('/weapons'));
+  });
+
   // ==========================================
   // 📊 PESTAÑA "ESTADÍSTICAS TOTALES" (mismo comportamiento que en el Constructor)
   // ==========================================
@@ -364,7 +398,7 @@ describe('SkillForgeComponent', () => {
 
   it('usa el ataque bruto y la afinidad del arma equipada', () => {
     flushCatalogos();
-    component.armaSeleccionada.set(crearArmaDePrueba({ damage: { raw: 150, display: 150 }, affinity: 25 }));
+    component.armaSeleccionada.set({ arma: crearArmaDePrueba({ damage: { raw: 150, display: 150 }, affinity: 25 }), gogma: null });
     fixture.detectChanges();
 
     expect(component.ataqueTotal()).toEqual(150);
@@ -378,7 +412,7 @@ describe('SkillForgeComponent', () => {
 
   it('al cambiar de idioma sustituye el arma elegida por su versión traducida (mismo id)', async () => {
     flushCatalogos();
-    component.armaSeleccionada.set(crearArmaDePrueba({ id: 7, name: 'Gran espada' }));
+    component.armaSeleccionada.set({ arma: crearArmaDePrueba({ id: 7, name: 'Gran espada' }), gogma: null });
     fixture.detectChanges();
     httpMock.expectOne(req => req.url.includes('/es/weapons')).flush([crearArmaDePrueba({ id: 7, name: 'Gran espada' })]);
     await fixture.whenStable();
@@ -392,7 +426,7 @@ describe('SkillForgeComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges(); // Ejecuta el efecto que sustituye el arma por la traducida
 
-    expect(component.armaSeleccionada()?.name).toEqual('Great Sword');
+    expect(component.armaSeleccionada()?.arma?.name).toEqual('Great Sword');
   });
 
   it('suma las resistencias elementales (positivas y negativas) de todas las piezas', () => {

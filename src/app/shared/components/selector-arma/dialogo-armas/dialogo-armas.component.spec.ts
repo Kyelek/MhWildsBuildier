@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 
 import { DialogoArmasComponent } from './dialogo-armas.component';
 import { Weapon } from '../../../../core/models/wilds.models';
-import { DatosDialogoArmas } from '../../../models/tipos-arma.models';
+import { ArmaEquipada, ConfiguracionGogma, DatosDialogoArmas } from '../../../models/tipos-arma.models';
 import { ApiLocale, WildsApiService } from '../../../../core/services/wilds-api.service';
 
 function arma(id: number, name: string, kind: string): Weapon {
@@ -23,10 +23,10 @@ const CATALOGO: Weapon[] = [
 describe('DialogoArmasComponent', () => {
   let fixture: ComponentFixture<DialogoArmasComponent>;
   let component: DialogoArmasComponent;
-  let dialogRef: jasmine.SpyObj<MatDialogRef<DialogoArmasComponent, Weapon>>;
-  let wildsApi: { locale: WritableSignal<ApiLocale>; getWeaponsPorTipo: jasmine.Spy };
+  let dialogRef: jasmine.SpyObj<MatDialogRef<DialogoArmasComponent, ArmaEquipada>>;
+  let wildsApi: { locale: WritableSignal<ApiLocale>; getWeaponsPorTipo: jasmine.Spy; getArmor: jasmine.Spy };
 
-  function crear(seleccionada: Weapon | null = null): void {
+  function crear(seleccionada: ArmaEquipada | null = null): void {
     dialogRef = jasmine.createSpyObj('MatDialogRef', ['close', 'afterOpened']);
     dialogRef.afterOpened.and.returnValue(of(undefined));
     const datos: DatosDialogoArmas = { seleccionada };
@@ -34,7 +34,9 @@ describe('DialogoArmasComponent', () => {
     wildsApi = {
       locale: signal<ApiLocale>('es'),
       getWeaponsPorTipo: jasmine.createSpy('getWeaponsPorTipo')
-        .and.callFake((tipo: string) => of(CATALOGO.filter(arma => arma.kind === tipo)))
+        .and.callFake((tipo: string) => of(CATALOGO.filter(arma => arma.kind === tipo))),
+      // Catálogo de armaduras del que el formulario Gogma saca las habilidades de set
+      getArmor: jasmine.createSpy('getArmor').and.returnValue(of([]))
     };
 
     TestBed.configureTestingModule({
@@ -61,17 +63,80 @@ describe('DialogoArmasComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.btn-cabecera').length).toEqual(1);
   });
 
-  it('"Arma Gogma" lleva al aviso de en desarrollo y la flecha vuelve a los tipos', () => {
+  it('"Arma Gogma" muestra la imagen de la interrogación y lleva a su formulario; la flecha vuelve a los tipos', () => {
     crear();
-    fixture.nativeElement.querySelector('.tarjeta-gogma').click();
+    const tarjeta: HTMLElement = fixture.nativeElement.querySelector('.tarjeta-gogma');
+    expect(tarjeta.querySelector('img')?.getAttribute('src')).toEqual('images/recursos/armagogmapng.png');
+
+    tarjeta.click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('app-en-desarrollo')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-formulario-gogma')).not.toBeNull();
     expect(dialogRef.close).not.toHaveBeenCalled();
 
     fixture.nativeElement.querySelectorAll('.btn-cabecera')[0].click();
     fixture.detectChanges();
     expect(component.viendoGogma()).toBeFalse();
     expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(15);
+  });
+
+  describe('arma Gogma', () => {
+    const CONFIGURACION: ConfiguracionGogma = {
+      tipo: 'hammer',
+      especial: 'fire',
+      habilidadesSet: [{ id: 131, gameId: 131, name: 'Alma del amo', kind: 'group' }, null]
+    };
+
+    it('la imagen del formulario muestra la rejilla de tipos (sin "Arma Gogma"): el tipo elegido es el del arma, sin buscador', () => {
+      crear();
+      component.verGogma();
+      fixture.detectChanges();
+
+      component.cambiarTipoGogma();
+      fixture.detectChanges();
+      // Rejilla sin la tarjeta Gogma, y el formulario sigue montado (oculto) para no perder lo rellenado
+      expect(fixture.nativeElement.querySelectorAll('.tarjeta-tipo').length).toEqual(14);
+      expect(fixture.nativeElement.querySelector('.tarjeta-gogma')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.pantalla-gogma').hidden).toBeTrue();
+
+      fixture.nativeElement.querySelectorAll('.tarjeta-tipo')[4].click(); // Martillo
+      fixture.detectChanges();
+      expect(component.tipoGogma()).toEqual('hammer');
+      expect(component.eligiendoTipoGogma()).toBeFalse();
+      expect(component.tipoElegido()).toBeNull();
+      expect(wildsApi.getWeaponsPorTipo).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelector('.pantalla-gogma').hidden).toBeFalse();
+      expect(dialogRef.close).not.toHaveBeenCalled();
+    });
+
+    it('desde la rejilla del arma Gogma, la flecha vuelve al formulario sin cambiar el tipo', () => {
+      crear();
+      component.verGogma();
+      component.tipoGogma.set('bow');
+      component.cambiarTipoGogma();
+      component.volver();
+      expect(component.eligiendoTipoGogma()).toBeFalse();
+      expect(component.viendoGogma()).toBeTrue();
+      expect(component.tipoGogma()).toEqual('bow');
+
+      // Desde el formulario, la flecha sí vuelve a la rejilla normal
+      component.volver();
+      expect(component.viendoGogma()).toBeFalse();
+    });
+
+    it('"Aceptar" cierra devolviendo el arma Gogma', () => {
+      crear();
+      component.aceptarGogma(CONFIGURACION);
+      expect(dialogRef.close).toHaveBeenCalledWith({ arma: null, gogma: CONFIGURACION });
+    });
+
+    it('con un arma Gogma equipada abre directamente en su formulario, con sus datos', () => {
+      crear({ arma: null, gogma: CONFIGURACION });
+      expect(component.viendoGogma()).toBeTrue();
+      expect(component.tipoElegido()).toBeNull();
+      expect(component.tipoGogma()).toEqual('hammer');
+      expect(component.gogmaInicial).toEqual(CONFIGURACION);
+      expect(component.seleccionada).toBeNull();
+    });
   });
 
   it('muestra el elemento o el estado del arma con su icono, y null si no tiene', () => {
@@ -106,7 +171,7 @@ describe('DialogoArmasComponent', () => {
   });
 
   it('abre directamente en la lista del tipo del arma ya elegida, con el botón de volver', () => {
-    crear(CATALOGO[3]);
+    crear({ arma: CATALOGO[3], gogma: null });
     expect(component.tipoElegido()).toEqual('insect-glaive');
     // Flecha de volver + X de cerrar
     expect(fixture.nativeElement.querySelectorAll('.btn-cabecera').length).toEqual(2);
@@ -200,10 +265,10 @@ describe('DialogoArmasComponent', () => {
     });
   });
 
-  it('cierra devolviendo el arma elegida, o sin nada al pulsar la X', () => {
+  it('cierra devolviendo el arma elegida (como arma normal), o sin nada al pulsar la X', () => {
     crear();
     component.elegirArma(CATALOGO[2]);
-    expect(dialogRef.close).toHaveBeenCalledWith(CATALOGO[2]);
+    expect(dialogRef.close).toHaveBeenCalledWith({ arma: CATALOGO[2], gogma: null });
 
     component.cerrar();
     expect(dialogRef.close).toHaveBeenCalledWith();

@@ -1,16 +1,18 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ApiLocale, WildsApiService } from '../../core/services/wilds-api.service';
-import { ArmorPiece, ArmorSetBonus, Weapon } from '../../core/models/wilds.models';
+import { ArmorPiece, ArmorSetBonus, SkillInfo } from '../../core/models/wilds.models';
 import { SelectorArmaComponent } from '../../shared/components/selector-arma/selector-arma.component';
 import { SelectorArmaduraComponent } from '../../shared/components/selector-armadura/selector-armadura.component';
 import { FILTROS_ARMADURA_VACIOS, FiltrosArmadura, ICONOS_RANURA } from '../../shared/models/filtros-armadura.models';
+import { ArmaEquipada, ConfiguracionGogma, habilidadesSetDeGogma, iconoTipoArma } from '../../shared/models/tipos-arma.models';
 import {
   AportePieza,
   BonificacionSetActiva,
   DescripcionHabilidad,
+  FuenteHabilidades,
   HabilidadAcumulada
 } from './models/skill-forge.models';
 
@@ -38,6 +40,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 })
 export class SkillForgeComponent {
   private readonly wildsApi = inject(WildsApiService);
+  private readonly translate = inject(TranslateService);
 
   // 1. Catálogos completos desde la API
   // 🌐 `request` observa el idioma actual de la API: al cambiarlo (selector EN/ES/JP),
@@ -81,7 +84,8 @@ export class SkillForgeComponent {
   readonly piezaBrazos = signal<ArmorPiece | null>(null);
   readonly piezaCintura = signal<ArmorPiece | null>(null);
   readonly piezaPiernas = signal<ArmorPiece | null>(null);
-  readonly armaSeleccionada = signal<Weapon | null>(null);
+  // Arma normal o arma Gogma (con sus habilidades de set, que cuentan como las de una pieza)
+  readonly armaSeleccionada = signal<ArmaEquipada | null>(null);
 
   // 🗂️ Pestaña activa sobre "Habilidades del Conjunto" (ver plantilla): por defecto se
   // muestran las habilidades acumuladas; la otra pestaña muestra las Estadísticas Totales.
@@ -111,10 +115,21 @@ export class SkillForgeComponent {
       this.piezaPiernas.update(actual => this.buscarPorId(actual, armadura));
     }
 
+    // El arma normal, o las habilidades de set del arma Gogma. Sin cambios se conserva el
+    // mismo objeto, para no redibujar nada sin motivo.
     const armasDelTipo = this.armasDelTipoSeleccionado.value();
-    if (armasDelTipo) {
-      this.armaSeleccionada.update(actual => this.buscarPorId(actual, armasDelTipo));
-    }
+    const catalogoHabilidades = this.skillsResource.value();
+    this.armaSeleccionada.update(actual => {
+      if (actual?.arma && armasDelTipo) {
+        const arma = this.buscarPorId(actual.arma, armasDelTipo) ?? actual.arma;
+        return arma === actual.arma ? actual : { arma, gogma: null };
+      }
+      if (actual?.gogma && catalogoHabilidades) {
+        const gogma = this.traducirGogma(actual.gogma, catalogoHabilidades);
+        return gogma === actual.gogma ? actual : { arma: null, gogma };
+      }
+      return actual;
+    });
   });
 
   // 🗡️ El arma ya no sale de un catálogo completo (el popup pide solo las del tipo elegido):
@@ -123,7 +138,7 @@ export class SkillForgeComponent {
   // dos (al elegir otra arma del mismo tipo no hace falta volver a pedir nada).
   private readonly armasDelTipoSeleccionado = rxResource({
     request: () => {
-      const tipo = this.armaSeleccionada()?.kind;
+      const tipo = this.armaSeleccionada()?.arma?.kind;
       return tipo ? `${tipo}|${this.wildsApi.locale()}` : undefined;
     },
     loader: ({ request }) => {
@@ -138,6 +153,18 @@ export class SkillForgeComponent {
   private buscarPorId<T extends { id: number }>(actual: T | null, catalogo: T[]): T | null {
     if (!actual) return null;
     return catalogo.find(item => item.id === actual.id) ?? actual;
+  }
+
+  // Habilidades de set del arma Gogma con el nombre del catálogo de /skills (ya en el idioma
+  // nuevo). Si ninguna cambia, devuelve la misma configuración.
+  private traducirGogma(gogma: ConfiguracionGogma, catalogo: SkillInfo[]): ConfiguracionGogma {
+    const traducir = (habilidad: SkillInfo | null): SkillInfo | null => {
+      const nombre = habilidad && catalogo.find(item => item.id === habilidad.id)?.name;
+      return habilidad && nombre && nombre !== habilidad.name ? { ...habilidad, name: nombre } : habilidad;
+    };
+    const [primera, segunda] = gogma.habilidadesSet;
+    const habilidadesSet: ConfiguracionGogma['habilidadesSet'] = [traducir(primera), traducir(segunda)];
+    return habilidadesSet[0] === primera && habilidadesSet[1] === segunda ? gogma : { ...gogma, habilidadesSet };
   }
 
   // 3. 🔍 Filtros de los popups de armadura, compartidos por las 5 ranuras: lo que se
@@ -156,14 +183,42 @@ export class SkillForgeComponent {
     return piezas.filter((pieza): pieza is ArmorPiece => pieza !== null);
   });
 
+  // Todo el equipo que aporta habilidades: primero el arma Gogma (sus habilidades de set
+  // cuentan como las de una pieza más) y después las piezas en orden de ranura
+  private readonly fuentesHabilidades = computed<FuenteHabilidades[]>(() => {
+    const fuentes: FuenteHabilidades[] = [];
+
+    const gogma = this.armaSeleccionada()?.gogma ?? null;
+    const habilidadesArma = habilidadesSetDeGogma(gogma);
+    if (gogma && habilidadesArma.length > 0) {
+      const nombreTipo = this.translate.instant(`weaponTypes.${gogma.tipo}`) as string;
+      fuentes.push({
+        aporte: {
+          ranura: 'weapon',
+          nombrePieza: this.translate.instant('weaponPicker.gogmaName', { name: nombreTipo }) as string,
+          icono: iconoTipoArma(gogma.tipo)
+        },
+        habilidades: habilidadesArma.map(skill => ({ skill, level: 1, description: '' }))
+      });
+    }
+
+    for (const pieza of this.piezasSeleccionadas()) {
+      fuentes.push({
+        aporte: { ranura: pieza.kind, nombrePieza: pieza.name, icono: ICONOS_RANURA[pieza.kind] },
+        habilidades: pieza.skills
+      });
+    }
+    return fuentes;
+  });
+
   // ==========================================
-  // ⚔️ REQUISITO 2: Habilidades acumuladas por las piezas individuales
+  // ⚔️ REQUISITO 2: Habilidades acumuladas por las piezas individuales (y el arma Gogma)
   // ==========================================
   readonly habilidadesActivas = computed<HabilidadAcumulada[]>(() => {
     const acumulado = new Map<number, HabilidadAcumulada>();
 
-    for (const pieza of this.piezasSeleccionadas()) {
-      for (const habilidad of pieza.skills) {
+    for (const { aporte, habilidades } of this.fuentesHabilidades()) {
+      for (const habilidad of habilidades) {
         const existente = acumulado.get(habilidad.skill.id);
         const nivelTotal = (existente?.nivel ?? 0) + habilidad.level;
 
@@ -173,8 +228,8 @@ export class SkillForgeComponent {
           kind: habilidad.skill.kind,
           nivel: nivelTotal,
           descripcion: this.obtenerDescripcionPorNivel(habilidad.skill.id, nivelTotal, habilidad.description),
-          // Las piezas se recorren en orden de ranura, así los iconos salen casco → piernas
-          aportes: [...(existente?.aportes ?? []), this.crearAporte(pieza, habilidad.level)]
+          // El equipo se recorre en orden de ranura, así los iconos salen arma, casco → piernas
+          aportes: [...(existente?.aportes ?? []), { ...aporte, nivel: habilidad.level }]
         });
       }
     }
@@ -199,14 +254,15 @@ export class SkillForgeComponent {
   // mismo; solo cambia cómo se muestran (ver el bucle de abajo).
   // ==========================================
 
-  // Habilidades de set equipadas, con las piezas que aportan cada una (en orden de ranura)
-  private readonly piezasPorHabilidadSet = computed<Map<number, { kind: string; piezas: ArmorPiece[] }>>(() => {
-    const porHabilidad = new Map<number, { kind: string; piezas: ArmorPiece[] }>();
-    for (const pieza of this.piezasSeleccionadas()) {
-      for (const { skill } of pieza.skills) {
+  // Habilidades de set equipadas, con el equipo que aporta cada una (en orden de ranura).
+  // El arma Gogma cuenta como una pieza más para cada una de sus habilidades de set.
+  private readonly piezasPorHabilidadSet = computed<Map<number, { kind: string; aportes: AportePieza[] }>>(() => {
+    const porHabilidad = new Map<number, { kind: string; aportes: AportePieza[] }>();
+    for (const { aporte, habilidades } of this.fuentesHabilidades()) {
+      for (const { skill } of habilidades) {
         if (skill.kind !== 'set' && skill.kind !== 'group') continue;
-        const actual = porHabilidad.get(skill.id) ?? { kind: skill.kind, piezas: [] };
-        actual.piezas.push(pieza);
+        const actual = porHabilidad.get(skill.id) ?? { kind: skill.kind, aportes: [] };
+        actual.aportes.push({ ...aporte, nivel: 1 });
         porHabilidad.set(skill.id, actual);
       }
     }
@@ -219,7 +275,7 @@ export class SkillForgeComponent {
     const todosLosSets = this.armorSetsResource.value() ?? [];
     const bonificaciones: BonificacionSetActiva[] = [];
 
-    for (const [skillId, { kind, piezas }] of this.piezasPorHabilidadSet()) {
+    for (const [skillId, { kind, aportes }] of this.piezasPorHabilidadSet()) {
       // Los rangos son los mismos en todos los conjuntos que comparten la habilidad
       if (kind === 'set') {
         const bonus = todosLosSets.find(set => set.bonus?.skill.id === skillId)?.bonus;
@@ -227,7 +283,7 @@ export class SkillForgeComponent {
 
         // La tarjeta se titula con el rango activado ("Eclipse negro I") y su origen es la
         // habilidad de set ("Tiranía de Gore Magala")
-        const bonificacion = this.construirBonificacion(`set-${skillId}`, bonus.skill.name, piezas, bonus);
+        const bonificacion = this.construirBonificacion(`set-${skillId}`, bonus.skill.name, aportes, bonus);
         if (bonificacion) bonificaciones.push(bonificacion);
         continue;
       }
@@ -235,7 +291,7 @@ export class SkillForgeComponent {
       const grupo = todosLosSets.find(set => set.groupBonus?.skill.id === skillId)?.groupBonus;
       if (!grupo) continue;
 
-      const bonificacion = this.construirBonificacion(`grupo-${skillId}`, grupo.skill.name, piezas, grupo);
+      const bonificacion = this.construirBonificacion(`grupo-${skillId}`, grupo.skill.name, aportes, grupo);
       if (!bonificacion) continue;
 
       // La tarjeta se titula con la habilidad de grupo ("Alma del amo"); la habilidad que
@@ -265,10 +321,10 @@ export class SkillForgeComponent {
   private construirBonificacion(
     clave: string,
     nombreOrigen: string,
-    piezas: ArmorPiece[],
+    aportes: AportePieza[],
     bonus: ArmorSetBonus
   ): BonificacionSetActiva | null {
-    const piezasEquipadas = piezas.length;
+    const piezasEquipadas = aportes.length;
     const rangoActivo = bonus.ranks
       .filter(rango => rango.pieces <= piezasEquipadas)
       .sort((a, b) => b.pieces - a.pieces)[0];
@@ -285,7 +341,7 @@ export class SkillForgeComponent {
       nivel: rangoActivo.skill.level,
       descripcion: rangoActivo.skill.description,
       efectoOtorgado: null,
-      aportes: piezas.map(pieza => this.crearAporte(pieza, 1))
+      aportes
     };
   }
 
@@ -328,11 +384,12 @@ export class SkillForgeComponent {
   });
 
   readonly ataqueTotal = computed(() => {
-    return this.armaSeleccionada()?.damage?.raw ?? 0;
+    // El arma Gogma aún no tiene estadísticas (solo tipo, elemento y habilidades)
+    return this.armaSeleccionada()?.arma?.damage?.raw ?? 0;
   });
 
   readonly afinidadTotal = computed(() => {
-    const arma = this.armaSeleccionada();
+    const arma = this.armaSeleccionada()?.arma;
     if (!arma) return 0;
     return arma.affinity !== undefined && arma.affinity !== null ? arma.affinity : 0;
   });
@@ -356,10 +413,6 @@ export class SkillForgeComponent {
   // ==========================================
   // ⚙️ MÉTODOS INTERNOS
   // ==========================================
-
-  private crearAporte(pieza: ArmorPiece, nivel: number): AportePieza {
-    return { ranura: pieza.kind, nombrePieza: pieza.name, nivel, icono: ICONOS_RANURA[pieza.kind] };
-  }
 
 
   // Busca en el catálogo de /skills la descripción exacta del nivel total alcanzado.

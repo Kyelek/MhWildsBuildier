@@ -3,7 +3,7 @@
        (solo fuera de la pantalla de tipos) junto a la X de cerrar (cómoda en móvil, donde
        apenas queda hueco fuera del popup para cerrarlo pulsando fuera) -->
   <header class="dialogo-cabecera">
-    @if (viendoGogma()) {
+    @if (viendoGogma() && !eligiendoTipoGogma()) {
       <h2 class="dialogo-titulo">{{ 'weaponPicker.gogma' | translate }}</h2>
     } @else if (tipoElegido()) {
       <h2 class="dialogo-titulo">
@@ -20,7 +20,7 @@
         class="btn-cabecera"
         [attr.aria-label]="'weaponPicker.back' | translate"
         [title]="'weaponPicker.back' | translate"
-        (click)="volverATipos()">←</button>
+        (click)="volver()">←</button>
     }
     <button
       type="button"
@@ -31,26 +31,41 @@
   </header>
 
   @if (viendoGogma()) {
-    <!-- 🚧 Armas Gogma: pendiente de un desarrollo futuro -->
-    <app-en-desarrollo [titulo]="'weaponPicker.gogma' | translate" />
-  } @else if (!tipoElegido()) {
+    <!-- ⚒️ Formulario del arma Gogma: su tipo se elige en la rejilla de abajo. Se oculta (sin
+         desmontarlo) mientras tanto, para no perder lo que ya se haya rellenado. -->
+    <div class="pantalla-gogma" [hidden]="eligiendoTipoGogma()">
+      <app-formulario-gogma
+        [(tipo)]="tipoGogma"
+        [inicial]="gogmaInicial"
+        (cambiarTipo)="cambiarTipoGogma()"
+        (aceptar)="aceptarGogma($event)" />
+    </div>
+  }
+
+  @if (viendoGogma() ? eligiendoTipoGogma() : !tipoElegido()) {
     <!-- 🗂️ Pantalla 1: un botón con la imagen de cada tipo de arma -->
     <div class="rejilla-tipos">
       @for (tipo of tipos; track tipo) {
         <button
           type="button"
           class="tarjeta-tipo"
-          [class.actual]="seleccionada?.kind === tipo"
+          [class.actual]="tipo === (viendoGogma() ? tipoGogma() : seleccionada?.kind)"
           (click)="elegirTipo(tipo)">
           <img [src]="iconoTipo(tipo)" alt="" width="56" height="56" />
           <span>{{ 'weaponTypes.' + tipo | translate }}</span>
         </button>
       }
-      <button type="button" class="tarjeta-tipo tarjeta-gogma" (click)="verGogma()">
-        <span>{{ 'weaponPicker.gogma' | translate }}</span>
-      </button>
+      @if (!viendoGogma()) {
+        <button
+          type="button"
+          class="tarjeta-tipo tarjeta-gogma"
+          (click)="verGogma()">
+          <img [src]="imagenGogma" alt="" width="56" height="56" />
+          <span>{{ 'weaponPicker.gogma' | translate }}</span>
+        </button>
+      }
     </div>
-  } @else {
+  } @else if (tipoElegido()) {
     <!-- 🔍 Pantalla 2: buscador centrado (acotado al tipo elegido) + lista con scroll virtual -->
     <div class="zona-busqueda">
       <app-buscador-filtros

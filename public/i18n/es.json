@@ -32,6 +32,18 @@
     "attack": "Ataque",
     "affinity": "Afinidad",
     "gogma": "Arma Gogma",
+    "gogmaName": "{{name}} Gogma",
+    "gogmaForm": {
+      "chooseBase": "Elige el tipo de arma",
+      "changeBase": "Cambiar tipo de arma",
+      "setSkill": "Habilidad de set {{number}}",
+      "skillSearch": "Buscar habilidad de set...",
+      "noSkill": "— Sin habilidad —",
+      "noResults": "No se encontraron resultados",
+      "slots": "Huecos para gemas",
+      "slotsSoon": "Las gemas llegarán pronto",
+      "accept": "Aceptar"
+    },
     "hiddenElement": "Elemento oculto",
     "elements": {
       "fire": "Fuego",

@@ -1,2 +1,61 @@
 // Estilos compartidos con el selector de armadura: ver src/styles/_campo-selector.scss
 @use 'campo-selector';
+
+$color-gold: #c5a059;
+
+// ==========================================
+// ⚒️ Arma Gogma: sin nombre, solo etiquetas (si no caben en una línea, el campo crece)
+// ==========================================
+.campo-boton:has(.campo-gogma) {
+  height: auto;
+  min-height: 55px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.campo-gogma {
+  white-space: normal;
+}
+
+.gogma-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+// Mismas etiquetas que las habilidades de las filas de armaduras
+.gogma-etiqueta {
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+
+  // Habilidades de set: borde punteado, como en la lista de armaduras
+  &.bonus {
+    border-style: dashed;
+  }
+}
+
+.gogma-huecos {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 2px;
+}
+
+// Hueco para gemas: cuadradito con su nivel (igual que en la lista de armaduras)
+.hueco {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(197, 160, 89, 0.6);
+  border-radius: 3px;
+  color: $color-gold;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}

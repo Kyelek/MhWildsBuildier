@@ -1,0 +1,61 @@
+<div class="formulario-gogma">
+  <!-- Tipo de arma: interrogación hasta elegirlo; al pulsar se muestra la rejilla de tipos -->
+  <button
+    type="button"
+    class="gogma-base"
+    [class.elegida]="tipo()"
+    [title]="(tipo() ? 'weaponPicker.gogmaForm.changeBase' : 'weaponPicker.gogmaForm.chooseBase') | translate"
+    (click)="cambiarTipo.emit()">
+    @if (tipo(); as tipo) {
+      <img [src]="iconoTipo(tipo)" alt="" width="96" height="96" />
+      <span class="gogma-nombre">{{ 'weaponPicker.gogmaName' | translate: { name: ('weaponTypes.' + tipo | translate) } }}</span>
+      <span class="gogma-pista">{{ 'weaponPicker.gogmaForm.changeBase' | translate }}</span>
+    } @else {
+      <img class="gogma-interrogacion" [src]="imagenGogma" alt="" width="96" height="96" />
+      <span class="gogma-pista">{{ 'weaponPicker.gogmaForm.chooseBase' | translate }}</span>
+    }
+  </button>
+
+  <div class="gogma-campos">
+    <app-selector-buscable
+      [elementos]="opcionesElemento"
+      [(valor)]="elemento"
+      [etiqueta]="'weaponPicker.filters.elementStatus' | translate"
+      [textoVacio]="'weaponPicker.gogmaForm.noResults' | translate">
+      <ng-template let-opcion>{{ opcion.icono }} {{ opcion.name }}</ng-template>
+    </app-selector-buscable>
+
+    <app-selector-buscable
+      [elementos]="opcionesHabilidad1()"
+      [(valor)]="habilidad1"
+      [etiqueta]="'weaponPicker.gogmaForm.setSkill' | translate: { number: 1 }"
+      [textoBuscador]="'weaponPicker.gogmaForm.skillSearch' | translate"
+      [textoVacio]="'weaponPicker.gogmaForm.noResults' | translate"
+      [permitirVacio]="true"
+      [etiquetaVacio]="'weaponPicker.gogmaForm.noSkill' | translate" />
+
+    <app-selector-buscable
+      [elementos]="opcionesHabilidad2()"
+      [(valor)]="habilidad2"
+      [etiqueta]="'weaponPicker.gogmaForm.setSkill' | translate: { number: 2 }"
+      [textoBuscador]="'weaponPicker.gogmaForm.skillSearch' | translate"
+      [textoVacio]="'weaponPicker.gogmaForm.noResults' | translate"
+      [permitirVacio]="true"
+      [etiquetaVacio]="'weaponPicker.gogmaForm.noSkill' | translate" />
+
+    <!-- 💎 Huecos para gemas: de momento solo se muestran (las gemas llegarán más adelante) -->
+    <div class="gogma-huecos">
+      <span class="gogma-huecos-titulo">{{ 'weaponPicker.gogmaForm.slots' | translate }}</span>
+      @for (nivel of huecos; track $index) {
+        <span class="hueco">{{ nivel }}</span>
+      }
+      <span class="gogma-huecos-nota">{{ 'weaponPicker.gogmaForm.slotsSoon' | translate }}</span>
+    </div>
+  </div>
+</div>
+
+<footer class="gogma-acciones">
+  <button type="button" class="btn-aceptar" [disabled]="!tipo()" (click)="confirmar()">
+    {{ 'weaponPicker.gogmaForm.accept' | translate }}
+  </button>
+</footer>
