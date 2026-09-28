@@ -53,27 +53,25 @@ export interface EspecialArma {
 // ⚒️ ARMA GOGMA
 // ==========================================
 
-// Imagen de la tarjeta "Arma Gogma" y del hueco del formulario mientras no hay arma elegida
-export const IMAGEN_GOGMA = 'images/recursos/armagogma.jpg';
+// Imagen de la tarjeta "Arma Gogma" y del hueco del formulario mientras no hay tipo elegido
+export const IMAGEN_GOGMA = 'images/recursos/armagogmapng.png';
 
 // Las armas Gogma tienen siempre tres huecos de nivel 3 para gemas
 export const HUECOS_GOGMA: readonly number[] = [3, 3, 3];
 
-// Lo que el cazador rellena en el formulario Gogma además del arma base
+// Lo que el cazador rellena en el formulario Gogma. De momento no se basa en ningún arma
+// concreta: solo en el tipo de arma ("Martillo Gogma")
 export interface ConfiguracionGogma {
+  tipo: string;            // Tipo de arma (mismo valor que Weapon.kind, p. ej. "hammer")
   especial: ClaveEspecial; // Elemento o estado elegido ('none' = sin elemento)
   // Dos habilidades de set (siempre distintas entre sí); cualquiera puede quedar vacía
   habilidadesSet: [SkillInfo | null, SkillInfo | null];
 }
 
-// Arma equipada: un arma normal (gogma = null) o un arma Gogma construida sobre un arma
-// base, de la que toma el tipo y, de momento, las estadísticas
-export interface ArmaEquipada {
-  arma: Weapon;
-  gogma: ConfiguracionGogma | null;
-}
-
-export const CONFIGURACION_GOGMA_VACIA: ConfiguracionGogma = { especial: 'none', habilidadesSet: [null, null] };
+// Arma equipada: un arma normal de la API o un arma Gogma (sin arma de la API detrás)
+export type ArmaEquipada =
+  | { arma: Weapon; gogma: null }
+  | { arma: null; gogma: ConfiguracionGogma };
 
 // Habilidades de set elegidas en un arma Gogma (sin los huecos vacíos)
 export function habilidadesSetDeGogma(gogma: ConfiguracionGogma | null): SkillInfo[] {
@@ -85,9 +83,6 @@ export function habilidadesSetDeGogma(gogma: ConfiguracionGogma | null): SkillIn
 // a la API, solo las del tipo que se elija)
 export interface DatosDialogoArmas {
   seleccionada: ArmaEquipada | null;
-  // false al elegir el arma base desde el propio formulario Gogma: sin la tarjeta
-  // "Arma Gogma", para no poder entrar en bucle
-  permitirGogma: boolean;
 }
 
 // ==========================================

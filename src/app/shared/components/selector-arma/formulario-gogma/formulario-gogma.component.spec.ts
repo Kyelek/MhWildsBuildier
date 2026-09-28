@@ -4,11 +4,9 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { FormularioGogmaComponent } from './formulario-gogma.component';
-import { ArmorPiece, SkillInfo, Weapon } from '../../../../core/models/wilds.models';
+import { ArmorPiece, SkillInfo } from '../../../../core/models/wilds.models';
 import { WildsApiService } from '../../../../core/services/wilds-api.service';
 import { ConfiguracionGogma } from '../../../models/tipos-arma.models';
-
-const ESPADA: Weapon = { id: 3, name: 'Gran espada de hierro', kind: 'great-sword', rarity: 1, affinity: 0, damage: { raw: 100, display: 100 }, slots: [], specials: [] };
 
 const ECLIPSE: SkillInfo = { id: 900, gameId: 900, name: 'Eclipse negro', kind: 'set' };
 const ALMA: SkillInfo = { id: 131, gameId: 131, name: 'Alma del amo', kind: 'group' };
@@ -70,40 +68,40 @@ describe('FormularioGogmaComponent', () => {
   });
 
   it('se abre con la configuración del arma Gogma ya equipada', async () => {
-    await crear({ especial: 'sleep', habilidadesSet: [null, ALMA] });
+    await crear({ tipo: 'bow', especial: 'sleep', habilidadesSet: [null, ALMA] });
     expect(component.elemento()?.clave).toEqual('sleep');
     expect(component.habilidad1()).toBeNull();
     expect(component.habilidad2()).toEqual(ALMA);
   });
 
-  it('"Aceptar" solo se activa con un arma base, y devuelve la configuración (habilidades vacías incluidas)', async () => {
+  it('"Aceptar" solo se activa con un tipo de arma, y devuelve la configuración (habilidades vacías incluidas)', async () => {
     await crear();
     const emitidas: ConfiguracionGogma[] = [];
     component.aceptar.subscribe(configuracion => emitidas.push(configuracion));
     const aceptar: HTMLButtonElement = fixture.nativeElement.querySelector('.btn-aceptar');
     expect(aceptar.disabled).toBeTrue();
 
-    component.base.set(ESPADA);
+    component.tipo.set('great-sword');
     fixture.detectChanges();
     expect(aceptar.disabled).toBeFalse();
 
     component.elemento.set(component.opcionesElemento.find(o => o.clave === 'water')!);
     component.habilidad2.set(ECLIPSE);
     aceptar.click();
-    expect(emitidas).toEqual([{ especial: 'water', habilidadesSet: [null, ECLIPSE] }]);
+    expect(emitidas).toEqual([{ tipo: 'great-sword', especial: 'water', habilidadesSet: [null, ECLIPSE] }]);
   });
 
-  it('muestra la interrogación hasta elegir el arma base, y avisa al pulsarla para elegirla', async () => {
+  it('muestra la interrogación hasta elegir el tipo de arma, y avisa al pulsarla para elegirlo', async () => {
     await crear();
     let pedida = false;
-    component.cambiarBase.subscribe(() => (pedida = true));
+    component.cambiarTipo.subscribe(() => (pedida = true));
     const imagen = () => fixture.nativeElement.querySelector('.gogma-base img').getAttribute('src');
-    expect(imagen()).toEqual('images/recursos/armagogma.jpg');
+    expect(imagen()).toEqual('images/recursos/armagogmapng.png');
 
     fixture.nativeElement.querySelector('.gogma-base').click();
     expect(pedida).toBeTrue();
 
-    component.base.set(ESPADA);
+    component.tipo.set('great-sword');
     fixture.detectChanges();
     expect(imagen()).toEqual('images/arms/great-sword.png');
   });

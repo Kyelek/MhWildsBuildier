@@ -351,11 +351,10 @@ describe('SkillForgeComponent', () => {
 
     component.piezaCabeza.set(crearPiezaDePrueba({ id: 30, kind: 'head', skills: [habilidadSet(900, 'Eclipse negro')] }));
     component.armaSeleccionada.set({
-      arma: crearArmaDePrueba({ name: 'Espadón' }),
-      gogma: { especial: 'fire', habilidadesSet: [habilidadSet(900, 'Eclipse negro').skill, almaDelAmo().skill] }
+      arma: null,
+      gogma: { tipo: 'great-sword', especial: 'fire', habilidadesSet: [habilidadSet(900, 'Eclipse negro').skill, almaDelAmo().skill] }
     });
     fixture.detectChanges();
-    httpMock.expectOne(req => req.url.endsWith('/weapons')).flush([]);
 
     // Casco + arma = 2 piezas de "Eclipse negro"; "Alma del amo" (1 de 3) aún no se activa
     expect(component.bonificacionesSet()).toEqual([
@@ -365,14 +364,16 @@ describe('SkillForgeComponent', () => {
     expect(component.bonificacionesSet()[0].aportes[0].icono).toEqual('images/arms/great-sword.png');
   });
 
-  it('un arma normal (o una Gogma sin habilidades) no aporta ninguna habilidad', async () => {
+  it('un arma Gogma sin habilidades no aporta nada, y aún no tiene estadísticas', async () => {
     flushCatalogos();
-    component.armaSeleccionada.set({ arma: crearArmaDePrueba(), gogma: { especial: 'none', habilidadesSet: [null, null] } });
+    component.armaSeleccionada.set({ arma: null, gogma: { tipo: 'bow', especial: 'none', habilidadesSet: [null, null] } });
     fixture.detectChanges();
-    httpMock.expectOne(req => req.url.endsWith('/weapons')).flush([]);
 
     expect(component.habilidadesActivas()).toEqual([]);
     expect(component.bonificacionesSet()).toEqual([]);
+    expect(component.ataqueTotal()).toEqual(0);
+    // Sin arma de la API detrás, no se pide ninguna lista de armas
+    httpMock.expectNone(req => req.url.endsWith('/weapons'));
   });
 
   // ==========================================
@@ -425,7 +426,7 @@ describe('SkillForgeComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges(); // Ejecuta el efecto que sustituye el arma por la traducida
 
-    expect(component.armaSeleccionada()?.arma.name).toEqual('Great Sword');
+    expect(component.armaSeleccionada()?.arma?.name).toEqual('Great Sword');
   });
 
   it('suma las resistencias elementales (positivas y negativas) de todas las piezas', () => {

@@ -93,6 +93,18 @@ $color-text: #f5f5e9;
   }
 }
 
+// El formulario del arma Gogma ocupa todo el alto disponible (con "Aceptar" abajo)
+.pantalla-gogma {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
 // ==========================================
 // 🔍 Pantalla 2: lista con scroll virtual
 // ==========================================
