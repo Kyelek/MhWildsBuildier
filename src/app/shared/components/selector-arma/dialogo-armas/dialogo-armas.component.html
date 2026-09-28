@@ -31,8 +31,12 @@
   </header>
 
   @if (viendoGogma()) {
-    <!-- 🚧 Armas Gogma: pendiente de un desarrollo futuro -->
-    <app-en-desarrollo [titulo]="'weaponPicker.gogma' | translate" />
+    <!-- ⚒️ Formulario del arma Gogma: el arma base se elige en otro popup de armas -->
+    <app-formulario-gogma
+      [(base)]="baseGogma"
+      [inicial]="gogmaInicial"
+      (cambiarBase)="elegirBaseGogma()"
+      (aceptar)="aceptarGogma($event)" />
   } @else if (!tipoElegido()) {
     <!-- 🗂️ Pantalla 1: un botón con la imagen de cada tipo de arma -->
     <div class="rejilla-tipos">
@@ -46,9 +50,16 @@
           <span>{{ 'weaponTypes.' + tipo | translate }}</span>
         </button>
       }
-      <button type="button" class="tarjeta-tipo tarjeta-gogma" (click)="verGogma()">
-        <span>{{ 'weaponPicker.gogma' | translate }}</span>
-      </button>
+      @if (permitirGogma) {
+        <button
+          type="button"
+          class="tarjeta-tipo tarjeta-gogma"
+          [attr.aria-label]="'weaponPicker.gogma' | translate"
+          [title]="'weaponPicker.gogma' | translate"
+          (click)="verGogma()">
+          <img [src]="imagenGogma" alt="" width="56" height="56" />
+        </button>
+      }
     </div>
   } @else {
     <!-- 🔍 Pantalla 2: buscador centrado (acotado al tipo elegido) + lista con scroll virtual -->

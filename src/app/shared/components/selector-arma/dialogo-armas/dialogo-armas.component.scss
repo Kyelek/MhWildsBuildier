@@ -83,12 +83,14 @@ $color-text: #f5f5e9;
   }
 }
 
-// 🚧 "Arma Gogma": sin imagen, solo el texto centrado (lleva al aviso de en desarrollo)
+// ⚒️ "Arma Gogma": solo la imagen de la interrogación, con borde discontinuo
 .tarjeta-gogma {
   border-style: dashed;
-  color: $color-gold;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
+
+  img {
+    border-radius: 4px;
+    object-fit: cover;
+  }
 }
 
 // ==========================================

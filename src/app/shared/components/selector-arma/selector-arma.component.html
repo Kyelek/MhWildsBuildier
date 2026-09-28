@@ -5,9 +5,31 @@
   <legend class="campo-etiqueta" [attr.aria-hidden]="!valor()">{{ etiqueta() }}</legend>
 
   <button type="button" class="campo-boton" aria-haspopup="dialog" (click)="abrir()">
-    @if (valor(); as arma) {
-      <img class="campo-icono" [src]="iconoTipo(arma.kind)" [alt]="'weaponTypes.' + arma.kind | translate" width="28" height="28" />
-      <span class="campo-texto">{{ arma.name }}</span>
+    @if (valor(); as equipada) {
+      <img class="campo-icono" [src]="iconoTipo(equipada.arma.kind)" [alt]="'weaponTypes.' + equipada.arma.kind | translate" width="28" height="28" />
+      @if (equipada.gogma; as gogma) {
+        <!-- ⚒️ Arma Gogma: nombre y, como etiquetas, elemento, habilidades de set y huecos -->
+        <span class="campo-texto campo-gogma">
+          <span class="gogma-nombre">{{ 'weaponPicker.gogmaName' | translate: { name: equipada.arma.name } }}</span>
+          <span class="gogma-etiquetas">
+            @if (especialGogma(); as especial) {
+              <span class="gogma-etiqueta">{{ especial.icono }} {{ especial.claveNombre | translate }}</span>
+            }
+            @for (habilidad of habilidadesSet(gogma); track habilidad.id) {
+              <span class="gogma-etiqueta bonus" [title]="'armorPicker.filters.setSkills' | translate">
+                <span aria-hidden="true">🎖️</span> {{ habilidad.name }}
+              </span>
+            }
+            <span class="gogma-huecos" [title]="'weaponPicker.gogmaForm.slots' | translate">
+              @for (nivel of huecosGogma; track $index) {
+                <span class="hueco">{{ nivel }}</span>
+              }
+            </span>
+          </span>
+        </span>
+      } @else {
+        <span class="campo-texto">{{ equipada.arma.name }}</span>
+      }
     } @else {
       <span class="campo-texto campo-placeholder">{{ etiqueta() }}</span>
     }

@@ -1,12 +1,20 @@
-import { ArmorPiece } from '../../../core/models/wilds.models';
+import { ArmorPiece, ArmorSkill } from '../../../core/models/wilds.models';
 
-// 🛡️ Pieza equipada que aporta una habilidad, con su icono de ranura (casco, pecho...).
-// "nivel" es lo que aporta ESA pieza (solo se muestra como "xN" en Habilidades del Conjunto).
+// 🛡️ Pieza equipada (o el arma) que aporta una habilidad, con su icono de ranura (casco,
+// pecho... o el tipo de arma). "nivel" es lo que aporta ESA pieza (solo se muestra como "xN"
+// en Habilidades del Conjunto).
 export interface AportePieza {
-  ranura: ArmorPiece['kind'];
+  ranura: ArmorPiece['kind'] | 'weapon';
   nombrePieza: string;
   nivel: number;
   icono: string;
+}
+
+// ⚔️ Equipo que aporta habilidades: una pieza de armadura o el arma Gogma (con sus
+// habilidades de set). "aporte" es cómo se muestra en los iconos de origen de cada habilidad.
+export interface FuenteHabilidades {
+  aporte: Omit<AportePieza, 'nivel'>;
+  habilidades: Pick<ArmorSkill, 'skill' | 'level' | 'description'>[];
 }
 
 // 📊 Habilidad ya acumulada entre todas las piezas equipadas (nivel total + descripción del nivel alcanzado)
@@ -16,7 +24,7 @@ export interface HabilidadAcumulada {
   kind: string;
   nivel: number;
   descripcion: string;
-  aportes: AportePieza[];  // Piezas que la aportan, en orden de ranura (casco → piernas)
+  aportes: AportePieza[];  // Equipo que la aporta, en orden de ranura (arma, casco → piernas)
 }
 
 // 🎖️ Bonificación de set actualmente activada (puede haber varias a la vez, una por cada
