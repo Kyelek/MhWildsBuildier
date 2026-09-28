@@ -8,10 +8,15 @@
     @let gogma = valor()?.gogma;
     @let arma = valor()?.arma;
     @if (gogma) {
-      <!-- ⚒️ Arma Gogma: nombre y, como etiquetas, elemento, habilidades de set y huecos -->
-      <img class="campo-icono" [src]="iconoTipo(gogma.tipo)" [alt]="'weaponTypes.' + gogma.tipo | translate" width="28" height="28" />
+      <!-- ⚒️ Arma Gogma: sin nombre, solo el icono de su tipo y, como etiquetas, elemento,
+           habilidades de set y huecos -->
+      <img
+        class="campo-icono"
+        [src]="iconoTipo(gogma.tipo)"
+        [alt]="'weaponPicker.gogmaName' | translate: { name: ('weaponTypes.' + gogma.tipo | translate) }"
+        width="28"
+        height="28" />
       <span class="campo-texto campo-gogma">
-        <span class="gogma-nombre">{{ 'weaponPicker.gogmaName' | translate: { name: ('weaponTypes.' + gogma.tipo | translate) } }}</span>
         <span class="gogma-etiquetas">
           @if (especialGogma(); as especial) {
             <span class="gogma-etiqueta">{{ especial.icono }} {{ especial.claveNombre | translate }}</span>

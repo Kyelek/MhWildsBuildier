@@ -64,14 +64,15 @@ describe('SelectorArmaComponent', () => {
     expect(dialog.open.calls.mostRecent().args[1]?.data).toEqual({ seleccionada: ARCO_GOGMA });
   });
 
-  it('muestra el arma Gogma con el icono de su tipo, su nombre y, como etiquetas, elemento, habilidades de set y 3 huecos', () => {
+  it('muestra el arma Gogma sin nombre: el icono de su tipo y, como etiquetas, elemento, habilidades de set y 3 huecos', () => {
     simularCierre(ARCO_GOGMA);
     component.abrir();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.campo-icono').getAttribute('src')).toEqual('images/arms/bow.png');
     const campo: HTMLElement = fixture.nativeElement.querySelector('.campo-gogma');
-    expect(campo.querySelector('.gogma-nombre')?.textContent).toContain('weaponPicker.gogmaName');
+    // Sin nombre: solo las etiquetas
+    expect(campo.textContent).not.toContain('weaponPicker.gogmaName');
     const etiquetas = Array.from(campo.querySelectorAll('.gogma-etiqueta')).map(e => e.textContent?.trim());
     expect(etiquetas).toEqual(['⚡ weaponPicker.elements.thunder', '🎖️ Alma del amo']);
     expect(campo.querySelectorAll('.hueco').length).toEqual(3);
